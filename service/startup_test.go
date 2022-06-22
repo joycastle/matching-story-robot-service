@@ -3,6 +3,7 @@ package service
 import (
 	"time"
 
+	"github.com/joycastle/casual-server-lib/config"
 	"github.com/joycastle/casual-server-lib/mysql"
 	"github.com/joycastle/casual-server-lib/redis"
 	"github.com/joycastle/matching-story-robot-service/confmanager"
@@ -67,6 +68,10 @@ func init() {
 			TestInterval:   time.Second * 300,
 		},
 	}
+
+	//init grpc
+	config.Grpc = make(map[string]string)
+	config.Grpc["chat"] = "127.0.0.1:9001"
 
 	redis.InitRedis(redisConfigs)
 }

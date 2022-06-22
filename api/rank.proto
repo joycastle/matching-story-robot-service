@@ -1,0 +1,37 @@
+syntax = "proto3";
+
+option csharp_namespace = "MM.Message";
+option go_package = "./;api";
+option optimize_for = SPEED;
+
+// package protobuf;
+import "guild.proto";
+import "user.proto";
+
+message GuildRank{
+  repeated GuildBaseInfo grs = 1;
+}
+
+message UserRank{
+  repeated UserBaseInfo urs = 1;
+}
+
+
+message CSUserRank{
+  string rankType = 1; // 排行榜类型 传国家名，默认"global"
+}
+
+message SCUserRank{
+  string rankType = 1; // 排行榜类型 global
+  UserRank userRank = 2;
+}
+
+//公会排行榜
+message CSRankGuild{
+  string rankType = 1; //请求排行榜类型
+}
+
+message SCRankGuild{
+  string rankType = 1; // 排行榜类型
+  GuildRank rank = 2; // 排行榜
+}

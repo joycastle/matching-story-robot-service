@@ -10,8 +10,8 @@ import (
 )
 
 const (
-	USERTYPE_NORMAL     = "normal"   //正常用户
-	USERTYPE_CLUB_ROBOT = "robclubs" //工会机器人
+	USERTYPE_NORMAL             = "normal"   //正常用户
+	USERTYPE_CLUB_ROBOT_SERVICE = "robclubs" //工会机器人
 
 	DEVICE_TYPE_CLUB_ROBOT = 9 //工会机器人设备类型标识
 
@@ -20,7 +20,7 @@ const (
 )
 
 //创建工会机器人
-func CreateClubRobot(name, headIcon string, likeCnt, level int) (model.User, error) {
+func CreateGuildRobot(name, headIcon string, likeCnt, level int) (model.User, error) {
 	var u model.User
 	u.UserName = name
 	u.UserHeadIcon = headIcon
@@ -29,7 +29,7 @@ func CreateClubRobot(name, headIcon string, likeCnt, level int) (model.User, err
 
 	u.UserCountryData = COUNTRY_CN
 	u.DeviceType = DEVICE_TYPE_CLUB_ROBOT
-	u.UserType = USERTYPE_CLUB_ROBOT
+	u.UserType = USERTYPE_CLUB_ROBOT_SERVICE
 
 	u.UserHelp = 0
 	u.CreateTime = time.Now().Unix()

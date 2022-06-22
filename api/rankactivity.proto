@@ -1,0 +1,72 @@
+syntax = "proto3";
+
+option csharp_namespace = "MM.Message";
+option go_package = "./;api";
+option optimize_for = SPEED;
+
+message RankActivityUserInfo {
+    int64 UserID = 1;
+    string Name = 2;
+    string HeadIcon = 3;
+    int32 Level = 4;
+    int32 Medal = 5;
+    int64 UpdateTime = 6;
+    int32 Channel = 7;
+}
+
+message RankActivityGroupInfo {
+    string ActivityID = 1;
+    int32 ActivityConfID = 2;
+    int64 StartTime = 3;
+    int64 JoinEndTime = 4;
+    int64 EndTime = 5;
+    repeated RankActivityUserInfo RankInfoArr = 6;
+    int64 GroupID = 7;
+    string ActivityGroupId = 8;
+}
+
+
+//method:syncrankactivityinfo
+message CSSyncRankActivityInfo {
+    int32 Level = 1;
+    int32 Medal = 2;
+    int32 LevelType = 3; //1普通；2是满级或者精英赛
+    int32 userType = 4;//0免费；1付费
+}
+
+message SCSyncRankActivityInfo {
+    RankActivityGroupInfo GroupInfo = 1;
+}
+
+//method:getrankactivityinfo
+message CSGetRankActivityInfo {
+    string ActivityID = 1;
+    int32 ActivityConfID = 2;
+    int64 StartTime = 3;
+}
+
+message SCGetRankActivityInfo {
+    RankActivityGroupInfo GroupInfo = 1;
+}
+
+
+//method:getrankactivitystatus
+message CSGetRankActivityStatus {
+    CSSyncRankActivityInfo activityInfo = 1;
+}
+
+message SCGetRankActivityStatus {
+    string ActivityID = 1; //根据规则生成的活动唯一ID
+    int32 ActivityConfID = 2;
+    int64 StartTime = 3;
+    int64 JoinEndTime = 4;
+    int64 EndTime = 5;
+    //0不存在
+    //1存在且可以参加
+    //2存在但是不能参加
+    //3活动存在，且拥有排名
+    int32 Status = 6;
+    int64 GroupID = 7;
+    string ActivityGroupId = 8;
+    int32 Ranking = 9;
+}

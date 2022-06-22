@@ -6,8 +6,8 @@ import (
 
 var GuildID int64 = 72719317539487744
 
-func Test_GetClubUserTypeDistribution(t *testing.T) {
-	disMap, err := GetClubUserTypeDistribution(GuildID)
+func Test_GetGuildUserTypeDistribution(t *testing.T) {
+	disMap, err := GetGuildUserTypeDistribution(GuildID)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -23,8 +23,8 @@ func Test_GetClubUserTypeDistribution(t *testing.T) {
 	}
 }
 
-func Test_JoinToClub(t *testing.T) {
-	disMap, err := GetClubUserTypeDistribution(GuildID)
+func Test_JoinToGuild(t *testing.T) {
+	disMap, err := GetGuildUserTypeDistribution(GuildID)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -39,16 +39,16 @@ func Test_JoinToClub(t *testing.T) {
 	likeCnt := 88
 	level := 99
 
-	u, err := CreateClubRobot(name, icon, likeCnt, level)
+	u, err := CreateGuildRobot(name, icon, likeCnt, level)
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	if err := JoinToClub(GuildID, u.UserID); err != nil {
+	if err := JoinToGuild(GuildID, u.UserID); err != nil {
 		t.Fatal(err)
 	}
 
-	disMap2, err := GetClubUserTypeDistribution(GuildID)
+	disMap2, err := GetGuildUserTypeDistribution(GuildID)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -66,7 +66,7 @@ func Test_JoinToClub(t *testing.T) {
 		t.Fatal("2")
 	}
 
-	if len(disMap[USERTYPE_CLUB_ROBOT]) != len(disMap2[USERTYPE_CLUB_ROBOT])-1 {
+	if len(disMap[USERTYPE_CLUB_ROBOT_SERVICE]) != len(disMap2[USERTYPE_CLUB_ROBOT_SERVICE])-1 {
 		t.Fatal("3")
 	}
 }

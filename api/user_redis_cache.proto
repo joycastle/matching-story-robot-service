@@ -1,0 +1,35 @@
+syntax = "proto3";
+
+option go_package = "./;api";
+
+import "userDataNative.proto";
+
+//玩家简易信息
+message UserSimpleInfo {
+    int64 id = 1; // userID
+    int32 level = 2; // 等级
+    string name = 3; // 姓名
+    string headIcon = 4; // 头像
+    string country = 5; // 国家
+    int32 like = 6;   // 玩家点赞
+    int32 channel = 7; //
+    int32 star = 8; // 星星 满级玩法，星星个数，可以理解为level2
+    int64 starActivityID = 9;
+    int32 UserHelp = 10;
+    int32 unlockID = 11; //解锁地格的ID
+    BuyData buyData = 12; //购买信息
+    int32 CheatUser = 13; //是否是作弊用户
+    int64 UpdateTime = 14; //最后存档时间
+    int32 ClientVersion = 15; //前端版本
+}
+
+//好友简易数据
+message FriendSimpleInfo {
+    int32 friendType = 1; //好友类型
+    int64 userID = 2; //userID
+}
+
+message FriendRecommendSimpleInfo {
+  	int64 recommendTime = 1;
+  	repeated FriendSimpleInfo friendDatas = 2;
+}

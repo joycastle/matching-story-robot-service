@@ -1,0 +1,144 @@
+syntax = "proto3";
+
+option csharp_namespace = "MM.Message";
+option go_package = "./;api";
+option optimize_for = SPEED;
+import "common.proto";
+import "userdata.proto";
+
+enum E_USER_TYPE {
+	NORMAL = 0;
+	GUEST  = 1;
+	GM     = 2;
+}
+
+enum E_LOGIN_RESPONSE {
+	FAILED = 0;
+	SUCCESSED_NEW = 1;
+	SUCCESSED_EXIST = 2;
+}
+
+enum E_SC_OPERATOR_TYPE {
+	//需要同步数据(弹出数据选择)
+	SYNCDATA = 0;
+	//使用服务端的数据(本地没有数据时)
+	USESERVER = 1;	
+	//使用客户端的数据(设备一致)
+	USELOCAL = 2;
+	//弹出游客数据将被覆盖提示
+	FORCESERVER = 3;
+	//客户端上传本地数据，创建FB账号，删除游客数据
+	FORCELOCAL = 4;
+}
+
+enum E_SC_SAVE_OPERATOR_TYPE {
+	//存盘成功
+	SAVE_SUCCESSED = 0;	
+	//存盘失败(校验失败)
+	SAVE_FAILED = 1;
+	//用户存盘时，此次发送的设备ID和上次不同,踢掉，重新登录
+	KICKOUT = 2;
+	//用户数据异常，强制使用服务器数据覆盖本地数据
+	FORCE_USE_SERVER = 3;
+	//弹出数据选择面板
+	SYNC_DATA = 4;
+}
+
+enum E_SC_SYNC_OPERATOR_TYPE {
+	USE_LOCAL_DATA = 0;
+	USE_SERVER_DATA = 1;
+	CHECK_DATA_ERROR = 2;
+}
+
+message CSLoginCheckAccount {
+	E_CHANNEL_TYPE channel = 1;
+	string accountId = 2;
+	DeviceInfo deviceInfo = 3;
+	E_LOCAL_DATA_TYPE localDateType = 4;
+	int32 languageType = 5;
+	string country = 6;
+	int32 level = 7;
+	int32 testUser = 8;
+}
+
+message CSSavePlayerData {
+	DeviceInfo	deviceInfo = 1;
+	PlayerData  playerData = 2;
+	int64 localTime = 3;
+	E_CHANNEL_TYPE channel = 4;
+	int32 languageType = 5;
+	int32 testUser = 6;
+	int32 forceSave = 7;
+}
+
+message SCSavePlayerData{
+	PlayerData playerData = 1;
+	E_SC_SAVE_OPERATOR_TYPE opType = 2;
+	int32 likedCount = 3;
+}
+
+//同步数据,玩家自己选择使用本地or远端
+message CSSyncPlayerData{
+	PlayerData playerData = 1;
+	E_SC_SYNC_OPERATOR_TYPE dataType = 2;
+	DeviceInfo	deviceInfo = 3;
+}
+
+message SCSyncPlayerData{
+	E_SC_SYNC_OPERATOR_TYPE dataType = 1;
+}
+
+message SCPlayerData {
+	PlayerData playerData = 1;
+	E_SC_OPERATOR_TYPE opType = 2;
+}
+
+enum E_BIND_ACCOUNT_TYPE {
+	//请求绑定数据
+	ASK_BIND = 0;
+	//帐号下有档，回复用户是否确认删除数据
+	RES_DEL_COMFIRE = 1;
+	//确认删除
+	COMFIRE_DEL = 2;
+	//成功
+	SUCESSED = 3;
+}
+
+enum E_USER_DENIAL_TYPE {
+	COMMON = 0;
+	LOCKED = 1;
+	DELETED = 2;
+}
+
+message CSBindAccount {
+	string oldAccount = 1;
+	string accountName = 2;
+	E_BIND_ACCOUNT_TYPE type = 3;
+	PlayerData playerData = 4;
+	DeviceInfo deviceInfo = 5;
+	int32 languageType = 6;
+}
+
+message SCBindAccount {
+	PlayerData plyaerData = 1;
+	E_BIND_ACCOUNT_TYPE type = 2;
+}
+
+message SCUserDenial {
+	 E_USER_DENIAL_TYPE type = 1;
+}
+
+message CSSyncServerTime{
+}
+
+message SCSyncServerTime{
+}
+
+message CSCheckUserStatus{
+	E_CHANNEL_TYPE channel = 1;
+	string accountId = 2;
+	DeviceInfo deviceInfo = 3;
+}
+message SCCheckUserStatus{
+	E_SC_SAVE_OPERATOR_TYPE type = 1;
+}

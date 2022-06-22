@@ -1,0 +1,106 @@
+syntax = "proto3";
+
+option csharp_namespace = "MM.Message";
+
+option go_package = "./;api";
+option optimize_for = SPEED;
+
+enum GuildActivityStatusCode {
+    GUILD_ACTIVITY_STATUS_CODE_NONE = 0;   // 不使用
+    GUILD_ACTIVITY_STATUS_CODE_OPEN = 1;   // 活动进行中
+    GUILD_ACTIVITY_STATUS_CODE_COMPLETED = 2; // 当前公会活动结束，达成目标, 在公示期时间内
+    GUILD_ACTIVITY_STATUS_CODE_UNCOMPLETED = 3; // 当前公会活动结束，到达截止时间，未达成目标, 在公示期时间内
+    GUILD_ACTIVITY_STATUS_CODE_END = 4; // 当前公会活动结束，暂时不能确定是否达成目标，中间状态, 在公示期时间内
+    GUILD_ACTIVITY_STATUS_CODE_UNKNOWN = 5; // 初始化状态
+    GUILD_ACTIVITY_STATUS_CODE_CLOSE = 6;  // 活动关闭, 公示期结束，看板已关闭
+    GUILD_ACTIVITY_STATUS_CODE_DROP_OUT = 7;  // 该玩家过了一关且中途(未完成)退出了该公会活动。(多级简历公会活动修改@2022.3.7)
+}
+
+
+enum LevelType {
+    LEVEL_TYPE_MAX_LEVEL = 0; // 满级玩法关卡
+    LEVEL_TYPE_COMMON = 1; // 普通关卡
+    LEVEL_TYPE_ELITE = 2; // 精英赛关卡
+}
+
+enum AckResult {
+    ACK_RESULT_FAIL = 0; // 失败
+    ACK_RESULT_SUCCESS = 1; // 成功
+    ACK_RESULT_ACKNOWLEDGED = 2; // 已被消费
+}
+
+
+// 关卡
+message GuildActLevel {
+    LevelType type = 1; // 关卡类型，枚举
+    string id = 2;    // 关卡唯一标识
+    int32 round = 3; // 若关卡为满级玩法，存在round这一属性
+    int32 score = 4;
+}
+
+// 请求我的公会活动状态
+message CSGetGuildActivityStatus {
+    int32 level = 1; // 我当前的等级, 若满足40而公会活动内无我，则加入
+    int64 activityId = 2; // 活动ID，若指定活动ID，则查询我在该期活动的数据并返回
+}
+
+// 请求我的公会活动当前状态, 若公会已完成活动，跳转其他公会，其活动状态依然为上一期}
+message SCGetGuildActivityStatus {
+    GuildActivityStatusCode status = 1; // 活动状态
+    int32 target = 2; // 总目标
+    int64 guild_id = 3;  // 该活动所属的公会ID
+    int64 id = 4; // 公会活动ID，若公会已完成活动，跳转其他公会，其活动id依然为上一个。否则，其活动为该公会活动。
+    bool has_reward = 5; // 是否可以领取宝箱奖励，过了一关才可以领
+    int32 rank = 6;
+    string guild_name = 7;  // 该公会所属的公会名
+    string guild_badge = 8;  // 该活动所属的公会徽章
+    int32 guild_number_count = 9;  // 该活动所属的公会人数
+    int32 target1 = 10; // 多阶奖励1
+    int32 target2 = 11; // 多阶奖励2
+    int32 score = 12; // 当前我的组总积分
+
+
+}
+
+// 获取当前公会活动list，服务端排序
+message CSGetGuildActivityRank {
+    int64 id = 1; // 公会活动ID，若公会已完成活动，跳转其他公会，其活动id依然为上一个。否则，其活动为该公会活动。
+    repeated GuildActLevel levels = 2; // 列表，从左往右依次加分
+}
+
+// 公会活动列表item
+message GuildActivityRankUserBaseInfo {
+    int32 score = 1; // 积分
+    string name = 2;
+    string head_icon = 3; // 头像
+    int32 rank = 4; // 排名
+    int32 channel = 5; // fb标识
+    int64 score_updated_time = 6; // 上次更新我的分数时间
+    bool is_leader = 7; // 是否是leader, ld本人需要展示
+    int32 level = 8; // 我的等级，参与排序
+    int64 user_id = 9; // 玩家id
+}
+
+message SCGetGuildActivityRank {
+
+    repeated GuildActivityRankUserBaseInfo userInfos = 1; // 玩家信息列表
+    GuildActivityStatusCode status = 2; // 活动状态
+    int64 id = 3;    // 公会活动ID，若公会已完成活动，跳转其他公会，其活动id依然为上一个。否则，其活动为该公会活动。
+    int32 target = 4;  // 总目标
+    int32 score = 5; // 公会活动总分
+    int32 target1 = 6;  // 多阶奖励1
+    int32 target2 = 7;  // 多阶奖励2
+
+}
+
+// 上传公会活动增量积分，上传关卡ID
+message CSUploadGuildActivityScore {
+    int64 id = 1; // 公会活动ID，若公会已完成活动，跳转其他公会，其活动id依然为上一个。否则，其活动为该公会活动。
+    repeated GuildActLevel levels = 2; // 列表，从左往右依次加分
+}
+
+message SCUploadGuildActivityScore {
+    AckResult result = 1;  // 是否加分成功, 仅当服务错误，返回0：加分失败。否则返回1
+    int32 score = 2; // 加完后的公会活动分数
+    GuildActivityStatusCode status = 3; // 活动状态
+}

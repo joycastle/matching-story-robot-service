@@ -1,0 +1,776 @@
+syntax = "proto3";
+
+option csharp_namespace = "MM.Message";
+option go_package = "./;api";
+option optimize_for = SPEED;
+
+import "common.proto";
+import "userDataNative.proto";
+import "levelabconfig.proto";
+import "user.proto";
+import "rank.proto";
+import "guild.proto";
+import "guild_help.proto";
+import "activity.proto";
+import "guildactivity.proto";
+import "mail.proto";
+import "rankactivity.proto";
+import "racelevelactivity.proto";
+
+//签到信息
+message SigninData{
+    //累计签到天数
+	int32 addupSignDays = 1;
+	//上次签到的日期
+	int64 lastSignTime = 2;
+	//签到开始的日期
+	int64 signStartTime = 3;
+	//累计签到的周期
+	int32 signAddperiod = 4;
+    //30天签到天数
+    int32 addupSignDays30 = 5;
+	//30天签到累计签到的周期
+	int32 signAddperiod30 = 6;
+}
+
+
+//限时商店数据
+message MergeShopData{
+    repeated LimitShop limitShops = 1;
+	int64 LastRefreshTime = 2;
+    repeated MaterialJson pieceShowTimes = 3;
+    int32 clickTimes = 4;
+	bool isForceRefreshShop = 5;//是否强制刷新商店逻辑-跨版本兼容商店逻辑
+}
+
+//限时商店
+message LimitShop{
+    int32 id = 1;
+	int32 type = 2;
+	LimitShopItemData MaterialData = 3;
+    int32 buyNum = 4;
+    int32 refreshNum = 5;
+	bool isAheadBuyRefresh = 6;
+}
+
+message LimitShopItemData{
+	repeated int32 itemIDs = 1;
+	repeated int32 itemNumers = 2;
+	repeated int32 itemGrades = 3;
+}
+
+//活动信息
+message ActivityData{
+    repeated Activity activitys = 1;
+    repeated Activity endActivitys = 2;
+	int32 currentActID = 3;//当前活动的id
+	int64 lastActEnableTime = 4;//上次活动开启的时间
+	int64 curActEndTime = 5;//这次活动的结束时间
+	repeated CurrentActRoundData currentActRoundData = 6;//活动轮次记录数据
+	int32 currentActContinueTime = 7;//当前活动的持续时间
+	ActivityLocalNotficationData actNotficationData = 8; //活动推送
+	repeated ActivityDotData allActivityDotData = 9;//所有活动的打点数据	
+}
+
+//活动打点数据
+message ActivityDotData{
+	string activityName = 1;//活动名称
+	string activityEpisode = 2;//活动标记	
+}
+
+//活动推送ID数据
+message ActivityLocalNotficationData{
+	repeated int32 startActNotficationIds = 1;
+	repeated int32 endActNotficationIds = 2;
+}
+
+//活动轮次记录
+message CurrentActRoundData{
+	int32 id = 1;//活动id
+	int32 actRound = 2;//活动轮次
+}
+
+//活动
+message Activity{
+    //任务id
+    int32 id = 1;
+    //类型
+    int32 type = 2;
+    //状态
+    int32 state = 3;
+    //进度
+    int32 processes = 4;
+    //开始时间
+    int64 startTime = 5;
+    //上次显示时间
+    int64 showTime = 6;
+    //阶段奖励领取次数
+    int32 getrewardnum = 7;
+    //结束时间
+    int32 endTime = 8;
+    //礼包购买ids
+    repeated int32 buyGiftIds = 9;
+    //储蓄罐首次可以购买是否显示过
+    int32 canBuyShow = 10;
+}
+
+message MaxLevelActivityData{
+	//该阶段连续通关的次数
+	int32 curStageConinPassLevelNum = 1;
+	//目前阶段
+	int32 currStage = 2;
+	//是否进入过该活动
+	bool isEnterThisActivity = 3;
+	//当前的体力数
+	int32 nowHeartNum = 4;
+	//体力开始恢复时间
+	int64 heartStartRecoverTime = 5;
+	//当前关卡数
+	int32 nowMaxLevelNum = 6;
+	//当前阶段的第一关卡ID
+	int32 nowStageFirstLevelID = 7;
+	//第二阶段的关卡ID组
+	repeated int32 twoStageLevelIDGroup = 8;
+	//当前活动通关次数
+	int32 nowActivityPassLevelNum = 9;
+	//第三阶段的关卡ID组
+	repeated int32 threeStageLevelIDGroup = 10;
+	//本次满级玩法累计通过阶段数
+	int32 maxLevelAccumulativePassStageNum = 11;
+	//多少次进入满级玩法
+	int32 howTimesEnterMaxLevelScene = 12;
+	//当前版本的最大关卡数
+	int32 nowVersionMaxLevelNum = 13;
+}
+
+//材料产出活动
+message MaterialOutPutActivityData{
+	//活动开启时间
+	int64 activityLastOpenTime = 1;
+	//上次活动结束时间
+	int64 lastActivityEndTime = 2;
+	//是否CD
+	bool isCD = 3;
+	//活动的抽取权重
+	repeated MaterialActivityRandomWeight RandomWeight = 4;
+	//当前的活动ID
+	int32 nowActivityID = 5;
+	//上次登录版本
+	string nowVersion = 6;
+}
+
+//存钱罐的数据
+message PiggyBankData{
+	//活动持续时间
+	int32 actContinueTime = 1;
+	//上次活动的开启时间
+	int64 lastActEnableTime = 2;
+	//活动CD时间
+	int32 actCDTime = 3;
+	//当前活动目前阶段数量
+	repeated int32 actStageTarget = 4;
+	//当前活动收集的钻石数量
+	int32 curActCollectNum = 5;
+	//额外奖励
+	repeated MaterialJson extraReward = 6;
+	//商品id
+	int32 payShopId = 7;
+	//不同难度关卡获得的奖励数量
+	repeated int32 diffGradeLevelGetRewardNum = 8; 
+	//上次活动的结束时间
+	int64 lastActEndTime = 9;
+	//当前活动的ID
+	int32 curActID = 10;
+	//是否第一次触发可购买
+	bool isFirstTriggerCanBuy = 11;
+	//是否该罐子第一次触发收集满
+	bool isFirstTriggerCurJarFull = 12;
+	//存钱罐开启的轮次
+	int32 piggyBankEnableRound = 13;
+}
+
+message NoviceGuideData{
+	//完成过的新手引导条件集合
+	repeated int32 alreadyFinishGuideList = 1;
+	int32 nowFixedGuideID = 2;
+	int32 triggerLandLack = 3;//触发地格不足的次数
+	int32 triggerBubbleGridLack = 4;
+	//已经显示过Free标签的序号
+	repeated int32 alreadyFreeIndex = 5;
+	//场景中累计获得的代币数量
+	int32 addUpSceneGetTokenNum = 6;
+	//场景中收集一级代币的次数
+	int32 sceneUseOneGradeTokenNum = 7;
+}
+
+message MaterialActivityRandomWeight{
+	int32 id = 1;
+	int32 weight = 2;
+}
+
+//周期商品信息
+message PayShopData{
+    repeated PayShop payShops = 1;
+	int32 nowBreakIceId = 2;//当前破冰礼包的ID
+	int64 BreakIceEnableTime = 3;//破冰礼包开启时间
+	int32 triggerCoinInsufficientNum = 4;//触发金币不足次数
+	int32 triggerLeveleDefeatedNum = 5;//触发关卡失败次数
+	bool isPopupBreakIceWindow = 6;//是否弹出破冰的界面 
+}
+
+//周期商品
+message PayShop{
+    //商品id
+    int32 id = 1;
+    //开始时间
+    int64 beginTime = 2;
+    //结束时间
+    int64 endTime = 3;
+    //购买次数
+    int32 buyCount = 4;
+}
+
+
+//商品新品状态记录
+message ProduceStateData{
+    repeated int32 ids = 1;
+}
+
+message ExchangeActivity{
+    //任务id
+    int32 id = 1;
+    //货币数量
+    int32 money = 2;
+    //开始时间
+    int32 startTime = 3;
+    //结束时间
+    int32 endTime = 4;
+    //阶段奖励领取
+    repeated int32 getrewardList = 5;
+    //购买次数
+    repeated MaterialJson buyNumList = 6;
+    //状态
+    int32 state = 7;
+    //进度
+    int32 process = 8;
+}
+
+//用户头像信息
+message UserHeadData{
+	repeated HeadData allUnLockHeadData = 1;
+}
+
+message HeadData{
+	int32 type = 1;//头像类型 ：包括普通头像 + 头像框
+	string id = 2;//头像id : 也是路径
+	bool isShowRedPoint = 3;//是否显示红点
+}
+
+message ExchangeActivityTable{
+    int32 currency_level = 1;
+    repeated int32 currency_num = 2;
+    repeated int32 refund_rate = 3;
+    repeated int32 refund_num = 4;
+    repeated int32 reward_progress = 5;
+    repeated int32 reward = 6;
+    repeated int32 shop_content = 7;
+    repeated int32 shop_price = 8;
+    repeated int32 shop_addprice = 9;
+    repeated int32 shop_pricemax = 10;
+    int32 lasttime = 11;
+    int32 reopentime_min = 12;
+    int32 id = 13;
+
+}
+
+//素材兑换活动
+message ExchangeActivityData{
+   ExchangeActivity currActivity = 1;
+   repeated ExchangeActivity endActivitys = 2;
+   ExchangeActivityTable currTable = 3;
+   int32 curToKenNum = 4;
+}
+
+//某个版本的评价数据
+message Reat {
+	//版本号
+	int32 version = 1;
+	//评价(1,好评 2差评,3关闭)
+	int32 reat = 2;
+}
+
+//所有的评价数据
+message ReatData{
+	repeated Reat reatData = 1;
+	int32 continuelevelSuccess = 2;
+	int32 version = 3;
+	bool curVersionIsHit = 4;
+	int64 lastReatTime = 5;
+	bool isHit = 6;
+}
+
+//回归奖励
+message ReturnRewardData{
+	int64 distanceLastLoginSecound = 1;
+	int64 lastGetReturnRewardTime = 2;
+}
+
+message LocalChatInfo {
+    int64 id= 1;
+    int64 from= 2;
+    int64 time= 3;
+    string type= 4;
+    string name= 5;
+    string headIcon= 6;
+    string content= 7;
+    int32 tag= 8;
+}
+
+//调查问卷
+message QuestionnaireData{
+	//上次调查的ID
+	int32 lastQuestionnaireID = 1;
+	//当前这期调查弹出的次数
+	int32 curPopUpWindowNum = 2;
+	//当前调查问卷的ID
+	int32 curQuestionnaireID = 3;
+}
+
+//工会记录数据
+message ClubData{
+    int32 preunlockShow = 1;
+    int32 unlockTipShow = 2;
+    int64 guildId = 3;
+    int64 helpUtc = 4;
+    int32 newPlayer = 5;
+    int64 lastMsgId = 6;
+    string badge = 7;
+    string name = 8;
+    int32 reqHeartTimes = 9;
+    repeated int64 useHeartUserIds = 10;
+    repeated GuildRespHelp hearts = 11;
+    repeated GuildBaseInfo globalGuildRank = 12;
+    repeated GuildBaseInfo countryGuildRank = 13;
+    repeated UserBaseInfo globalUserRank = 14;
+    repeated UserBaseInfo countryUserRank = 15;
+    repeated GuildBaseInfo recommendGuilds = 16;
+    GuildInfo myGuildInfo = 17;
+    string chatToken = 18;
+    repeated LocalChatInfo chatInfos = 19;
+    int32 tokenSetTime = 20;
+    repeated int64 userHelpsIds = 21;
+}
+
+message NewMaxLevelData{
+    int32 id = 1; // 活动ID
+    int64 groupId = 2; // 玩家所属组ID
+    int64 uniqueId = 3; // 活动唯一ID 活动开启时生成
+    int64 createGroupTime = 4; // 创建组时间
+    int32 rank = 5;// 排行榜名次
+    int32 level = 6;//当前关卡数
+    int64 endTime = 7;//结束时间
+    int32 score = 8;//积分
+    int32 getReward = 9;//是否领取了奖励
+    int32 showPreUI = 10;//是否显示过预告UI
+    repeated RankUserBaseInfo rankUsers = 11;//排行榜数据
+    int32 refreshtime = 12;//排行榜刷新时间间隔
+    repeated RankUserBaseInfo endRankUsers = 13;//最终排行榜数据
+    int32 cheat = 14;//这期活动是否作弊玩家
+}
+
+message ClassicActivityData{
+    int32 level = 1;//当前关卡数
+    int32 showPreUI = 2;//是否显示过预告UI
+    bool isUnlock = 3;//是否开启
+    int32 totalLevels = 4;//累计关卡数
+    int32 currMaxlevelId = 5;//对应的满级玩法的活动Id
+}
+
+message GiftBoxRewardData{
+	repeated MaterialJson boxRewardList = 1;
+	int32 type = 2;
+	string imgPath = 3;
+}
+
+//公有的礼包宝箱数据
+message BaseGiftBoxData{
+	repeated GiftBoxRewardData allRewardList = 1;
+	int32 shopId = 2;
+	int32 onlyId = 3;
+	int32 configId = 4;
+}
+
+//限时礼包数据
+message TimeLimitGiftBoxData{
+	BaseGiftBoxData giftBoxData = 1;
+	int64 giftEndTime = 2;//礼包到期时间
+	int64 giftEnableTime = 3;//礼包开始时间
+	bool isBuy = 4;//是否购买礼包
+}
+
+//故事礼包数据
+message StoryGiftBox{
+	TimeLimitGiftBoxData timeLimitData = 1;
+	int32 nowIndex = 2;//当前档位
+}
+
+//失败礼包数据
+message FailingGiftBox{
+	StoryGiftBox giftBoxData = 1;
+	int32 levelCD = 2;//关卡cd
+}
+
+//故事礼包
+message StoryGiftBoxData{
+	repeated StoryGiftBox lastEndGiftBoxAct = 1;
+	StoryGiftBox storyGiftBoxData = 2;
+	int32 storyGiftBoxEnableNum = 3;
+}
+
+//失败礼包
+message FailingGiftBoxData{
+	FailingGiftBox  failingGiftBox = 1;
+	repeated FailingGiftBox lastEndGiftBoxAct = 2;
+	int32 nowStageFailingNum = 3;
+}
+
+//连续宝箱活动数据
+message ContinueBoxData{
+	repeated ContinueBoxConfigData nowActAllBoxData = 1;
+	int64 lastActEnableTime = 2;
+	int64 nowActEndTime = 3;
+	int32 nowContinueActType = 4;
+	int32 nowStageActIndex = 5;
+	int32 nowActID = 6;
+	int64 lastForcePopupTime = 7;
+	int32 nowStageActBuyPayBoxNum = 8;
+	int32 nowStageBuyNum = 9;
+}
+
+message MayaActivityData{
+	int64 nowActEndTime = 1;
+	int64 lastActEnableTime = 2;
+	int32 mayaTokenNum = 3;//这期活动的活动收集进度
+	bool isBuyExtraReward = 4;//是否购买了额外奖励
+	MayaConfigData config = 5;//maya活动的配置数据
+	bool isClearReward = 6;//是否清算奖励
+	bool isPopupShowTips = 7;//是否弹出过提示
+}
+
+message MayaConfigData{
+	repeated MayaRewardData allRewardList = 1;//这期活动的所有奖励
+	int32 extraPrice = 2;//额外奖励的价格
+	int32 maxProgressNum = 3;//最大进度的数量
+	repeated int32 levelRange = 4;//关卡范围 
+	int32 configID = 5;//活动的配置id
+	repeated int32 mayaTokenLevelOutPutNum = 6;//maya币产出数量
+	repeated int32 extraTokenLevelOutPutNum = 7;//额外币产出数量
+	int32 buildingType = 8;//这期元素链building的类型
+}
+
+message MayaRewardData{
+	int32 type = 1;//类型的含义是 免费的 还是额外的
+	int32 needNum = 2;//领取这个奖励所需要的数量
+	MaterialJson mats = 3;//这个奖励的具体id和数量
+	bool isGet = 4;//是否领取
+}
+
+//连续宝箱配置表数据
+message ContinueBoxConfigData{
+	BaseGiftBoxData boxBaseData = 1;
+	int32 isFor = 2;
+}
+
+//连胜活动数据
+message ContinuePassLevelData{
+	int32 NowStagePassNum = 1;
+	int64 nowActEndTime = 2;
+	int64 lastActEnableTime = 3;
+	int32 nowStageLastingPassNum = 4;//持久得阶段数据
+	int32 reqABTest = 5;
+	int32 reqABTest39 = 6;
+}
+
+//补发数据
+message ReissueData {
+	int64 activityID = 1;
+	int32 score = 2;
+	int32 guildScore = 3;
+}
+
+//阶段奖励补发数据
+message StepReissueData {
+	int64 activityID = 1;
+	int32 score1 = 2;
+	int32 score2 = 3;
+	int32 score3 = 4;
+	int32 guildScore = 5;
+	repeated int32 stepGetIndexs = 6;
+    int32 firstSyncScoreStep = 7;
+}
+
+//公会活动
+message ClubActivityData{
+    int64 activityId = 1;//活动id
+    repeated GuildActLevel levels = 2;
+    int32 rank = 3;
+    int32 target = 4;//公会目标积分
+    int32 guildScore = 5;//公会当前积分
+    int32 isShowInfoUI = 6;
+    GuildActivityStatusCode statusCode = 7;
+    int32 canGetRwd = 8;
+    int32 alreadyGetRwd = 9;
+    int32 alreadyGetAddRwd = 10;
+    int32 score = 11;//玩家当前积分
+    string guild_name  = 12;//该活动所属的公会名字
+    string guild_badge = 13;//该活动所属的公会徽章
+    int32 threaten = 14;//推出公会是否威胁提示
+    int64 guildId = 15; //该活动所属的公会ID
+    int32 guildMemberCount = 16;//该活动所属的公会成员个数
+    int64 endTimeEndUtc = 17;//活动结束时间
+    int64 showTimeEndUtc = 18;//公示期结束时间
+    int32 notShowIcon = 19;//公示期到达的等级的玩家不显示icon
+    repeated GuildActivityRankUserBaseInfo rankUsers = 20;//排行榜玩家数据
+	repeated int64 alreadyActivityIDs = 21;//已经领过奖励的活动ID列表
+	repeated int64 alreadyActivityAddIDs = 22;//已经领过额外奖励的活动ID列表
+	repeated ReissueData reissueActivityDatas = 23;//需要补发奖励的活动ID列表
+    int32 target1 = 24;//公会目标积分第一阶段
+    int32 target2 = 25;//公会目标积分第二阶段
+    int32 firstSyncScoreStep = 26;//首次同步积分所在哪个阶段
+    repeated int32 stepRewardGetList = 27;//阶段奖励领取情况
+    int32 addRewardGet = 28;//额外奖励领取情况
+    int32 isDropOut = 29;//不显示主界面按钮
+    repeated StepReissueData stepReissueActivityDatas = 30;//阶段奖励补发奖励的活动数据
+    int32 isShowContinue = 31;//显示继续按钮
+    int32 notNeedSyncRankData = 32;//是否需要同步服务器排行数据
+    int32 reallyGuildScore = 33;//真实的公会积分
+}
+
+//数据合并数据
+message MergeMoudleData{
+   int32 hasMailReward = 1;//是否有奖励邮件
+   int32 oldPlayerSendReward = 2;//老玩家是否添加了奖励邮件
+   int32 mergebuildingData = 3;//老玩家是否合并了建筑数据
+   int32 isGiveAlice = 4;//是否送了爱丽丝
+   int32 isMergeDiamond = 5;//B合并过钻石
+   int32 isMergeSystemMoudle = 6;//是否合并了系统功能
+   int32 taskDataBugIsOk = 7;//是否处理了任务问题
+   int32 isNpcErrorOk = 8;//是否处理了NPC容错问题
+   int32 isNpcErrorIllOk = 9;//是否处理了NPC容错图鉴
+   int32 oldPlayerSendRewardNew = 10;//老玩家是否添加了奖励邮件newbonus
+   int32 isMergeNewBonus = 11;//是否进行了newbonus合并
+}
+
+
+//排名活动数据
+message RankActivityData{
+    int32 activityConfID = 1; // 活动配置ID
+    string uniqueId = 2; // 活动唯一ID 活动开启时生成
+    int64 startTime = 3; // 活动开启时间
+    int64 joinEndTime = 4;//加入结束时间
+    int64 endTime = 5; // 活动结束时间
+    int32 notsyncmedal = 6; //待同步的奖牌数
+    repeated RankActivityUserInfo rankUsers = 7;//最终排行榜数据
+    int32 status = 8;//最终排行榜数据
+    int32 showRed = 9;//显示红点
+    int32 hasJoinRwd = 10;//是否有加入奖励
+    int32 isShowOpenUI = 11;//是否显示活动开启UI
+    int32 medal = 12;//积分
+    int32 rank = 13;//排名
+    int64 groupID = 14;//分组id
+    int32 joinBreak = 15;//加入成功打断
+    int32 alreadyGetJoinRwd = 16;//已经领取加入奖励
+    int32 lastAddMedalLevel = 17;//加本地缓存的积分判断关卡数
+	string activityGroupId = 18;
+}
+
+//FanPageLike数据
+message FanPageLikeData{
+    int32 showTimes = 1; //弹出的次数
+    int32 showTimeUtc = 2; //该次出现的时间戳
+    int32 isGetRwd = 3; //是否已领奖
+    int32 status = 4;//状态
+    repeated int32 showWindowList = 5;//保存显示UI对应的次数
+    int32 firstBandFB = 6;//首次绑定FB
+}
+
+//TeaParty活动数据
+message TeaPartyActivityData{
+    int32 activityId = 1;//活动Id, 配置表的Id
+    int32 isShowOpenUI = 2;//是否弹出过开启的UI
+    int32 status = 3;//活动的状态
+    int32 getStepRwdIndex = 4;//阶段奖励领取的Index(0, 1, 2)
+    int32 score = 5;//当前的积分
+    int32 openUIScore = 6;//上一次打开UI时的积分
+    repeated int32 stepTargets = 7;//阶段的目标值
+    int32 IsOpenBreak = 8;//是否触发过活动开启的打断
+    int64 actEndTime = 9;//活动结束时间戳
+    int64 actStartTime = 10;//活动开始时间戳
+    int64 isActEndFlyToBrand = 11;//活动结束是否播放了吊牌动画
+    repeated int32 coefficients = 12;//虚拟进度变化百分比
+}
+
+//竞速活动数据
+message RaceActivityData{
+    RaceLevelActivityInfo activityInfo = 1;//基本数据
+    ActivityGroupInfo groupInfo = 2;//组数据
+    int32 status = 3;//状态
+    repeated GroupMemberInfo rankUsersUI = 4;//上一次打开UI排行榜数据
+    int32 showRed = 5;//显示红点
+    int32 isShowOpenUI = 6;//是否显示活动开启UI
+    int32 notsyncmedal = 7; //待同步的积分
+    int32 preRank = 8;//上一期的排名
+    int32 rank = 9;//排名
+    int32 score = 10;//分数
+    int32 isAlreadyShowTips = 11; //是否显示了Tips
+    int32 isOpenBreak = 12;//是否开启打断(每组一次)
+    int32 isEndBreak = 13;//是否结束打断(每组一次)
+    int32 isSelfScoreBreak = 14;//积分达到目标值
+    int32 alreadyGetRwd = 15;//是否领奖
+    int32 activityTimes = 16;//轮次
+    int64 totelMatchTime = 17;//三消中的时间 秒数 初始值
+    int32 withinChallengeTimes = 18;//挑战次数  初始值
+    int32 joinLevel = 19;//加入时的关卡数
+    int64 joinTimeUtc = 20;//加入时的时间戳
+}
+
+//用户数据
+message PlayerData{
+    //用户基础信息
+    BaseData baseData = 1;
+    //经验
+    ExpData expData = 2;
+    //金钱
+    MoneyData moneyData = 3;
+    //体力
+    HeartData heartData = 4;
+    //关卡
+    LevelData levelData = 5;
+    //物品
+    ItemData  itemData = 6;
+    //泡泡
+    BubbleData bubbleData = 7;
+    //宝箱
+    BasketData basketData = 8;
+    //建筑
+    MapBuildingData mapBuildingData = 9;
+    //MergeCounter
+    BuildingMergeCounter buildingMergeCounter = 10;
+    //新建筑通知
+    NewBuildingNotices newBuildingNotices = 11;
+    //灵力
+    MapGridSprites	mapGridSprites = 12;
+    //Merge商店
+    MergeShopData mergeShopData = 15;
+    //系统设置
+    SystemSetting SystemSettingData = 16;
+    //相机
+    CameraData cameraData = 17;
+    //图鉴
+    IllustrationData illustrationData = 18;
+    //任务
+    TaskData taskData = 19;
+    //签到
+    SigninData signData = 20;
+    //活动
+    ActivityData activityData = 21;
+    //付费商城
+    PayShopData payShopData = 22;
+    //购买信息
+    BuyData buyData = 23;
+    //商品状态
+    ProduceStateData produceStateData = 24;
+    //成就信息
+    AchievementData achievementData = 25;
+    //结算信息
+    GameEndBalaceData gameEndBalaceData = 26;
+    //本地好友信息
+    FriendLocalData friendLocalData = 27;
+    //NPC数据
+    NPCData nPCData = 28;
+    //岛屿解锁数据
+    LandUnLockData landUnLockData = 29;
+	//漂浮物数据
+	FlotageData flotageData = 30;
+	//最大关卡活动数据
+	MaxLevelActivityData maxLevelActivityData = 31;
+    //收集书数据
+    CollectBookData collectBookData = 32;
+	//剧情数据
+    GamePlotData gamePlotData = 33;
+	//新手引导
+	NoviceGuideData noviceGuideData = 34;
+	//素材产出活动
+	MaterialOutPutActivityData materialOutPutActivityData = 35;
+	//城堡数据
+	CastalData castalData = 36;
+	//建筑合成信息
+	BuildingMergeData buildingMergeData = 37;
+	//事件记录数据
+	EventRecordData eventRecordData = 38;
+	//功能建筑泡泡数据
+	FunctionMapBubbleData functionMapBubbleData = 39;
+    //素材兑换活动
+    ExchangeActivityData exchangeActivityData = 40;
+	//活动产出
+	EventOutPutData eventOutPutData = 41;
+	//玩家的统计数据
+	StatisticsData statisticsData = 42;
+	//玩家的评价数据
+	ReatData reatData = 43;
+	//收集棋子活动
+	CollectPiecesActivityData CollectPiecesActivityData = 44;
+	//当前关卡的AB测试配置
+	LevelABConfigData LevelABConfigData = 45;
+	//存钱罐活动
+	PiggyBankData PiggyBankData = 46; 
+	//玩家的AB测试数据
+	FunctionABConfigData FunctionABConfigData = 47;
+    //公会数据
+    ClubData ClubData = 48;
+    //新满级玩法
+    NewMaxLevelData NewMaxLevelData = 49;
+	//时间宝箱
+	UITimeBoxData UITimeBoxData = 50;
+	//回归奖励
+	ReturnRewardData ReturnRewardData =51;
+    //公会活动
+    ClubActivityData ClubActivityData = 52;
+	//调查问卷
+	QuestionnaireData QuestionnaireData = 53;
+	//魔力值
+	MagicData MagicData = 54;
+	//玩家本地邮件的数据
+	LocalMailData MailData = 55;
+	//新岛屿解锁数据
+	NewLandUnLockData NewLandUnLockData = 56;
+	//关卡宝箱数据
+	LevelBoxData levelBoxData = 57;
+    //Npc wonder数据
+    NpcWonderData npcWonderData = 58;
+    //Npc 额外奖励数据
+    NpcExtraData npcExtraData = 59;
+    //精英赛数据
+    ClassicActivityData ClassicActivityData = 60;
+	//头像数据
+	UserHeadData UserHeadData = 61;
+	ContinueBoxData ContinueBoxData = 62;
+	KeyData KeyData = 63;
+    MergeMoudleData MergeMoudleData = 64;
+	//连胜活动数据
+	ContinuePassLevelData ContinuePassLevelData = 65;
+	//故事礼包
+	StoryGiftBoxData StoryGiftBoxData = 66;
+	//失败礼包
+	FailingGiftBoxData FailingGiftBoxData = 67;
+    //排名活动
+    RankActivityData RankActivityData = 68;
+    //FanpageLike
+    FanPageLikeData FanPageLikeData = 69;
+	//maya活动
+	MayaActivityData MayaActivityData = 70;
+    //teaparty
+    TeaPartyActivityData TeaPartyActivityData = 71;
+    //Race
+    RaceActivityData RaceActivityData = 72;
+}

@@ -1,0 +1,38 @@
+syntax = "proto3";
+
+option csharp_namespace = "MM.Message";
+option go_package = "./;api";
+option optimize_for = SPEED;
+
+import "userdata.proto";
+
+enum PlayerOperatorType {
+	ModiryNameAndHeadIcon = 0;
+	DeleteAccount = 1;
+	ReqPlayerData = 2;
+	AddWriteExcludeList = 3;
+	RemoveWriteExcludeList = 4;
+	AddSpecialUser = 5;
+	DelSpecialUser = 6;
+}
+enum PlayerOperatorReType {
+	Success = 0;
+	ModifyNameError = 1;
+	ModifyHeadIconError = 2;
+	ModifyNameAndHeadIconError = 3;
+}
+
+message CSPlayerOperator {
+	PlayerOperatorType type = 1;
+	//头像
+	string strParam = 2;
+	//名字
+	string strParam1 = 3;
+	//
+	int64 userID = 4;
+}
+
+message SCPlayerOperator {
+	PlayerOperatorReType type = 1;
+	PlayerData playerData = 2;
+}

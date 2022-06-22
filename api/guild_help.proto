@@ -1,0 +1,96 @@
+syntax = "proto3";
+
+option csharp_namespace = "MM.Message";
+
+option go_package = "./;api";
+option optimize_for = SPEED;
+import "user.proto";
+
+message GuildReqHelp{
+    int64 id = 1;                                // 帮助标识
+    int32 total = 2;                             // 总数
+    int32 count = 3;                             // 当前资源数
+    int32 resource = 4;                          // 请求资源类型，eg. 1： 体力； 2：碎片；
+    int64 guildId = 5;                           // 公会ID
+    int64 time = 6;                              // 请求时间
+    UserBaseInfo requester = 7;                  // 请求者
+    GuildRespHelpList guildRespHelpList = 8;             // 请求者标识
+}
+
+message GuildRespHelpList{
+  repeated GuildRespHelp guildRespHelps = 1;  // 响应帮助列表
+}
+
+message GuildRespHelp{
+    int64 id = 1;                                // 响应帮助标识
+    GuildReqHelp guildReqHelp = 2;               // 请求帮助
+    int64 time = 4;                              // 事件到达服务器时间
+    UserBaseInfo responser =5;                   // 响应者
+    bool Ack = 6; // 是否已消费
+}
+
+// 请求帮助
+message CSRequestGuildHelp{
+  int64 guildId = 1;       // 所在公会ID
+  int32 resource = 2;      // 请求资源类型，eg. 1： 体力； 2：碎片；
+  int32 total = 3;         // 请求资源总数
+}
+
+// 请求帮助
+message SCRequestGuildHelp{
+  GuildReqHelp guildReqHelp = 1;
+}
+
+
+// 响应帮助
+message CSResponseGuildHelp{
+  int64 reqHelpId = 1;        // request help id
+  int64 guildId = 2;          // 公会ID
+}
+
+// 响应帮助
+message SCResponseGuildHelp{
+  GuildRespHelp guildRespHelp = 1;
+}
+
+
+// 消费response help
+message CSAckGuildHelp{
+  int64 RespHelpId = 1;    // response help id
+}
+
+
+// 消费response help
+message SCAckGuildHelp{
+  int32 result = 1;        // 0: 失败， 1：成功
+}
+
+
+// list未消费的response help
+message CSListGuildHelp{
+  int64 respHelpId = 1;     // 提供一个响应help ID，则默认拉取大于该条help的数据
+}
+
+
+// list未消费的response help
+message SCListGuildHelp{
+  repeated GuildRespHelp guildRespHelps = 1;
+}
+
+
+// 获取公会未达成的request help list
+message CSHistoryGuildHelp{
+  int64 guildId = 1;       // 所在公会ID
+  int64 reqHelpId = 2;     // 提供一个请求help ID，则默认拉取大于该条help的数据
+}
+
+
+// 获取公会未达成的request help list
+message SCHistoryGuildHelp{
+  repeated GuildReqHelp guildReqHelps = 1;
+}
+
+// 获取上次请求时间
+message SCUserLastReqHelp{
+  int64 time=1;
+}

@@ -1,0 +1,95 @@
+syntax = "proto3";
+
+option csharp_namespace = "MM.Message";
+option go_package = "./;api";
+option optimize_for = SPEED;
+
+// 活动信息
+message ActivityInfo{
+  int32 id = 1; // 活动ID
+  int32 activityType = 2; // 活动类型
+  int32 state = 3; // 活动状态
+  int64 beginTime = 4; // 开始时间
+  int64 endTime = 5; // 结束时间
+  int64 showTime = 6; // 开始展示时间
+  int64 uniqueId = 7; // 活动唯一ID 活动开启时生成
+}
+
+// 请求活动信息
+message CSActivity{
+}
+
+message SCActivity{
+  repeated ActivityInfo activityInfos = 1; // 活动列表
+}
+
+// 活动结算获得积分
+message CSActivityScore{
+  int32 id = 1; // 活动ID
+  int32 score = 2; // 活动当前总积分
+  int64 groupId = 3; // 玩家所属组ID
+  int64 uniqueId = 4; // 活动唯一ID 活动开启时生成
+}
+
+message SCActivityScore{
+  int32 id = 1; // 活动ID
+  int32 score = 2; // 活动当前总积分
+  int64 groupId = 3; // 玩家所属组ID
+  int64 uniqueId = 4; // 活动唯一ID 活动开启时生成
+}
+
+// 请求活动排行榜
+message CSActivityRank{
+  int32 rankType = 1;
+  int32 id = 2; // 活动ID
+  int32 score = 3; // 活动积分
+  int64 groupId = 4; // 玩家所属组ID
+  int64 uniqueId = 5; // 活动唯一ID 活动开启时生成
+}
+
+// 排行榜用户基本信息 （这个后面可能会修改、统一用一个基本信息）
+message RankUserBaseInfo{
+  int64 id = 1; // ID
+  int32 score = 2; // 积分
+  string name = 3; // 姓名
+  string headIcon = 4; // 头像
+  int32 rank = 5; // 排名
+  string country = 6; //国家
+  int32 channel = 7; //
+  int32 level = 8; //成员等级
+  string  guildBadge = 9; //　公会徽章
+  string guildName = 10; // 公会名称
+  int64 scoreTime = 11; // 生成该积分的时间
+}
+
+message SCActivityRank{
+  int32 rankType = 1;
+  repeated RankUserBaseInfo useInfos = 2; // 玩家信息列表
+  int32 state = 3; //  当前活动状态
+  int64 groupId = 4; // 玩家所属组ID
+  int64 uniqueId = 5; // 活动唯一ID 活动开启时生成
+}
+
+// 请求加入活动
+message CSJoinActivity{
+  int32 id = 1; // 活动ID
+}
+
+// 请求加入活动返回
+message SCJoinActivity{
+  int32 id = 1; // 活动ID
+  int64 groupId = 2; // 玩家所属组ID
+  int64 uniqueId = 3; // 活动唯一ID 活动开启时生成
+  int64 createGroupTime = 4; // 创建组时间
+  int32 rank = 5; // 组内排名
+}
+
+// 领取奖励
+message CSReceiveAward{
+  int64 groupId = 1; // 玩家所属组ID
+  int64 uniqueId = 2; // 活动唯一ID 活动开启时生成
+}
+// 领取奖励结果
+message SCReceiveAward{
+  int32 result = 1; // 返回 2000正常领取，其它值错误
+}

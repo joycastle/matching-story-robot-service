@@ -1,0 +1,133 @@
+syntax = "proto3";
+
+option csharp_namespace = "MM.Message";
+option go_package = "./;api";
+option optimize_for = SPEED;
+
+import "common.proto";
+
+//邮件发送类型
+enum MailSendType{
+	//指定时间一次发送
+	Once = 0;
+	//周期性重复发送
+	Repeat = 1;
+}
+
+//邮件类型
+enum MailType{
+	Server = 0;
+	Local = 1;
+}
+
+//邮件生成器状态
+enum MailGeneraterState {
+	//未发送
+	UnSend = 0;
+	//发送中
+	Sending = 1;
+	//已发送
+	Sended = 2;
+	//活动的(重复发送的邮件，未结束的状态)
+	Active = 3;
+	//失效(重复发送的邮件，结束的状态)
+	InActive = 4;
+	//撤回
+	WithDraw = 5;
+}
+
+//邮件操作类型
+enum MailOperatorType {
+	//请求
+	Req = 0;
+	//修改
+	Modify = 1;
+	//删除
+	Del = 2;
+}
+
+//邮件状态
+enum MailStateType {
+	//未读
+	UnRead = 0;
+	//已读
+	Readed = 1;
+}
+
+//邮件扩展条件
+message MailConditionEx {
+	//最小登录时间
+	int32 minLoginDay = 1;
+	//最大登录时间
+	int32 maxLoginDay = 2;
+	//最小付费额
+	int32 minPay = 3;
+	//最大付费额
+	int32 maxPay = 4;
+	//有效期(int格式的日期，在此日期之前有效)
+	int32 validity = 5;
+}
+
+message MailContentData{
+	//语言类型
+	int32 languageType = 1;
+	//标题
+	string tittle = 2;
+	//内容
+	string content = 3;
+}
+
+//邮件数据
+message MailData {
+	//邮件ID
+	int64 mailID = 1;
+	//邮件的内容
+	repeated MailContentData mailContent = 2;
+	//附件
+	repeated MaterialJson mats = 3;
+	//创建时间
+	int64 createTime = 4;
+	//邮件状态
+	MailStateType  state = 5;
+	//版本号
+	repeated int32 version = 6;
+	//邮件类型 0 服务器邮件 1 本地邮件
+	MailType type = 7;
+}
+
+//已经发送的全局邮件数据
+message SendedMailData {
+	int64 sendedMailID = 1;
+	int32 validity = 2;
+	int64 sendTime = 3;
+}
+
+//玩家收到过的邮件ID
+message PlayerMailIds {
+	repeated int64 mailIds = 1;
+}
+
+//玩家的邮件
+message PlayerMails {
+	repeated MailData mails = 1;
+}
+
+//全服邮件的数据
+message GlobalMailData {
+	MailConditionEx mailCondition = 1;
+	MailData mailData = 2;
+}
+
+message CSMailData {
+	MailOperatorType operatorType = 1;
+	repeated int64 mailID = 2;
+}
+
+message SCMailData {
+	PlayerMails mailData = 1;
+}
+
+message LocalMailData {
+	repeated MailData mails = 1;
+	int64 incrMailID = 2;
+}

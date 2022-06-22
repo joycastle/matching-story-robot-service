@@ -1,0 +1,25 @@
+syntax = "proto3";
+
+option csharp_namespace = "MM.Message";
+option go_package = "./;api";
+option optimize_for = SPEED;
+
+//enum DeviceType {
+//	Android = 0;
+//	iOS = 1;
+//	Windows = 2;
+//	OSX = 3;
+//}
+
+message CSGetConfig {
+	//本地版本号
+	int32 localVersion = 1;
+	//本地设备类型(Windows,Android,iOS,OSX)
+	int32 deviceType = 2;
+	//本地时间
+	int64 localTime = 3;
+}
+
+message SCConfig {
+	int32 forbidContry = 1;
+}

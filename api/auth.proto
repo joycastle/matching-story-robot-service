@@ -1,0 +1,21 @@
+syntax = "proto3";
+
+option csharp_namespace = "MM.Message";
+
+option optimize_for = SPEED;
+option go_package = "./;api";
+
+message CSUserToken{
+}
+
+// 请求token返回
+message SCUserToken{
+  string token = 1;
+  int64 userId = 2;
+
+}
+
+// 请求ping返回
+message SCAuthPing{
+  int32 result = 1;
+}

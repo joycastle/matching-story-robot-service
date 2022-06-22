@@ -1,0 +1,59 @@
+syntax = "proto3";
+
+option go_package = "./;api";
+
+import "userdata.proto";
+
+enum E_GM_OPER_TYPE {
+	ADD_MAIL = 0;
+	CLEAR_USER_DATA = 1;
+	SEARCH_USER_BY_GUID = 2;
+	SEARCH_USER_BY_ROUND_LEVEL = 3;
+	LOCK_ACCOUNT = 4;
+	RE_LOCK_ACCOUNT = 5;
+	ADD_GLOBAL_MAIL = 6;
+	SEARCH_USER_BY_ACCOUNT_ID = 7;
+	ADD_ACTIVITY_AWARD = 8;
+}
+
+enum E_GM_OPER_BACK_TYPE {
+	MAIL_OK = 0;
+	MAIL_USER_ERROR = 1;	
+	SEARCH_USER_BY_GUID_OK = 2;
+	SEARCH_USER_BY_GUID_ERROR = 3;
+	SEARCH_USER_BY_ROUND_LEVEL_OK = 4;
+	SEARCH_USER_BY_ROUND_LEVEL_ERROR = 5;
+	LOCK_ACCOUNT_OK = 6;
+	LOCK_ACCOUNT_ERROR = 7;
+	RE_LOCK_ACCOUNT_OK = 8;
+	RE_LOCK_ACCOUNT_ERROR = 9;
+	ADD_GLOBAL_MAIL_OK = 10;
+	ADD_GLOBAL_MAIL_ERROR = 11;
+	ADD_ACTIVITY_AWARD_OK = 12;
+	ADD_ACTIVITY_AWARD_ERROR = 13;
+}
+
+message GSGMOperator{
+	E_GM_OPER_TYPE type = 1;
+	repeated int64 userid = 2;
+	string mailTitle = 3;
+	string mailContent = 4;
+	repeated int32 mailItem = 5;
+	int32 sendTime = 6;
+	int64 requestId = 7;
+	int32 beginlevel = 8;
+	int32 endlevel = 9;
+	int64 accountid = 10;
+	string version = 11;
+	repeated int32 pid = 12;
+	repeated int32 mailItemCount = 13;
+	int32 itemflag =14;
+}
+
+message SSGMOperatorBack {
+	E_GM_OPER_BACK_TYPE type = 1;
+	repeated int64 userid = 2;
+	int64 requestId = 3;
+	repeated PlayerData playerData = 4;
+	int32 count = 5;
+}

@@ -71,11 +71,16 @@ func init() {
 	redis.InitRedis(redisConfigs)
 
 	//InitConfig
-	if err := ReadConfigFromConfManager(); err != nil {
+	if err := ReadRobotTeamConfigFromConfManager(); err != nil {
 		panic(err)
 	}
 
 	if len(configRobotNames) <= 0 {
 		panic("configRobotNamsArray Empty")
+	}
+
+	//robot chat msg config
+	if err := ReadRobotTeamChatFromConfManager(); err != nil {
+		panic(err)
 	}
 }

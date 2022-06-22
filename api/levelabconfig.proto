@@ -1,0 +1,51 @@
+syntax = "proto3";
+
+option csharp_namespace = "MM.Message";
+option go_package = "./;api";
+option optimize_for = SPEED;
+
+
+//请求当前的AB测试配置
+message ConfigData {
+	//当前AB测试的版本
+	string version = 1;
+	//当前的关卡
+	int32 level = 2;
+	//测试类型 0 未开启 1整套 2分关
+	string type = 3;
+	//当前的AB测试组
+	string group = 4;
+	//当前AB测试客户端版本
+	string clientVersion = 5;
+}
+
+//当前前端的AB测试配置
+message LevelABConfigData {	
+	//当前的配置
+	ConfigData currentData = 1;
+	//历史配置
+	repeated ConfigData historyData = 2;
+	//是否已经初始化过
+	int32 inited = 3;
+}
+
+//功能的ABTest数据
+message ABConfigData {
+	string type = 1;
+	string group = 2;
+}
+
+//玩家当前的ABTest数据
+message FunctionABConfigData {
+	repeated ABConfigData configs = 1;
+}
+
+message CSGetABConfig {
+	ABConfigData configData = 1;
+	repeated string types = 2;
+}
+
+message SCGetABConfig {
+	ABConfigData configData = 1;
+	repeated ABConfigData configDatas = 2;
+}

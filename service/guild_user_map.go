@@ -8,7 +8,7 @@ import (
 )
 
 //获取club的用户uid
-func GetClubUserIds(guildID int64) ([]int64, error) {
+func GetGuildUserIds(guildID int64) ([]int64, error) {
 	var users []model.GuildUserMap
 	if r := mysql.Get("default-slave").Where("guild_id = ?", guildID).Find(&users); r.Error != nil {
 		return nil, r.Error
@@ -23,8 +23,8 @@ func GetClubUserIds(guildID int64) ([]int64, error) {
 }
 
 //获取用户类型分布
-func GetClubUserTypeDistribution(guildID int64) (map[string][]model.User, error) {
-	uids, err := GetClubUserIds(guildID)
+func GetGuildUserTypeDistribution(guildID int64) (map[string][]model.User, error) {
+	uids, err := GetGuildUserIds(guildID)
 	if err != nil {
 		return nil, err
 	}
@@ -44,7 +44,7 @@ func GetClubUserTypeDistribution(guildID int64) (map[string][]model.User, error)
 }
 
 //加入工会
-func JoinToClub(guildID, uid int64) error {
+func JoinToGuild(guildID, uid int64) error {
 	var gum model.GuildUserMap
 	gum.UserID = uid
 	gum.GuildID = guildID

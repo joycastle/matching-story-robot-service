@@ -4,13 +4,13 @@ import (
 	"testing"
 )
 
-func Test_CreateClubRobot_GetOne_BatchGet(t *testing.T) {
+func Test_CreateGuildRobot_GetOne_BatchGet(t *testing.T) {
 	name := "TestHello"
 	icon := "8"
 	likeCnt := 88
 	level := 99
 
-	u, err := CreateClubRobot(name, icon, likeCnt, level)
+	u, err := CreateGuildRobot(name, icon, likeCnt, level)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -24,11 +24,11 @@ func Test_CreateClubRobot_GetOne_BatchGet(t *testing.T) {
 		t.Fatal(err)
 	} else {
 		if u3.UserName != name || u3.UserHeadIcon != icon || u3.UserLikeCount != uint(likeCnt) || u3.UserLevel != level {
-			t.Fatal("CreateClubRobot Error 1")
+			t.Fatal("CreateGuildRobot Error 1")
 		}
 
-		if u3.DeviceType != DEVICE_TYPE_CLUB_ROBOT || u3.UserType != USERTYPE_CLUB_ROBOT || u3.UserCountryData != COUNTRY_CN {
-			t.Fatal("CreateClubRobot Error 2")
+		if u3.DeviceType != DEVICE_TYPE_CLUB_ROBOT || u3.UserType != USERTYPE_CLUB_ROBOT_SERVICE || u3.UserCountryData != COUNTRY_CN {
+			t.Fatal("CreateGuildRobot Error 2")
 		}
 	}
 
@@ -39,19 +39,19 @@ func Test_CreateClubRobot_GetOne_BatchGet(t *testing.T) {
 
 	var uids []int64
 	var uidMap map[int64]struct{} = make(map[int64]struct{})
-	if u, err := CreateClubRobot(name, icon, likeCnt, level); err != nil {
+	if u, err := CreateGuildRobot(name, icon, likeCnt, level); err != nil {
 		t.Fatal(err)
 	} else {
 		uids = append(uids, u.UserID)
 		uidMap[u.UserID] = struct{}{}
 	}
-	if u, err := CreateClubRobot(name, icon, likeCnt, level); err != nil {
+	if u, err := CreateGuildRobot(name, icon, likeCnt, level); err != nil {
 		t.Fatal(err)
 	} else {
 		uids = append(uids, u.UserID)
 		uidMap[u.UserID] = struct{}{}
 	}
-	if u, err := CreateClubRobot(name, icon, likeCnt, level); err != nil {
+	if u, err := CreateGuildRobot(name, icon, likeCnt, level); err != nil {
 		t.Fatal(err)
 	} else {
 		uids = append(uids, u.UserID)

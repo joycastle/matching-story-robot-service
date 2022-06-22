@@ -1,0 +1,186 @@
+syntax = "proto3";
+
+option csharp_namespace = "MM.Message";
+option go_package = "./;api";
+option optimize_for = SPEED;
+import "code.proto";
+
+
+//公会开放类型
+enum GuildOpenType{
+    NONE1 = 0;
+    CLOSE = 1;
+    OPEN = 2;
+}
+
+enum RankType{
+    GLOBAL = 0;//全局
+    COUNTRY = 1;//国家
+}
+
+// 返回公会状态
+message GetGuild {
+  uint32 retCode = 1;
+  string id = 2;
+  string name = 3;
+  //  ...
+}
+
+//公会基本信息
+message GuildBaseInfo{
+    int64 id = 1; //公会ID
+    string  Badge = 2; //　公会徽章
+    GuildOpenType   openType = 3; //  公会类型（0-不可加入，1-可加入，其它后面再扩展）
+    int32  limitLevel = 4; //限制等级
+    int64  score = 5; //公会积分
+    int64  leader = 6; // 会长
+    string name = 7; // 公会名称
+    string desc = 8; // 公会简介
+    string country = 9; // 国家
+    int32 memberNum = 10; // 成员数量
+    int32 helpCount = 11; // 公会帮助次数
+    bool robot = 12; // 机器人
+    string frameIcon = 13; //边框
+    int32 star = 14; // 星星 满级玩法，星星个数，可以理解为level2
+}
+
+//公会成员信息
+message GuildMember{
+    int64 id = 1; //成员ID
+    int32 score = 2; //成员积分
+    int32 level = 3; //成员等级
+    string name = 4; //成员名
+    string headIcon = 5; //头像
+    int32 help = 6; //
+    int32 like = 7;
+    string country = 8; //国家
+    int32 channel = 9; //
+    int32 star = 10; // 累计积分 (星星)
+    int32 trophy = 11; // 成就奖杯
+    int64 starActivityId =12;  // star字段所属的活动ID，若该ID与当前正在开启的活动ID不一致，则返回0
+
+}
+
+//公会信息
+message GuildInfo{
+    GuildBaseInfo base = 1;//公会基础信息
+    GuildMembers  members = 2; //公会成员列表
+}
+//公会成员列表
+message GuildMembers{
+    repeated GuildMember members = 2;//公会成员列表
+}
+
+//创建公会
+message CSCreateGuild{
+    string  badge = 1; //　公会徽章
+    GuildOpenType   openType = 2; //  公会类型（0-不可加入，1-可加入，其它后面再扩展）
+    int32  limitLevel = 3; //限制等级
+    string name = 4; //公会名称
+    string desc = 5; //公会简介
+    string country = 6; // 国家
+}
+
+//创建公会响应
+message SCCreateGuild{
+    GuildInfo guildInfo = 1;//公会基础信息
+}
+
+//加入公会
+message CSJoinGuild{
+    int64 guildId = 1;//公会ID
+}
+
+//加入公会响应
+message SCJoinGuild{
+    GuildInfo guildInfo = 1;//公会信息
+}
+
+//离开公会
+message CSLeaveGuild{
+    int64 guildId = 1;//玩家id
+}
+
+//离开公会响应
+message SCLeaveGuild{
+    int32 result = 1;
+}
+
+//搜索公会
+message CSSearchGuild{
+    string name = 1;   //按名字搜索
+    int64 guildId = 2;//搜索指定公会ID
+}
+
+message SCSearchGuild{
+    repeated GuildInfo guilds = 1;
+}
+
+//更新公会
+message CSUpdateGuild{
+    int64 guildId = 1;//公会ID
+    int32 levelLimit = 2;//等级限制
+    GuildOpenType openType  = 3; //公会类型
+    string badge = 4;// 公会徽章
+    string desc = 5;// 公会描述
+    string name = 6;// 公会名字
+}
+
+//更新公会响应
+message SCUpdateGuild{
+    GuildBaseInfo guildInfo = 1;//公会基础信息
+}
+
+//获得公会信息
+message CSGetGuild{
+    int64 guildId = 1;//公会ID
+}
+
+message SCGetGuild{
+    GuildInfo guildInfo = 1;//公会信息
+}
+
+//推荐公会
+message CSRecommendGuild{
+
+}
+
+message SCRecommendGuild{
+    int64 refreshTime  = 1; // 刷新时间
+    repeated GuildBaseInfo guilds = 2;
+}
+
+message CSMemberUpdate{
+    int32 level = 1; // 成员等级
+    int32 like = 2;
+    string name = 3;
+    string headIcon = 4;
+    int32 channel = 5;
+    int32 star = 6;  // 满级玩法星星
+}
+
+message SCMemberUpdate{
+    int32 level = 1; // 成员等级
+    int32 like = 2;
+}
+
+message CSUpdateMemberHelpCount{
+    int64 userId = 1;
+    int64 helpCount = 2;
+}
+
+message SCUpdateMemberHelpCount{
+    int64 userId = 1;
+    int64 helpCount = 2;
+}
+
+// 公会踢除成员
+message CSKickMember{
+    int64 memberId = 1;
+    int64 guildId = 2;
+}
+
+message SCKickMember{
+    PANGU_CODE result = 1;
+    GuildInfo guildInfo = 2;//公会信息
+}

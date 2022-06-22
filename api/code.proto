@@ -1,0 +1,69 @@
+syntax = "proto3";
+
+option csharp_namespace = "MM.Message";
+option go_package = "./;api";
+option optimize_for = SPEED;
+
+enum PANGU_CODE {
+    PANGU_CODE_UNSPECIFIED = 0;         // 无效code
+    PANGU_CODE_OK = 2000;               // 成功
+    PANGU_CODE_NOT_LOGGED_IN = 4010;    // 未登录
+    PANGU_CODE_UNAUTHORIZED = 4011;     // 未授权
+    PANGU_CODE_PARAMETER_ILLEGAL = 4030; // 参数不合法
+    PANGU_CODE_UNTRUSTED_USER = 4031;  // 非法的用户Id
+    PANGU_CODE_ROUTING_NOT_EXIST = 4040;  // 路由不存在
+    PANGU_CODE_REQUEST_TIMEOUT = 4080;   // 服务器等待客户端发送的请求超时
+
+    PANGU_CODE_SERVER_ERR = 5000;      // 系统错误
+
+    // 60 系统相关
+
+    PANGU_CODE_HTTP_UNPACK_ERR = 6000;
+    PANGU_CODE_HTTP_PACK_ERR = 6001;
+    PANGU_CODE_REDIS_ERR = 6002;
+
+    // 61 数据存储相关
+
+    PANGU_CODE_NO_DATA = 6101;          // 没有数据
+    PANGU_CODE_MODEL_ADD_ERR = 6102;    // 添加错误
+    PANGU_CODE_MODEL_DEL_ERR = 6103; // 删除错误
+    PANGU_CODE_MODEL_STORE_ERR = 6104;  // 存储错误
+
+    // 70 公会相关
+
+    PANGU_CODE_PLAYER_IN_GUILD = 7000;    // 玩家在公会中
+    PANGU_CODE_GUILD_NOT_EXIST = 7001;    // 公会不存在
+    PANGU_CODE_PLAYER_NO_GUILD = 7002;    // 玩家不在公会中
+    PANGU_CODE_PLAYER_NOT_EXIST = 7003;   // 用户不存在
+    PANGU_CODE_GUILD_LIMIT_LEVEL = 7004;  // 限制等级不能大于会长等级
+    PANGU_CODE_GUILD_MAX_MEMBER_NUM = 7005; // 公会人数已满
+    PANGU_CODE_PLAYER_NOT_LEADER = 7006; // 不是会长
+    PANGU_CODE_GUILD_NOT_KICK_SELF   = 7007; // 不能删除自己
+    PANGU_CODE_PLAYER_IS_CHEAT_USER = 7008; // 作弊玩家
+
+    // 71 公会请求帮助相关
+
+    PANGU_CODE_REQUEST_INTERVAL_TOO_SHORT = 7100; // 请求资源间隔过短(时间间隔可配置->app.guild.helpInterval)
+    PANGU_CODE_HELP_IS_SATISFIED = 7101;          // 该请求帮助已被满足，无法帮助(该体力请求已完成)
+    PANGU_CODE_HELP_IS_CONSUMED = 7105;           // 该资源已被消费(体力已经被领取，无法再次领取)
+
+    PANGU_CODE_ACTIVITY_ID_ERROR = 8000; // 活动ID错误
+    PANGU_CODE_ACTIVITY_PLAYER_NO_GROUP = 8001; // 玩家不在组中
+    PANGU_CODE_ACTIVITY_NO_OPEN = 8002; // 活动没开启
+    PANGU_CODE_ACTIVITY_RECEIVE_AWARD = 8003; // 活动已领取奖励
+    PANGU_CODE_PANGU_CODE_JOIN_ACTIVITY_TIMEOUT = 8004; // 超时不能加入活动
+    PANGU_CODE_ACTIVITY_PLAYER_IN_GROUP = 8005; // 玩家不在组中
+    PANGU_CODE_ACTIVITY_STOP_ENTER = 8006; // 停止进入
+    PANGU_CODE_ACTIVITY_REWARD_NOT_START = 8007; // 未开始领奖
+    PANGU_CODE_ACTIVITY_GROUP_ID_ERROR = 8008; // 找不到指定组ID
+
+    // 100 聊天微服务相关
+
+    PANGU_CODE_PIGEON_GRPC_ERR = 10000;
+    PANGU_CODE_PIGEON_MISS_IGNORE_MYSELF = 10001;      // ignoreMyself缺未提供userId
+    PANGU_CODE_PIGEON_GRPC_SEND_ERR = 10002;
+
+    PANGU_CODE_MADEL_RUSH = 11031; // 服务被删除
+    PANGU_CODE_MADEL_RUSH_JOIN_END = 11032; // 加入已关闭
+
+}

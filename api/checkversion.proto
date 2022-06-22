@@ -1,0 +1,77 @@
+syntax = "proto3";
+
+option csharp_namespace = "MM.Message";
+option go_package = "./;api";
+option optimize_for = SPEED;
+
+import "common.proto";
+
+enum DeviceType {
+	Android = 0;
+	iOS = 1;
+	Windows = 2;
+	OSX = 3;
+}
+
+//更新类型
+enum UpdateType{
+	//普通--可以取消
+	Normal = 0;
+	//强制--不可取消
+	Force = 1;
+	//静默--不弹框直接下载
+	Silence = 2;
+}
+
+message CSCheckVersion {
+	//本地版本号
+	int32 localVersion = 1;
+	//本地设备类型(Windows,Android,iOS,OSX)
+	DeviceType deviceType = 2;
+	//本地时间
+	int64 localTime = 3;
+}
+
+//更新内容
+message ContentData {
+	//语言类型
+	int32 languageType = 1;
+	//标题
+	string updateTittle = 2;
+	//内容
+	string updateString = 3;
+}
+
+message UpdateContent {
+	//更新的版本号
+	int32 version = 1;
+	//更新类型
+	UpdateType updateType = 2;
+	//更新内容
+	repeated ContentData data = 3;
+	//更新发布时间
+	int64 time = 4;
+}
+
+message SCCheckVersion {
+	//当前最新版本号
+	int32 version = 1;
+	//当前更新的信息
+	UpdateContent updateContent = 2;
+}
+
+//请求ABTest
+message CSABTestConfig {
+	//当前版本号
+	int32 localVersion = 1;
+	//设备ID
+	string deviceID = 2;
+	//请求的AB测试类型列表
+	repeated int32 abType = 3;
+}
+
+//ABTest组
+message SCABTestConfig{
+    //Server端回复的ABTest组
+	repeated ABConfig abConfig = 1;
+}

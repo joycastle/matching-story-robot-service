@@ -7,46 +7,31 @@ import (
 )
 
 func (f *file2Struct) init() {
-    f.File2Str["MEDAL_RUSH_USERGROUP_CONFIG"] = &confcsv.MEDALRUSHUSERGROUPCONFIG{}
-    f.File2Str["guildrecommend"] = &confcsv.Guildrecommend{}
-    f.File2Str["level_race_config"] = &confcsv.LevelRaceConfig{}
-    f.File2Str["teamchesttime"] = &confcsv.Teamchesttime{}
     f.File2Str["BOT_FRIEND_CONFIG"] = &confcsv.BOTFRIENDCONFIG{}
     f.File2Str["BOT_ISLAND"] = &confcsv.BOTISLAND{}
     f.File2Str["level_race_group_config"] = &confcsv.LevelRaceGroupConfig{}
-    f.File2Str["level_race_usergroup_config"] = &confcsv.LevelRaceUsergroupConfig{}
-    f.File2Str["MEDAL_RUSH_GROUP_CONFIG"] = &confcsv.MEDALRUSHGROUPCONFIG{}
+    f.File2Str["robot_name"] = &confcsv.RobotName{}
+    f.File2Str["teamchestgroup"] = &confcsv.Teamchestgroup{}
+    f.File2Str["FRIEND_DELAY"] = &confcsv.FRIENDDELAY{}
+    f.File2Str["MEDAL_RUSH_USERGROUP_CONFIG"] = &confcsv.MEDALRUSHUSERGROUPCONFIG{}
     f.File2Str["maxleveltournament"] = &confcsv.Maxleveltournament{}
+    f.File2Str["robot"] = &confcsv.Robot{}
     f.File2Str["system"] = &confcsv.System{}
     f.File2Str["robot_team_config"] = &confcsv.RobotTeamConfig{}
     f.File2Str["robot_team_initial"] = &confcsv.RobotTeamInitial{}
-    f.File2Str["teamchestgroup"] = &confcsv.Teamchestgroup{}
-    f.File2Str["FRIEND_DELAY"] = &confcsv.FRIENDDELAY{}
-    f.File2Str["MEDAL_RUSH_TIME_CONFIG"] = &confcsv.MEDALRUSHTIMECONFIG{}
-    f.File2Str["robot"] = &confcsv.Robot{}
-    f.File2Str["robot_name"] = &confcsv.RobotName{}
+    f.File2Str["teamchesttime"] = &confcsv.Teamchesttime{}
     f.File2Str["robot_team"] = &confcsv.RobotTeam{}
+    f.File2Str["robot_team_chat"] = &confcsv.RobotTeamChat{}
+    f.File2Str["MEDAL_RUSH_GROUP_CONFIG"] = &confcsv.MEDALRUSHGROUPCONFIG{}
+    f.File2Str["MEDAL_RUSH_TIME_CONFIG"] = &confcsv.MEDALRUSHTIMECONFIG{}
+    f.File2Str["guildrecommend"] = &confcsv.Guildrecommend{}
+    f.File2Str["level_race_config"] = &confcsv.LevelRaceConfig{}
+    f.File2Str["level_race_usergroup_config"] = &confcsv.LevelRaceUsergroupConfig{}
 
 }
 
 //IConfManager 配置管理中心
 type IConfManager interface {
-
-    GetConfMEDALRUSHUSERGROUPCONFIGNum() (int, error)
-    GetConfMEDALRUSHUSERGROUPCONFIGByKey(key int) (confcsv.IMEDALRUSHUSERGROUPCONFIG, error)
-    GetConfMEDALRUSHUSERGROUPCONFIGByIndex(index int) (confcsv.IMEDALRUSHUSERGROUPCONFIG, error)
-
-    GetConfGuildrecommendNum() (int, error)
-    GetConfGuildrecommendByKey(key int) (confcsv.IGuildrecommend, error)
-    GetConfGuildrecommendByIndex(index int) (confcsv.IGuildrecommend, error)
-
-    GetConfLevelRaceConfigNum() (int, error)
-    GetConfLevelRaceConfigByKey(key int) (confcsv.ILevelRaceConfig, error)
-    GetConfLevelRaceConfigByIndex(index int) (confcsv.ILevelRaceConfig, error)
-
-    GetConfTeamchesttimeNum() (int, error)
-    GetConfTeamchesttimeByKey(key int) (confcsv.ITeamchesttime, error)
-    GetConfTeamchesttimeByIndex(index int) (confcsv.ITeamchesttime, error)
 
     GetConfBOTFRIENDCONFIGNum() (int, error)
     GetConfBOTFRIENDCONFIGByKey(key int) (confcsv.IBOTFRIENDCONFIG, error)
@@ -60,17 +45,29 @@ type IConfManager interface {
     GetConfLevelRaceGroupConfigByKey(key int) (confcsv.ILevelRaceGroupConfig, error)
     GetConfLevelRaceGroupConfigByIndex(index int) (confcsv.ILevelRaceGroupConfig, error)
 
-    GetConfLevelRaceUsergroupConfigNum() (int, error)
-    GetConfLevelRaceUsergroupConfigByKey(key int) (confcsv.ILevelRaceUsergroupConfig, error)
-    GetConfLevelRaceUsergroupConfigByIndex(index int) (confcsv.ILevelRaceUsergroupConfig, error)
+    GetConfRobotNameNum() (int, error)
+    GetConfRobotNameByKey(key int) (confcsv.IRobotName, error)
+    GetConfRobotNameByIndex(index int) (confcsv.IRobotName, error)
 
-    GetConfMEDALRUSHGROUPCONFIGNum() (int, error)
-    GetConfMEDALRUSHGROUPCONFIGByKey(key int) (confcsv.IMEDALRUSHGROUPCONFIG, error)
-    GetConfMEDALRUSHGROUPCONFIGByIndex(index int) (confcsv.IMEDALRUSHGROUPCONFIG, error)
+    GetConfTeamchestgroupNum() (int, error)
+    GetConfTeamchestgroupByKey(key int) (confcsv.ITeamchestgroup, error)
+    GetConfTeamchestgroupByIndex(index int) (confcsv.ITeamchestgroup, error)
+
+    GetConfFRIENDDELAYNum() (int, error)
+    GetConfFRIENDDELAYByKey(key int) (confcsv.IFRIENDDELAY, error)
+    GetConfFRIENDDELAYByIndex(index int) (confcsv.IFRIENDDELAY, error)
+
+    GetConfMEDALRUSHUSERGROUPCONFIGNum() (int, error)
+    GetConfMEDALRUSHUSERGROUPCONFIGByKey(key int) (confcsv.IMEDALRUSHUSERGROUPCONFIG, error)
+    GetConfMEDALRUSHUSERGROUPCONFIGByIndex(index int) (confcsv.IMEDALRUSHUSERGROUPCONFIG, error)
 
     GetConfMaxleveltournamentNum() (int, error)
     GetConfMaxleveltournamentByKey(key int) (confcsv.IMaxleveltournament, error)
     GetConfMaxleveltournamentByIndex(index int) (confcsv.IMaxleveltournament, error)
+
+    GetConfRobotNum() (int, error)
+    GetConfRobotByKey(key int) (confcsv.IRobot, error)
+    GetConfRobotByIndex(index int) (confcsv.IRobot, error)
 
     GetConfSystemNum() (int, error)
     GetConfSystemByKey(key int) (confcsv.ISystem, error)
@@ -84,193 +81,41 @@ type IConfManager interface {
     GetConfRobotTeamInitialByKey(key int) (confcsv.IRobotTeamInitial, error)
     GetConfRobotTeamInitialByIndex(index int) (confcsv.IRobotTeamInitial, error)
 
-    GetConfTeamchestgroupNum() (int, error)
-    GetConfTeamchestgroupByKey(key int) (confcsv.ITeamchestgroup, error)
-    GetConfTeamchestgroupByIndex(index int) (confcsv.ITeamchestgroup, error)
-
-    GetConfFRIENDDELAYNum() (int, error)
-    GetConfFRIENDDELAYByKey(key int) (confcsv.IFRIENDDELAY, error)
-    GetConfFRIENDDELAYByIndex(index int) (confcsv.IFRIENDDELAY, error)
-
-    GetConfMEDALRUSHTIMECONFIGNum() (int, error)
-    GetConfMEDALRUSHTIMECONFIGByKey(key int) (confcsv.IMEDALRUSHTIMECONFIG, error)
-    GetConfMEDALRUSHTIMECONFIGByIndex(index int) (confcsv.IMEDALRUSHTIMECONFIG, error)
-
-    GetConfRobotNum() (int, error)
-    GetConfRobotByKey(key int) (confcsv.IRobot, error)
-    GetConfRobotByIndex(index int) (confcsv.IRobot, error)
-
-    GetConfRobotNameNum() (int, error)
-    GetConfRobotNameByKey(key int) (confcsv.IRobotName, error)
-    GetConfRobotNameByIndex(index int) (confcsv.IRobotName, error)
+    GetConfTeamchesttimeNum() (int, error)
+    GetConfTeamchesttimeByKey(key int) (confcsv.ITeamchesttime, error)
+    GetConfTeamchesttimeByIndex(index int) (confcsv.ITeamchesttime, error)
 
     GetConfRobotTeamNum() (int, error)
     GetConfRobotTeamByKey(key int) (confcsv.IRobotTeam, error)
     GetConfRobotTeamByIndex(index int) (confcsv.IRobotTeam, error)
 
+    GetConfRobotTeamChatNum() (int, error)
+    GetConfRobotTeamChatByKey(key int) (confcsv.IRobotTeamChat, error)
+    GetConfRobotTeamChatByIndex(index int) (confcsv.IRobotTeamChat, error)
+
+    GetConfMEDALRUSHGROUPCONFIGNum() (int, error)
+    GetConfMEDALRUSHGROUPCONFIGByKey(key int) (confcsv.IMEDALRUSHGROUPCONFIG, error)
+    GetConfMEDALRUSHGROUPCONFIGByIndex(index int) (confcsv.IMEDALRUSHGROUPCONFIG, error)
+
+    GetConfMEDALRUSHTIMECONFIGNum() (int, error)
+    GetConfMEDALRUSHTIMECONFIGByKey(key int) (confcsv.IMEDALRUSHTIMECONFIG, error)
+    GetConfMEDALRUSHTIMECONFIGByIndex(index int) (confcsv.IMEDALRUSHTIMECONFIG, error)
+
+    GetConfGuildrecommendNum() (int, error)
+    GetConfGuildrecommendByKey(key int) (confcsv.IGuildrecommend, error)
+    GetConfGuildrecommendByIndex(index int) (confcsv.IGuildrecommend, error)
+
+    GetConfLevelRaceConfigNum() (int, error)
+    GetConfLevelRaceConfigByKey(key int) (confcsv.ILevelRaceConfig, error)
+    GetConfLevelRaceConfigByIndex(index int) (confcsv.ILevelRaceConfig, error)
+
+    GetConfLevelRaceUsergroupConfigNum() (int, error)
+    GetConfLevelRaceUsergroupConfigByKey(key int) (confcsv.ILevelRaceUsergroupConfig, error)
+    GetConfLevelRaceUsergroupConfigByIndex(index int) (confcsv.ILevelRaceUsergroupConfig, error)
+
 }
 
 
-
-//GetConfMEDALRUSHUSERGROUPCONFIGNum auto
-func (c * ConfManager) GetConfMEDALRUSHUSERGROUPCONFIGNum() (int, error) {
-    inters, ok := c.confMap["MEDAL_RUSH_USERGROUP_CONFIG"]
-    if !ok {
-        return 0, fmt.Errorf("not find conf file name:%s", "MEDAL_RUSH_USERGROUP_CONFIG")
-    }
-    return len(inters), nil
-}
-
-//GetConfMEDALRUSHUSERGROUPCONFIGByKey auto
-func (c * ConfManager) GetConfMEDALRUSHUSERGROUPCONFIGByKey(key int) (confcsv.IMEDALRUSHUSERGROUPCONFIG, error) {
-    inters, ok := c.confMap["MEDAL_RUSH_USERGROUP_CONFIG"]
-    if !ok {
-        return nil, fmt.Errorf("not find conf file name:%s", "MEDAL_RUSH_USERGROUP_CONFIG")
-    }
-
-    for _, inter := range inters {
-        obj := inter.(confcsv.IMEDALRUSHUSERGROUPCONFIG)
-        if obj.GetID() == key {
-            return obj, nil
-        }
-    }
-    return nil, fmt.Errorf("conf not find MEDAL_RUSH_USERGROUP_CONFIG file key:%v", key)
-}
-
-//GetConfMEDALRUSHUSERGROUPCONFIGByIndex auto
-func (c * ConfManager) GetConfMEDALRUSHUSERGROUPCONFIGByIndex(index int) (confcsv.IMEDALRUSHUSERGROUPCONFIG, error) {
-    inters, ok := c.confMap["MEDAL_RUSH_USERGROUP_CONFIG"]
-    if !ok {
-        return nil, fmt.Errorf("not find conf file name:%s", "MEDAL_RUSH_USERGROUP_CONFIG")
-    }
-
-    if len(inters) <= index {
-        return nil, fmt.Errorf("conf MEDAL_RUSH_USERGROUP_CONFIG index crash index:%d, len:%d", len(inters), index)
-    }
-
-    obj := inters[index].(confcsv.IMEDALRUSHUSERGROUPCONFIG)
-    return obj, nil
-}
-
-//GetConfGuildrecommendNum auto
-func (c * ConfManager) GetConfGuildrecommendNum() (int, error) {
-    inters, ok := c.confMap["guildrecommend"]
-    if !ok {
-        return 0, fmt.Errorf("not find conf file name:%s", "guildrecommend")
-    }
-    return len(inters), nil
-}
-
-//GetConfGuildrecommendByKey auto
-func (c * ConfManager) GetConfGuildrecommendByKey(key int) (confcsv.IGuildrecommend, error) {
-    inters, ok := c.confMap["guildrecommend"]
-    if !ok {
-        return nil, fmt.Errorf("not find conf file name:%s", "guildrecommend")
-    }
-
-    for _, inter := range inters {
-        obj := inter.(confcsv.IGuildrecommend)
-        if obj.GetID() == key {
-            return obj, nil
-        }
-    }
-    return nil, fmt.Errorf("conf not find guildrecommend file key:%v", key)
-}
-
-//GetConfGuildrecommendByIndex auto
-func (c * ConfManager) GetConfGuildrecommendByIndex(index int) (confcsv.IGuildrecommend, error) {
-    inters, ok := c.confMap["guildrecommend"]
-    if !ok {
-        return nil, fmt.Errorf("not find conf file name:%s", "guildrecommend")
-    }
-
-    if len(inters) <= index {
-        return nil, fmt.Errorf("conf guildrecommend index crash index:%d, len:%d", len(inters), index)
-    }
-
-    obj := inters[index].(confcsv.IGuildrecommend)
-    return obj, nil
-}
-
-//GetConfLevelRaceConfigNum auto
-func (c * ConfManager) GetConfLevelRaceConfigNum() (int, error) {
-    inters, ok := c.confMap["level_race_config"]
-    if !ok {
-        return 0, fmt.Errorf("not find conf file name:%s", "level_race_config")
-    }
-    return len(inters), nil
-}
-
-//GetConfLevelRaceConfigByKey auto
-func (c * ConfManager) GetConfLevelRaceConfigByKey(key int) (confcsv.ILevelRaceConfig, error) {
-    inters, ok := c.confMap["level_race_config"]
-    if !ok {
-        return nil, fmt.Errorf("not find conf file name:%s", "level_race_config")
-    }
-
-    for _, inter := range inters {
-        obj := inter.(confcsv.ILevelRaceConfig)
-        if obj.GetID() == key {
-            return obj, nil
-        }
-    }
-    return nil, fmt.Errorf("conf not find level_race_config file key:%v", key)
-}
-
-//GetConfLevelRaceConfigByIndex auto
-func (c * ConfManager) GetConfLevelRaceConfigByIndex(index int) (confcsv.ILevelRaceConfig, error) {
-    inters, ok := c.confMap["level_race_config"]
-    if !ok {
-        return nil, fmt.Errorf("not find conf file name:%s", "level_race_config")
-    }
-
-    if len(inters) <= index {
-        return nil, fmt.Errorf("conf level_race_config index crash index:%d, len:%d", len(inters), index)
-    }
-
-    obj := inters[index].(confcsv.ILevelRaceConfig)
-    return obj, nil
-}
-
-//GetConfTeamchesttimeNum auto
-func (c * ConfManager) GetConfTeamchesttimeNum() (int, error) {
-    inters, ok := c.confMap["teamchesttime"]
-    if !ok {
-        return 0, fmt.Errorf("not find conf file name:%s", "teamchesttime")
-    }
-    return len(inters), nil
-}
-
-//GetConfTeamchesttimeByKey auto
-func (c * ConfManager) GetConfTeamchesttimeByKey(key int) (confcsv.ITeamchesttime, error) {
-    inters, ok := c.confMap["teamchesttime"]
-    if !ok {
-        return nil, fmt.Errorf("not find conf file name:%s", "teamchesttime")
-    }
-
-    for _, inter := range inters {
-        obj := inter.(confcsv.ITeamchesttime)
-        if obj.GetID() == key {
-            return obj, nil
-        }
-    }
-    return nil, fmt.Errorf("conf not find teamchesttime file key:%v", key)
-}
-
-//GetConfTeamchesttimeByIndex auto
-func (c * ConfManager) GetConfTeamchesttimeByIndex(index int) (confcsv.ITeamchesttime, error) {
-    inters, ok := c.confMap["teamchesttime"]
-    if !ok {
-        return nil, fmt.Errorf("not find conf file name:%s", "teamchesttime")
-    }
-
-    if len(inters) <= index {
-        return nil, fmt.Errorf("conf teamchesttime index crash index:%d, len:%d", len(inters), index)
-    }
-
-    obj := inters[index].(confcsv.ITeamchesttime)
-    return obj, nil
-}
 
 //GetConfBOTFRIENDCONFIGNum auto
 func (c * ConfManager) GetConfBOTFRIENDCONFIGNum() (int, error) {
@@ -392,83 +237,163 @@ func (c * ConfManager) GetConfLevelRaceGroupConfigByIndex(index int) (confcsv.IL
     return obj, nil
 }
 
-//GetConfLevelRaceUsergroupConfigNum auto
-func (c * ConfManager) GetConfLevelRaceUsergroupConfigNum() (int, error) {
-    inters, ok := c.confMap["level_race_usergroup_config"]
+//GetConfRobotNameNum auto
+func (c * ConfManager) GetConfRobotNameNum() (int, error) {
+    inters, ok := c.confMap["robot_name"]
     if !ok {
-        return 0, fmt.Errorf("not find conf file name:%s", "level_race_usergroup_config")
+        return 0, fmt.Errorf("not find conf file name:%s", "robot_name")
     }
     return len(inters), nil
 }
 
-//GetConfLevelRaceUsergroupConfigByKey auto
-func (c * ConfManager) GetConfLevelRaceUsergroupConfigByKey(key int) (confcsv.ILevelRaceUsergroupConfig, error) {
-    inters, ok := c.confMap["level_race_usergroup_config"]
+//GetConfRobotNameByKey auto
+func (c * ConfManager) GetConfRobotNameByKey(key int) (confcsv.IRobotName, error) {
+    inters, ok := c.confMap["robot_name"]
     if !ok {
-        return nil, fmt.Errorf("not find conf file name:%s", "level_race_usergroup_config")
+        return nil, fmt.Errorf("not find conf file name:%s", "robot_name")
     }
 
     for _, inter := range inters {
-        obj := inter.(confcsv.ILevelRaceUsergroupConfig)
+        obj := inter.(confcsv.IRobotName)
         if obj.GetID() == key {
             return obj, nil
         }
     }
-    return nil, fmt.Errorf("conf not find level_race_usergroup_config file key:%v", key)
+    return nil, fmt.Errorf("conf not find robot_name file key:%v", key)
 }
 
-//GetConfLevelRaceUsergroupConfigByIndex auto
-func (c * ConfManager) GetConfLevelRaceUsergroupConfigByIndex(index int) (confcsv.ILevelRaceUsergroupConfig, error) {
-    inters, ok := c.confMap["level_race_usergroup_config"]
+//GetConfRobotNameByIndex auto
+func (c * ConfManager) GetConfRobotNameByIndex(index int) (confcsv.IRobotName, error) {
+    inters, ok := c.confMap["robot_name"]
     if !ok {
-        return nil, fmt.Errorf("not find conf file name:%s", "level_race_usergroup_config")
+        return nil, fmt.Errorf("not find conf file name:%s", "robot_name")
     }
 
     if len(inters) <= index {
-        return nil, fmt.Errorf("conf level_race_usergroup_config index crash index:%d, len:%d", len(inters), index)
+        return nil, fmt.Errorf("conf robot_name index crash index:%d, len:%d", len(inters), index)
     }
 
-    obj := inters[index].(confcsv.ILevelRaceUsergroupConfig)
+    obj := inters[index].(confcsv.IRobotName)
     return obj, nil
 }
 
-//GetConfMEDALRUSHGROUPCONFIGNum auto
-func (c * ConfManager) GetConfMEDALRUSHGROUPCONFIGNum() (int, error) {
-    inters, ok := c.confMap["MEDAL_RUSH_GROUP_CONFIG"]
+//GetConfTeamchestgroupNum auto
+func (c * ConfManager) GetConfTeamchestgroupNum() (int, error) {
+    inters, ok := c.confMap["teamchestgroup"]
     if !ok {
-        return 0, fmt.Errorf("not find conf file name:%s", "MEDAL_RUSH_GROUP_CONFIG")
+        return 0, fmt.Errorf("not find conf file name:%s", "teamchestgroup")
     }
     return len(inters), nil
 }
 
-//GetConfMEDALRUSHGROUPCONFIGByKey auto
-func (c * ConfManager) GetConfMEDALRUSHGROUPCONFIGByKey(key int) (confcsv.IMEDALRUSHGROUPCONFIG, error) {
-    inters, ok := c.confMap["MEDAL_RUSH_GROUP_CONFIG"]
+//GetConfTeamchestgroupByKey auto
+func (c * ConfManager) GetConfTeamchestgroupByKey(key int) (confcsv.ITeamchestgroup, error) {
+    inters, ok := c.confMap["teamchestgroup"]
     if !ok {
-        return nil, fmt.Errorf("not find conf file name:%s", "MEDAL_RUSH_GROUP_CONFIG")
+        return nil, fmt.Errorf("not find conf file name:%s", "teamchestgroup")
     }
 
     for _, inter := range inters {
-        obj := inter.(confcsv.IMEDALRUSHGROUPCONFIG)
+        obj := inter.(confcsv.ITeamchestgroup)
+        if obj.GetGroupID() == key {
+            return obj, nil
+        }
+    }
+    return nil, fmt.Errorf("conf not find teamchestgroup file key:%v", key)
+}
+
+//GetConfTeamchestgroupByIndex auto
+func (c * ConfManager) GetConfTeamchestgroupByIndex(index int) (confcsv.ITeamchestgroup, error) {
+    inters, ok := c.confMap["teamchestgroup"]
+    if !ok {
+        return nil, fmt.Errorf("not find conf file name:%s", "teamchestgroup")
+    }
+
+    if len(inters) <= index {
+        return nil, fmt.Errorf("conf teamchestgroup index crash index:%d, len:%d", len(inters), index)
+    }
+
+    obj := inters[index].(confcsv.ITeamchestgroup)
+    return obj, nil
+}
+
+//GetConfFRIENDDELAYNum auto
+func (c * ConfManager) GetConfFRIENDDELAYNum() (int, error) {
+    inters, ok := c.confMap["FRIEND_DELAY"]
+    if !ok {
+        return 0, fmt.Errorf("not find conf file name:%s", "FRIEND_DELAY")
+    }
+    return len(inters), nil
+}
+
+//GetConfFRIENDDELAYByKey auto
+func (c * ConfManager) GetConfFRIENDDELAYByKey(key int) (confcsv.IFRIENDDELAY, error) {
+    inters, ok := c.confMap["FRIEND_DELAY"]
+    if !ok {
+        return nil, fmt.Errorf("not find conf file name:%s", "FRIEND_DELAY")
+    }
+
+    for _, inter := range inters {
+        obj := inter.(confcsv.IFRIENDDELAY)
         if obj.GetID() == key {
             return obj, nil
         }
     }
-    return nil, fmt.Errorf("conf not find MEDAL_RUSH_GROUP_CONFIG file key:%v", key)
+    return nil, fmt.Errorf("conf not find FRIEND_DELAY file key:%v", key)
 }
 
-//GetConfMEDALRUSHGROUPCONFIGByIndex auto
-func (c * ConfManager) GetConfMEDALRUSHGROUPCONFIGByIndex(index int) (confcsv.IMEDALRUSHGROUPCONFIG, error) {
-    inters, ok := c.confMap["MEDAL_RUSH_GROUP_CONFIG"]
+//GetConfFRIENDDELAYByIndex auto
+func (c * ConfManager) GetConfFRIENDDELAYByIndex(index int) (confcsv.IFRIENDDELAY, error) {
+    inters, ok := c.confMap["FRIEND_DELAY"]
     if !ok {
-        return nil, fmt.Errorf("not find conf file name:%s", "MEDAL_RUSH_GROUP_CONFIG")
+        return nil, fmt.Errorf("not find conf file name:%s", "FRIEND_DELAY")
     }
 
     if len(inters) <= index {
-        return nil, fmt.Errorf("conf MEDAL_RUSH_GROUP_CONFIG index crash index:%d, len:%d", len(inters), index)
+        return nil, fmt.Errorf("conf FRIEND_DELAY index crash index:%d, len:%d", len(inters), index)
     }
 
-    obj := inters[index].(confcsv.IMEDALRUSHGROUPCONFIG)
+    obj := inters[index].(confcsv.IFRIENDDELAY)
+    return obj, nil
+}
+
+//GetConfMEDALRUSHUSERGROUPCONFIGNum auto
+func (c * ConfManager) GetConfMEDALRUSHUSERGROUPCONFIGNum() (int, error) {
+    inters, ok := c.confMap["MEDAL_RUSH_USERGROUP_CONFIG"]
+    if !ok {
+        return 0, fmt.Errorf("not find conf file name:%s", "MEDAL_RUSH_USERGROUP_CONFIG")
+    }
+    return len(inters), nil
+}
+
+//GetConfMEDALRUSHUSERGROUPCONFIGByKey auto
+func (c * ConfManager) GetConfMEDALRUSHUSERGROUPCONFIGByKey(key int) (confcsv.IMEDALRUSHUSERGROUPCONFIG, error) {
+    inters, ok := c.confMap["MEDAL_RUSH_USERGROUP_CONFIG"]
+    if !ok {
+        return nil, fmt.Errorf("not find conf file name:%s", "MEDAL_RUSH_USERGROUP_CONFIG")
+    }
+
+    for _, inter := range inters {
+        obj := inter.(confcsv.IMEDALRUSHUSERGROUPCONFIG)
+        if obj.GetID() == key {
+            return obj, nil
+        }
+    }
+    return nil, fmt.Errorf("conf not find MEDAL_RUSH_USERGROUP_CONFIG file key:%v", key)
+}
+
+//GetConfMEDALRUSHUSERGROUPCONFIGByIndex auto
+func (c * ConfManager) GetConfMEDALRUSHUSERGROUPCONFIGByIndex(index int) (confcsv.IMEDALRUSHUSERGROUPCONFIG, error) {
+    inters, ok := c.confMap["MEDAL_RUSH_USERGROUP_CONFIG"]
+    if !ok {
+        return nil, fmt.Errorf("not find conf file name:%s", "MEDAL_RUSH_USERGROUP_CONFIG")
+    }
+
+    if len(inters) <= index {
+        return nil, fmt.Errorf("conf MEDAL_RUSH_USERGROUP_CONFIG index crash index:%d, len:%d", len(inters), index)
+    }
+
+    obj := inters[index].(confcsv.IMEDALRUSHUSERGROUPCONFIG)
     return obj, nil
 }
 
@@ -509,6 +434,46 @@ func (c * ConfManager) GetConfMaxleveltournamentByIndex(index int) (confcsv.IMax
     }
 
     obj := inters[index].(confcsv.IMaxleveltournament)
+    return obj, nil
+}
+
+//GetConfRobotNum auto
+func (c * ConfManager) GetConfRobotNum() (int, error) {
+    inters, ok := c.confMap["robot"]
+    if !ok {
+        return 0, fmt.Errorf("not find conf file name:%s", "robot")
+    }
+    return len(inters), nil
+}
+
+//GetConfRobotByKey auto
+func (c * ConfManager) GetConfRobotByKey(key int) (confcsv.IRobot, error) {
+    inters, ok := c.confMap["robot"]
+    if !ok {
+        return nil, fmt.Errorf("not find conf file name:%s", "robot")
+    }
+
+    for _, inter := range inters {
+        obj := inter.(confcsv.IRobot)
+        if obj.GetID() == key {
+            return obj, nil
+        }
+    }
+    return nil, fmt.Errorf("conf not find robot file key:%v", key)
+}
+
+//GetConfRobotByIndex auto
+func (c * ConfManager) GetConfRobotByIndex(index int) (confcsv.IRobot, error) {
+    inters, ok := c.confMap["robot"]
+    if !ok {
+        return nil, fmt.Errorf("not find conf file name:%s", "robot")
+    }
+
+    if len(inters) <= index {
+        return nil, fmt.Errorf("conf robot index crash index:%d, len:%d", len(inters), index)
+    }
+
+    obj := inters[index].(confcsv.IRobot)
     return obj, nil
 }
 
@@ -632,83 +597,163 @@ func (c * ConfManager) GetConfRobotTeamInitialByIndex(index int) (confcsv.IRobot
     return obj, nil
 }
 
-//GetConfTeamchestgroupNum auto
-func (c * ConfManager) GetConfTeamchestgroupNum() (int, error) {
-    inters, ok := c.confMap["teamchestgroup"]
+//GetConfTeamchesttimeNum auto
+func (c * ConfManager) GetConfTeamchesttimeNum() (int, error) {
+    inters, ok := c.confMap["teamchesttime"]
     if !ok {
-        return 0, fmt.Errorf("not find conf file name:%s", "teamchestgroup")
+        return 0, fmt.Errorf("not find conf file name:%s", "teamchesttime")
     }
     return len(inters), nil
 }
 
-//GetConfTeamchestgroupByKey auto
-func (c * ConfManager) GetConfTeamchestgroupByKey(key int) (confcsv.ITeamchestgroup, error) {
-    inters, ok := c.confMap["teamchestgroup"]
+//GetConfTeamchesttimeByKey auto
+func (c * ConfManager) GetConfTeamchesttimeByKey(key int) (confcsv.ITeamchesttime, error) {
+    inters, ok := c.confMap["teamchesttime"]
     if !ok {
-        return nil, fmt.Errorf("not find conf file name:%s", "teamchestgroup")
+        return nil, fmt.Errorf("not find conf file name:%s", "teamchesttime")
     }
 
     for _, inter := range inters {
-        obj := inter.(confcsv.ITeamchestgroup)
-        if obj.GetGroupID() == key {
-            return obj, nil
-        }
-    }
-    return nil, fmt.Errorf("conf not find teamchestgroup file key:%v", key)
-}
-
-//GetConfTeamchestgroupByIndex auto
-func (c * ConfManager) GetConfTeamchestgroupByIndex(index int) (confcsv.ITeamchestgroup, error) {
-    inters, ok := c.confMap["teamchestgroup"]
-    if !ok {
-        return nil, fmt.Errorf("not find conf file name:%s", "teamchestgroup")
-    }
-
-    if len(inters) <= index {
-        return nil, fmt.Errorf("conf teamchestgroup index crash index:%d, len:%d", len(inters), index)
-    }
-
-    obj := inters[index].(confcsv.ITeamchestgroup)
-    return obj, nil
-}
-
-//GetConfFRIENDDELAYNum auto
-func (c * ConfManager) GetConfFRIENDDELAYNum() (int, error) {
-    inters, ok := c.confMap["FRIEND_DELAY"]
-    if !ok {
-        return 0, fmt.Errorf("not find conf file name:%s", "FRIEND_DELAY")
-    }
-    return len(inters), nil
-}
-
-//GetConfFRIENDDELAYByKey auto
-func (c * ConfManager) GetConfFRIENDDELAYByKey(key int) (confcsv.IFRIENDDELAY, error) {
-    inters, ok := c.confMap["FRIEND_DELAY"]
-    if !ok {
-        return nil, fmt.Errorf("not find conf file name:%s", "FRIEND_DELAY")
-    }
-
-    for _, inter := range inters {
-        obj := inter.(confcsv.IFRIENDDELAY)
+        obj := inter.(confcsv.ITeamchesttime)
         if obj.GetID() == key {
             return obj, nil
         }
     }
-    return nil, fmt.Errorf("conf not find FRIEND_DELAY file key:%v", key)
+    return nil, fmt.Errorf("conf not find teamchesttime file key:%v", key)
 }
 
-//GetConfFRIENDDELAYByIndex auto
-func (c * ConfManager) GetConfFRIENDDELAYByIndex(index int) (confcsv.IFRIENDDELAY, error) {
-    inters, ok := c.confMap["FRIEND_DELAY"]
+//GetConfTeamchesttimeByIndex auto
+func (c * ConfManager) GetConfTeamchesttimeByIndex(index int) (confcsv.ITeamchesttime, error) {
+    inters, ok := c.confMap["teamchesttime"]
     if !ok {
-        return nil, fmt.Errorf("not find conf file name:%s", "FRIEND_DELAY")
+        return nil, fmt.Errorf("not find conf file name:%s", "teamchesttime")
     }
 
     if len(inters) <= index {
-        return nil, fmt.Errorf("conf FRIEND_DELAY index crash index:%d, len:%d", len(inters), index)
+        return nil, fmt.Errorf("conf teamchesttime index crash index:%d, len:%d", len(inters), index)
     }
 
-    obj := inters[index].(confcsv.IFRIENDDELAY)
+    obj := inters[index].(confcsv.ITeamchesttime)
+    return obj, nil
+}
+
+//GetConfRobotTeamNum auto
+func (c * ConfManager) GetConfRobotTeamNum() (int, error) {
+    inters, ok := c.confMap["robot_team"]
+    if !ok {
+        return 0, fmt.Errorf("not find conf file name:%s", "robot_team")
+    }
+    return len(inters), nil
+}
+
+//GetConfRobotTeamByKey auto
+func (c * ConfManager) GetConfRobotTeamByKey(key int) (confcsv.IRobotTeam, error) {
+    inters, ok := c.confMap["robot_team"]
+    if !ok {
+        return nil, fmt.Errorf("not find conf file name:%s", "robot_team")
+    }
+
+    for _, inter := range inters {
+        obj := inter.(confcsv.IRobotTeam)
+        if obj.GetID() == key {
+            return obj, nil
+        }
+    }
+    return nil, fmt.Errorf("conf not find robot_team file key:%v", key)
+}
+
+//GetConfRobotTeamByIndex auto
+func (c * ConfManager) GetConfRobotTeamByIndex(index int) (confcsv.IRobotTeam, error) {
+    inters, ok := c.confMap["robot_team"]
+    if !ok {
+        return nil, fmt.Errorf("not find conf file name:%s", "robot_team")
+    }
+
+    if len(inters) <= index {
+        return nil, fmt.Errorf("conf robot_team index crash index:%d, len:%d", len(inters), index)
+    }
+
+    obj := inters[index].(confcsv.IRobotTeam)
+    return obj, nil
+}
+
+//GetConfRobotTeamChatNum auto
+func (c * ConfManager) GetConfRobotTeamChatNum() (int, error) {
+    inters, ok := c.confMap["robot_team_chat"]
+    if !ok {
+        return 0, fmt.Errorf("not find conf file name:%s", "robot_team_chat")
+    }
+    return len(inters), nil
+}
+
+//GetConfRobotTeamChatByKey auto
+func (c * ConfManager) GetConfRobotTeamChatByKey(key int) (confcsv.IRobotTeamChat, error) {
+    inters, ok := c.confMap["robot_team_chat"]
+    if !ok {
+        return nil, fmt.Errorf("not find conf file name:%s", "robot_team_chat")
+    }
+
+    for _, inter := range inters {
+        obj := inter.(confcsv.IRobotTeamChat)
+        if obj.GetID() == key {
+            return obj, nil
+        }
+    }
+    return nil, fmt.Errorf("conf not find robot_team_chat file key:%v", key)
+}
+
+//GetConfRobotTeamChatByIndex auto
+func (c * ConfManager) GetConfRobotTeamChatByIndex(index int) (confcsv.IRobotTeamChat, error) {
+    inters, ok := c.confMap["robot_team_chat"]
+    if !ok {
+        return nil, fmt.Errorf("not find conf file name:%s", "robot_team_chat")
+    }
+
+    if len(inters) <= index {
+        return nil, fmt.Errorf("conf robot_team_chat index crash index:%d, len:%d", len(inters), index)
+    }
+
+    obj := inters[index].(confcsv.IRobotTeamChat)
+    return obj, nil
+}
+
+//GetConfMEDALRUSHGROUPCONFIGNum auto
+func (c * ConfManager) GetConfMEDALRUSHGROUPCONFIGNum() (int, error) {
+    inters, ok := c.confMap["MEDAL_RUSH_GROUP_CONFIG"]
+    if !ok {
+        return 0, fmt.Errorf("not find conf file name:%s", "MEDAL_RUSH_GROUP_CONFIG")
+    }
+    return len(inters), nil
+}
+
+//GetConfMEDALRUSHGROUPCONFIGByKey auto
+func (c * ConfManager) GetConfMEDALRUSHGROUPCONFIGByKey(key int) (confcsv.IMEDALRUSHGROUPCONFIG, error) {
+    inters, ok := c.confMap["MEDAL_RUSH_GROUP_CONFIG"]
+    if !ok {
+        return nil, fmt.Errorf("not find conf file name:%s", "MEDAL_RUSH_GROUP_CONFIG")
+    }
+
+    for _, inter := range inters {
+        obj := inter.(confcsv.IMEDALRUSHGROUPCONFIG)
+        if obj.GetID() == key {
+            return obj, nil
+        }
+    }
+    return nil, fmt.Errorf("conf not find MEDAL_RUSH_GROUP_CONFIG file key:%v", key)
+}
+
+//GetConfMEDALRUSHGROUPCONFIGByIndex auto
+func (c * ConfManager) GetConfMEDALRUSHGROUPCONFIGByIndex(index int) (confcsv.IMEDALRUSHGROUPCONFIG, error) {
+    inters, ok := c.confMap["MEDAL_RUSH_GROUP_CONFIG"]
+    if !ok {
+        return nil, fmt.Errorf("not find conf file name:%s", "MEDAL_RUSH_GROUP_CONFIG")
+    }
+
+    if len(inters) <= index {
+        return nil, fmt.Errorf("conf MEDAL_RUSH_GROUP_CONFIG index crash index:%d, len:%d", len(inters), index)
+    }
+
+    obj := inters[index].(confcsv.IMEDALRUSHGROUPCONFIG)
     return obj, nil
 }
 
@@ -752,123 +797,123 @@ func (c * ConfManager) GetConfMEDALRUSHTIMECONFIGByIndex(index int) (confcsv.IME
     return obj, nil
 }
 
-//GetConfRobotNum auto
-func (c * ConfManager) GetConfRobotNum() (int, error) {
-    inters, ok := c.confMap["robot"]
+//GetConfGuildrecommendNum auto
+func (c * ConfManager) GetConfGuildrecommendNum() (int, error) {
+    inters, ok := c.confMap["guildrecommend"]
     if !ok {
-        return 0, fmt.Errorf("not find conf file name:%s", "robot")
+        return 0, fmt.Errorf("not find conf file name:%s", "guildrecommend")
     }
     return len(inters), nil
 }
 
-//GetConfRobotByKey auto
-func (c * ConfManager) GetConfRobotByKey(key int) (confcsv.IRobot, error) {
-    inters, ok := c.confMap["robot"]
+//GetConfGuildrecommendByKey auto
+func (c * ConfManager) GetConfGuildrecommendByKey(key int) (confcsv.IGuildrecommend, error) {
+    inters, ok := c.confMap["guildrecommend"]
     if !ok {
-        return nil, fmt.Errorf("not find conf file name:%s", "robot")
+        return nil, fmt.Errorf("not find conf file name:%s", "guildrecommend")
     }
 
     for _, inter := range inters {
-        obj := inter.(confcsv.IRobot)
+        obj := inter.(confcsv.IGuildrecommend)
         if obj.GetID() == key {
             return obj, nil
         }
     }
-    return nil, fmt.Errorf("conf not find robot file key:%v", key)
+    return nil, fmt.Errorf("conf not find guildrecommend file key:%v", key)
 }
 
-//GetConfRobotByIndex auto
-func (c * ConfManager) GetConfRobotByIndex(index int) (confcsv.IRobot, error) {
-    inters, ok := c.confMap["robot"]
+//GetConfGuildrecommendByIndex auto
+func (c * ConfManager) GetConfGuildrecommendByIndex(index int) (confcsv.IGuildrecommend, error) {
+    inters, ok := c.confMap["guildrecommend"]
     if !ok {
-        return nil, fmt.Errorf("not find conf file name:%s", "robot")
+        return nil, fmt.Errorf("not find conf file name:%s", "guildrecommend")
     }
 
     if len(inters) <= index {
-        return nil, fmt.Errorf("conf robot index crash index:%d, len:%d", len(inters), index)
+        return nil, fmt.Errorf("conf guildrecommend index crash index:%d, len:%d", len(inters), index)
     }
 
-    obj := inters[index].(confcsv.IRobot)
+    obj := inters[index].(confcsv.IGuildrecommend)
     return obj, nil
 }
 
-//GetConfRobotNameNum auto
-func (c * ConfManager) GetConfRobotNameNum() (int, error) {
-    inters, ok := c.confMap["robot_name"]
+//GetConfLevelRaceConfigNum auto
+func (c * ConfManager) GetConfLevelRaceConfigNum() (int, error) {
+    inters, ok := c.confMap["level_race_config"]
     if !ok {
-        return 0, fmt.Errorf("not find conf file name:%s", "robot_name")
+        return 0, fmt.Errorf("not find conf file name:%s", "level_race_config")
     }
     return len(inters), nil
 }
 
-//GetConfRobotNameByKey auto
-func (c * ConfManager) GetConfRobotNameByKey(key int) (confcsv.IRobotName, error) {
-    inters, ok := c.confMap["robot_name"]
+//GetConfLevelRaceConfigByKey auto
+func (c * ConfManager) GetConfLevelRaceConfigByKey(key int) (confcsv.ILevelRaceConfig, error) {
+    inters, ok := c.confMap["level_race_config"]
     if !ok {
-        return nil, fmt.Errorf("not find conf file name:%s", "robot_name")
+        return nil, fmt.Errorf("not find conf file name:%s", "level_race_config")
     }
 
     for _, inter := range inters {
-        obj := inter.(confcsv.IRobotName)
+        obj := inter.(confcsv.ILevelRaceConfig)
         if obj.GetID() == key {
             return obj, nil
         }
     }
-    return nil, fmt.Errorf("conf not find robot_name file key:%v", key)
+    return nil, fmt.Errorf("conf not find level_race_config file key:%v", key)
 }
 
-//GetConfRobotNameByIndex auto
-func (c * ConfManager) GetConfRobotNameByIndex(index int) (confcsv.IRobotName, error) {
-    inters, ok := c.confMap["robot_name"]
+//GetConfLevelRaceConfigByIndex auto
+func (c * ConfManager) GetConfLevelRaceConfigByIndex(index int) (confcsv.ILevelRaceConfig, error) {
+    inters, ok := c.confMap["level_race_config"]
     if !ok {
-        return nil, fmt.Errorf("not find conf file name:%s", "robot_name")
+        return nil, fmt.Errorf("not find conf file name:%s", "level_race_config")
     }
 
     if len(inters) <= index {
-        return nil, fmt.Errorf("conf robot_name index crash index:%d, len:%d", len(inters), index)
+        return nil, fmt.Errorf("conf level_race_config index crash index:%d, len:%d", len(inters), index)
     }
 
-    obj := inters[index].(confcsv.IRobotName)
+    obj := inters[index].(confcsv.ILevelRaceConfig)
     return obj, nil
 }
 
-//GetConfRobotTeamNum auto
-func (c * ConfManager) GetConfRobotTeamNum() (int, error) {
-    inters, ok := c.confMap["robot_team"]
+//GetConfLevelRaceUsergroupConfigNum auto
+func (c * ConfManager) GetConfLevelRaceUsergroupConfigNum() (int, error) {
+    inters, ok := c.confMap["level_race_usergroup_config"]
     if !ok {
-        return 0, fmt.Errorf("not find conf file name:%s", "robot_team")
+        return 0, fmt.Errorf("not find conf file name:%s", "level_race_usergroup_config")
     }
     return len(inters), nil
 }
 
-//GetConfRobotTeamByKey auto
-func (c * ConfManager) GetConfRobotTeamByKey(key int) (confcsv.IRobotTeam, error) {
-    inters, ok := c.confMap["robot_team"]
+//GetConfLevelRaceUsergroupConfigByKey auto
+func (c * ConfManager) GetConfLevelRaceUsergroupConfigByKey(key int) (confcsv.ILevelRaceUsergroupConfig, error) {
+    inters, ok := c.confMap["level_race_usergroup_config"]
     if !ok {
-        return nil, fmt.Errorf("not find conf file name:%s", "robot_team")
+        return nil, fmt.Errorf("not find conf file name:%s", "level_race_usergroup_config")
     }
 
     for _, inter := range inters {
-        obj := inter.(confcsv.IRobotTeam)
+        obj := inter.(confcsv.ILevelRaceUsergroupConfig)
         if obj.GetID() == key {
             return obj, nil
         }
     }
-    return nil, fmt.Errorf("conf not find robot_team file key:%v", key)
+    return nil, fmt.Errorf("conf not find level_race_usergroup_config file key:%v", key)
 }
 
-//GetConfRobotTeamByIndex auto
-func (c * ConfManager) GetConfRobotTeamByIndex(index int) (confcsv.IRobotTeam, error) {
-    inters, ok := c.confMap["robot_team"]
+//GetConfLevelRaceUsergroupConfigByIndex auto
+func (c * ConfManager) GetConfLevelRaceUsergroupConfigByIndex(index int) (confcsv.ILevelRaceUsergroupConfig, error) {
+    inters, ok := c.confMap["level_race_usergroup_config"]
     if !ok {
-        return nil, fmt.Errorf("not find conf file name:%s", "robot_team")
+        return nil, fmt.Errorf("not find conf file name:%s", "level_race_usergroup_config")
     }
 
     if len(inters) <= index {
-        return nil, fmt.Errorf("conf robot_team index crash index:%d, len:%d", len(inters), index)
+        return nil, fmt.Errorf("conf level_race_usergroup_config index crash index:%d, len:%d", len(inters), index)
     }
 
-    obj := inters[index].(confcsv.IRobotTeam)
+    obj := inters[index].(confcsv.ILevelRaceUsergroupConfig)
     return obj, nil
 }
 

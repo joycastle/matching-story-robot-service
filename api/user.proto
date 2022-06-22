@@ -1,0 +1,22 @@
+syntax = "proto3";
+
+option csharp_namespace = "MM.Message";
+option go_package = "./;api";
+option optimize_for = SPEED;
+
+
+// 玩家基本信息
+message UserBaseInfo{
+  int64 id = 1; // ID
+  int32 level = 2; // 等级
+  string name = 3; // 姓名
+  string headIcon = 4; // 头像
+  string country = 5; // 国家
+  int64 guildID = 6; // 公会ID
+  string  Badge = 7; //　公会徽章
+  string guildName = 8; // 公会名字
+  int32 like = 9;   // 玩家点赞
+  int32 channel = 10; //渠道
+  int32 star = 11; // 星星 满级玩法，星星个数，可以理解为level2
+  int64 starActivityID = 12;
+}

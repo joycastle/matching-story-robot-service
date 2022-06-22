@@ -1,0 +1,51 @@
+syntax = "proto3";
+
+option csharp_namespace = "MM.Message";
+
+option go_package = "./;api";
+option optimize_for = SPEED;
+
+//本地数据类型
+enum E_LOCAL_DATA_TYPE{
+	//没有数据
+	NONE = 0;
+	//游客数据
+	GUEST_DATA = 1;
+	//FB数据
+	FACEBOOK_DATA = 2;
+}
+
+enum E_CHANNEL_TYPE {
+	GUEST_CHANNEL = 0;
+	FACEBOOK_CHANNEL = 1;
+}
+
+message DeviceInfo {
+	string uniqID = 1;
+	int32 deviceType = 2;
+}
+
+//用户账号信息
+message AccountInfo {
+	string accountid = 1;
+	DeviceInfo deviceData = 2;
+	E_CHANNEL_TYPE channel = 3; 
+}
+
+//奖励信息
+message MaterialJson{
+	int32 id = 1;
+	int32 count = 2;
+}
+
+message EmptyMessage{
+}
+
+//AB测试的数据
+message ABConfig {
+	//类型
+	int32 abType = 1;
+	//组别
+	int32 abGroup = 2;
+}
+

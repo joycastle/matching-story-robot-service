@@ -1,0 +1,46 @@
+syntax = "proto3";
+
+option csharp_namespace = "MM.Message";
+option go_package = "./;api";
+option optimize_for = SPEED;
+
+
+message SCErrorMsg {
+}
+
+enum S2CBackCode {
+	DEFAULT = 0;
+	//服务端处理错误
+	SERVER_ERROR = 1000;
+	//帐号被封
+	ACCOUNT_LOCK = 1001;
+	//帐号被删除
+	ACCOUNT_DEL = 1002;
+	//版本校验失败
+	VERSION_CODE_ERROR = 1003;
+	//校验码错误
+	ENCRYPT_CODE_ERROR = 1004;
+	//登录校验错误
+	LOGIN_CHECK_ERROR = 1005;
+	//保存数据金币校验错误
+	SAVE_SILVER_CHECK_ERROR = 1016;
+	//保存数据爱心校验错误
+	SAVE_ENERGY_CHECK_ERROR = 1007;
+	//保存数据失败
+	SAVE_DATA_ERROR = 1008;	
+	
+	SERVER_INFO_ERROR = 1050;
+	
+	//好友已满
+	FRIEND_HAS_FULL = 1051;
+	//充值失败
+	RECHARGE_FAILED = 1052;
+	//没有订单信息
+	NO_RECHARGE_ID = 1053;
+	//订单已完成
+	RECHARGE_HAS_DONE = 1054;
+	//绑定账号失败
+	ACCOUNT_BIND_ERROR = 1055;
+	//成功
+	SUCCESS			   = 2000;
+}

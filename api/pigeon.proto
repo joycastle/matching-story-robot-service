@@ -1,0 +1,120 @@
+syntax = "proto3";
+
+import "guild_help.proto";
+
+option go_package = "./;api";
+
+service PigeonGrpc {
+    rpc Send(RpcSendReq) returns (Reply) {}
+    rpc ReqHelp(RpcReqHelpReq) returns (Reply) {}
+    rpc RespHelp(RpcRespHelpReq) returns (Reply) {}
+
+    rpc CreateRoom(CreateRoomReq) returns (Reply) {}
+    rpc DeleteRoom(DeleteRoomReq) returns (Reply) {}
+    rpc AddMember(RoomMemberMap) returns (Reply) {}
+    rpc RemoveMember(RoomMemberMap) returns (Reply) {}
+
+    rpc PutUserToken(UserToken) returns (Reply) {}
+
+}
+
+
+message Room {
+    int64  roomId = 1;
+}
+
+message RpcMessageParam {
+    Room  room = 1;
+    User user = 2;
+    bool ignoreMyself = 3;
+    bool isPersist = 4;
+    string route = 5;
+}
+
+message RpcSendReq {
+    RpcMessageParam param = 1;
+    Message body = 2;
+}
+
+message RpcReqHelpReq {
+    RpcMessageParam param = 1;
+    GuildReqHelp body = 2;
+}
+
+message RpcRespHelpReq {
+    RpcMessageParam param = 1;
+    GuildRespHelp body = 2;
+}
+
+message Message {
+    int64 id = 1;                 // 消息唯一标识，保证随时间自增，使用snowflake算法
+    int64 from = 2;               // 发送者用户ID
+    string name = 3;              // 发送者昵称
+    string  headIcon = 4;         // 发送者头像
+    string type = 5;              // 消息类型 text/img/活动
+    string content = 6;           // 消息内容，根据type识别
+    int64 time = 7;               // Unix时间戳，消息到达服务器时间
+    int32 tag = 8;                // 用户标签: 来源/徽章/, 如channel，来自facebook/google
+}
+
+message Reply {
+    bool success = 1;
+    int32 code = 2;           // pangu code
+}
+
+message CreateRoomReq {
+    Room room = 1;            // 房间ID，由调用方提供，若不存在，则snowflake初始化
+    User user = 2;            // 默认加入的会长
+    string roomName = 3;      // 房间名
+
+}
+
+message DeleteRoomReq {
+    Room room = 1;
+}
+
+message RoomMemberMap {
+    Room room = 1;
+    User user = 2;
+
+}
+
+// todo: User范围过大，可能与其他Message冲突
+message User {
+    int64  userId = 1;
+}
+
+message UserToken {
+    User user = 1;
+    string token = 2;
+}
+
+
+message CSHistory {
+    int64 room_id = 1;       // 拉取指定房间的消息
+    int32 count = 2;         // 拉取数量，maxMessageCount: 500，可配置
+    int64 message_id = 3;    // 消息标识，按照此条消息，向上或下根据offset定位指定消息区间
+    int32 offset = 4;        // 正负值，根据消息ID定位
+}
+
+
+message SCHistory {
+    repeated Message messages = 1; // 消息列表
+}
+
+message CSSend {
+    Message message = 1;      // 消息
+}
+
+message SCSend {
+    Message message = 1;      // 返回消息对象，下发消息ID与消息到达服务器时间(id, time)
+}
+
+message CSOffset {
+    int64 room_id = 1;       // 房间ID
+    int64 message_id = 2;    // 消息标识，按照此条消息，定位聊天列表位置
+}
+
+message SCOffset {
+    int32 offset = 1;        // 未读消息数量
+}
