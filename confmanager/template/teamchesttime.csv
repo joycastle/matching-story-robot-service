@@ -1,0 +1,4 @@
+id,type,startpoint,start_time,endpoint,end_time,show_time,event_type
+INT,INT,INT,INT_ARRAY,INT,INT_ARRAY,INT,INT
+#,类型,天,活动开启时间,,活动结束时间,公示结束时间 单位/秒,活动类型
+10001,1,5,00|00|01,7,23|59|59,86400,100

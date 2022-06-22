@@ -1,0 +1,4 @@
+ID,ACCEPT_DELAY
+INT,INT_ARRAY
+#,接受好友延迟，范围单位为秒
+1,300|3600

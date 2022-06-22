@@ -1,0 +1,348 @@
+// Package csv2go 将csv表自动转换为对应的go struct
+package csv2go
+
+import (
+	"encoding/csv"
+	"fmt"
+	"os"
+	"os/exec"
+	"path"
+	"path/filepath"
+	"strings"
+)
+
+var typeForCsv2Go = map[string]string{
+	"INT":          "int",
+	"STRING":       "string",
+	"INT_ARRAY":    "[]int",
+	"STRING_ARRAY": "[]string",
+	"INT2_ARRAY":   "[][]int",
+	"FLOAT":        "float32",
+}
+
+// Csv2Struct csv转struct参数
+type Csv2Struct struct {
+	csvPath     string   // 解析的csv路径
+	savePath    string   // 转换后文件的保存路径
+	packageName string   // 保存路径的包名
+	dealFiles   []string // 需要处理的文件名，不输入默认全选
+	fiterFiles  []string // 需要过滤的文件名，不输入默认不过滤
+}
+
+// NewCsv2Struct 创建csv转struct转换器
+func NewCsv2Struct() *Csv2Struct {
+	return &Csv2Struct{}
+}
+
+// SetCsvPath 设置csv路径
+func (c *Csv2Struct) SetCsvPath(csvPath string) *Csv2Struct {
+	c.csvPath = csvPath
+	return c
+}
+
+// SetSavePath 设置自动生成文件保存路径
+func (c *Csv2Struct) SetSavePath(savePath string) *Csv2Struct {
+	c.savePath = savePath
+	return c
+}
+
+// SetPackageName 设置包名
+func (c *Csv2Struct) SetPackageName(packageName string) *Csv2Struct {
+	c.packageName = packageName
+	return c
+}
+
+// SetDealFiles 设置需要处理的文件
+func (c *Csv2Struct) SetDealFiles(files []string) *Csv2Struct {
+	c.dealFiles = files
+	return c
+}
+
+// SetFiterFiles 设置需要过滤的文件
+func (c *Csv2Struct) SetFiterFiles(files []string) *Csv2Struct {
+	c.fiterFiles = files
+	return c
+}
+
+// Run 执行
+func (c *Csv2Struct) Run() {
+	csv2Columns := c.readCsvHead()
+	c.csvColumn2File(csv2Columns)
+}
+
+// CsvName2Columns 解析csv信息
+type CsvName2Columns struct {
+	CsvName  string
+	Columns  []string
+	Types    []string
+	Comments []string
+}
+
+func (c *Csv2Struct) readCsvHead() []*CsvName2Columns {
+	fmt.Println("csvPath:", c.csvPath)
+	// 读取csv文件夹，获取所有的文件名与文件路径映射，并且将文件名去除后缀
+	fileNameMap := make(map[string]string)
+	err := filepath.Walk(c.csvPath, func(path string, info os.FileInfo, errWalk error) error {
+		if errWalk != nil {
+			return errWalk
+		}
+
+		if !strings.Contains(path, ".csv") {
+			return nil
+		}
+
+		_, fileName := filepath.Split(path)
+
+		if isInArray(fileName, c.fiterFiles) {
+			return nil
+		}
+
+		if len(c.dealFiles) > 0 && !isInArray(fileName, c.dealFiles) {
+			return nil
+		}
+
+		structName := strings.TrimSuffix(fileName, ".csv")
+		fileNameMap[structName] = path
+		return nil
+	})
+
+	if err != nil {
+		panic(fmt.Sprintf("readCsvHead filepath.Walk err:%s", err.Error()))
+	}
+
+	// 将csv文件转化为对应的CsvName2Columns 结构体
+	csv2Columns := make([]*CsvName2Columns, 0, len(fileNameMap))
+	for structName, filePath := range fileNameMap {
+		fileIO, err := os.Open(filePath)
+		if err != nil {
+			panic(fmt.Sprintf("readCsvHead ioutil.ReadFile err:%s", err.Error()))
+		}
+		defer fileIO.Close()
+
+		csvReader := csv.NewReader(fileIO)
+		columns, err := csvReader.Read()
+		if err != nil {
+			panic(fmt.Sprintf("readCsvHead columns csvReader.Read err:%s", err.Error()))
+		}
+
+		//处理bom
+		if len(columns) > 0 {
+			name := columns[0]
+			if len(name) > 3 {
+				if name[0] == 0xef || name[1] == 0xbb || name[2] == 0xbf {
+					name = name[3:]
+					columns[0] = name
+				}
+			}
+		}
+
+		if len(columns) < 2 {
+			panic(fmt.Sprintf("readCsvHead columns csvReader.Read err columnslen < 2 len:%d", len(columns)))
+		}
+
+		types, err := csvReader.Read()
+		if err != nil {
+			panic(fmt.Sprintf("readCsvHead types csvReader.Read err:%s", err.Error()))
+		}
+
+		if len(columns) > len(types) {
+			panic(fmt.Sprintf("readCsvHead types less than columns typesLen:%d, columnsLen:%d", len(types), len(columns)))
+		}
+
+		comments, err := csvReader.Read()
+		if err != nil {
+			panic(fmt.Sprintf("readCsvHead comments csvReader.Read err:%s", err.Error()))
+		}
+
+		csv2Column := &CsvName2Columns{
+			CsvName:  structName,
+			Columns:  columns,
+			Types:    types,
+			Comments: comments,
+		}
+		csv2Columns = append(csv2Columns, csv2Column)
+	}
+
+	for _, csvInfo := range csv2Columns {
+		fmt.Println("csv file to csvInfo:", csvInfo.CsvName)
+	}
+	return csv2Columns
+}
+
+func (c *Csv2Struct) csvColumn2File(csv2Columns []*CsvName2Columns) {
+	if len(c.packageName) <= 0 {
+		panic(fmt.Sprintf("csvColumn2File packageName len is 0"))
+	}
+
+	for _, structInfo := range csv2Columns {
+		var fileContent string
+		fileContent += dealStructContent(structInfo)
+		fileContent += dealInterfaceContent(structInfo)
+		fileContent += dealMethodContent(structInfo)
+
+		fileSavePath := path.Join(c.savePath, fmt.Sprintf("%s_auto.go", strings.ToLower(structInfo.CsvName)))
+		c.createCsvGoStructFile(fileSavePath, fileContent)
+	}
+}
+
+func (c *Csv2Struct) createCsvGoStructFile(filePath, fileContent string) {
+	if _, err := os.Stat(filePath); os.IsExist(err) {
+		errR := os.Remove(filePath)
+		if errR != nil {
+			panic(fmt.Sprintf("createCsvGoStructFile os.Remove filePath:%s, err:%s", filePath, errR))
+		}
+	}
+
+	f, err := os.Create(filePath)
+	if err != nil {
+		panic(fmt.Sprintf("createCsvGoStructFile os.Create filePath:%s, err:%s", filePath, err))
+	}
+	defer f.Close()
+
+	topContent := "//Package csvauto GENERATED BY CSV AUTO; DO NOT EDIT \n"
+	packageTop := fmt.Sprintf("package %s", c.packageName)
+	_, err = f.WriteString(topContent + packageTop + "\n\n" + fileContent)
+	if err != nil {
+		panic(fmt.Sprintf("createCsvGoStructFile f.WriteString err:%s", err))
+	}
+	cmd := exec.Command("gofmt", "-w", filePath)
+	err = cmd.Run()
+	if err != nil {
+		fmt.Println("----------------------------------------------------------")
+		fmt.Println(fileContent)
+		panic(fmt.Sprintf("createCsvGoStructFile f.WriteString exec.Command file %s err:%s", filePath, err))
+	}
+}
+
+func dealTypeToGo(typeCsv string) (string, error) {
+	colType, ok := typeForCsv2Go[typeCsv]
+	if !ok {
+		return "", fmt.Errorf("not find column type:%s", typeCsv)
+	}
+	return colType, nil
+}
+
+func dealStructContent(structInfo *CsvName2Columns) string {
+	var structContent string
+	tableName := dealName(structInfo.CsvName)
+	structContent += fmt.Sprintf("//%s auto\n", tableName)
+	structContent += "type " + tableName + " struct {\n"
+	for idx, column := range structInfo.Columns {
+		colType, err := dealTypeToGo(structInfo.Types[idx])
+		if err != nil {
+			panic(fmt.Sprintf("csvColumn2File err type info file:%s, type:%s, err:%s", structInfo.CsvName, structInfo.Types[idx], err.Error()))
+		}
+
+		var colComment string
+		if tableName != "robot" && len(structInfo.Comments) > idx && len(structInfo.Comments[idx]) > 0 {
+			colComment = fmt.Sprintf("//%s", structInfo.Comments[idx])
+			colComment = strings.Replace(colComment, "\n", " ", -1)
+
+		}
+
+		column = dealName(column)
+		structContent += fmt.Sprintf("    %s %s %s\n",
+			column, colType, colComment)
+	}
+	structContent += "}\n\n\n"
+
+	// fmt.Println("structContent:", structContent)
+	return structContent
+}
+
+func dealInterfaceContent(structInfo *CsvName2Columns) string {
+	var interContent string
+	tableName := dealName(structInfo.CsvName)
+	interContent += fmt.Sprintf("//I%s auto\n", tableName)
+	interContent += "type I" + tableName + " interface {\n"
+	for idx, column := range structInfo.Columns {
+		colType, ok := typeForCsv2Go[structInfo.Types[idx]]
+		if !ok {
+			panic(fmt.Sprintf("csvColumn2File err type info file:%s, type:%s", structInfo.CsvName, structInfo.Types[idx]))
+		}
+
+		column = dealName(column)
+		if strings.Contains(colType, "[]") {
+			interContent += fmt.Sprintf("    Get%sLen() int\n", column)
+			arrBaseType := strings.TrimPrefix(colType, "[]")
+			interContent += fmt.Sprintf("    Get%sByIndex(index int) %s\n", column, arrBaseType)
+		} else {
+			interContent += fmt.Sprintf("    Get%s() %s\n", column, colType)
+		}
+	}
+	interContent += "}\n\n\n"
+
+	// fmt.Println("interContent:", interContent)
+	return interContent
+}
+
+func dealMethodContent(structInfo *CsvName2Columns) string {
+	var methodContent string
+	tableName := dealName(structInfo.CsvName)
+	firstLower := getFirstCharLower(tableName)
+	for idx, column := range structInfo.Columns {
+		colType, ok := typeForCsv2Go[structInfo.Types[idx]]
+		if !ok {
+			panic(fmt.Sprintf("csvColumn2File err type info file:%s, type:%s", structInfo.CsvName, structInfo.Types[idx]))
+		}
+
+		column = dealName(column)
+		if strings.Contains(colType, "[]") {
+			methodContent += fmt.Sprintf("//Get%sLen auto \n", column)
+			methodContent += fmt.Sprintf("func (%s *%s) Get%sLen() int {\n", firstLower, tableName, column)
+			methodContent += fmt.Sprintf("    return len(%s.%s) \n }\n\n", firstLower, column)
+			arrBaseType := strings.TrimPrefix(colType, "[]")
+			methodContent += fmt.Sprintf("//Get%sByIndex auto \n", column)
+			methodContent += fmt.Sprintf("func (%s *%s) Get%sByIndex(index int) %s {\n", firstLower, tableName, column, arrBaseType)
+			methodContent += fmt.Sprintf("    return %s.%s[index] \n}\n\n", firstLower, column)
+		} else {
+			methodContent += fmt.Sprintf("//Get%s auto \n", column)
+			methodContent += fmt.Sprintf("func (%s *%s)  Get%s() %s {\n", firstLower, tableName, column, colType)
+			methodContent += fmt.Sprintf("    return %s.%s \n}\n\n", firstLower, column)
+		}
+	}
+
+	// fmt.Println("methodContent:", methodContent)
+	return methodContent
+}
+
+func isInArray(fileName string, arrayFiles []string) bool {
+	for _, fileTemp := range arrayFiles {
+		if strings.Compare(fileName, fileTemp) == 0 {
+			return true
+		}
+	}
+	return false
+}
+
+func dealName(name string) string {
+	// 将_x转换为X,q且首字母大写
+	params := strings.Split(name, "_")
+	if len(params) > 0 {
+		suffix := params[len(params)-1]
+		if suffix == "id" || suffix == "Id" {
+			suffix = "ID"
+		}
+		params[len(params)-1] = suffix
+	}
+
+	var result string
+	for _, paramInfo := range params {
+		result += strings.ToUpper(paramInfo[0:1]) + paramInfo[1:]
+	}
+
+	if len(result) >= 2 {
+		sufIdx := len(result) - 2
+		suffix := result[sufIdx:]
+		if suffix == "id" || suffix == "Id" {
+			suffix = "ID"
+		}
+
+		result = result[0:sufIdx] + suffix
+	}
+	return result
+}
+
+func getFirstCharLower(name string) string {
+	return strings.ToLower(name[0:1])
+}
