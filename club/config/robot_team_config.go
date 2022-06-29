@@ -267,3 +267,16 @@ func GetStrengthRequestByRand() int64 {
 	//rand.Seed(time.Now().UnixNano())
 	return int64(cmin + rand.Intn(step+1))
 }
+
+//获取发送体力请求之后的延迟
+func GetHelpTalkTimeGapByRand() int {
+	cmin := configIRobotTeamConfig.GetHelpTalkTimegapByIndex(0)
+	cmax := configIRobotTeamConfig.GetHelpTalkTimegapByIndex(1)
+	step := cmax - cmin
+	if step < 0 {
+		step = step * -1
+	}
+	//随机值
+	//rand.Seed(time.Now().UnixNano())
+	return cmin + rand.Intn(step+1)
+}

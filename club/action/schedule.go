@@ -16,12 +16,17 @@ const (
 	JOB_TYPE_REQUEST_CHAT = "RequestChat"
 	JOB_TYPE_HELP         = "Help"
 	JOB_TYPE_ACTIVITY     = "Activity"
+
+	JOB_TYPE_DELETE_GUILD = "DeleteGuild"
+
+	JOB_TYPE_OWN_AI = "OwnAI"
 )
 
 type Job struct {
 	GuildID    int64
 	UserID     int64
 	ActionTime int64
+	RobotNum   int
 }
 
 var (
@@ -46,9 +51,17 @@ var (
 	helpProcessChannel chan *Job       = make(chan *Job, 5000)
 
 	//activity job other operation see action_activity.go
-	activityCrontabJob     map[string]*Job = make(map[string]*Job, 5000)
-	activityCrontabJobMu   *sync.Mutex     = new(sync.Mutex)
-	activityProcessChannel chan *Job       = make(chan *Job, 5000)
+	//activityCrontabJob     map[string]*Job = make(map[string]*Job, 5000)
+	//activityCrontabJobMu   *sync.Mutex     = new(sync.Mutex)
+	//activityProcessChannel chan *Job       = make(chan *Job, 5000)
+
+	//delete guild
+	deleteGuildChannel chan *Job = make(chan *Job, 100)
+
+	//using for ownaction
+	OwnActionJob      map[string]*Job = make(map[string]*Job, 5000)
+	OwnActionJobMu    *sync.Mutex     = new(sync.Mutex)
+	OwnProcessChannel chan *Job       = make(chan *Job, 5000)
 )
 
 func DeleteJob(targets map[string]*Job, mu *sync.Mutex, newTargets map[string]*Job) int {
@@ -71,9 +84,9 @@ func CreateJob(targets map[string]*Job, mu *sync.Mutex, newTargets map[string]*J
 		if _, ok := targets[k]; !ok {
 			if actionTimeHandler != nil {
 				newJob.ActionTime = actionTimeHandler()
-				targets[k] = newJob
-				c = c + 1
 			}
+			targets[k] = newJob
+			c = c + 1
 		}
 	}
 	mu.Unlock()
@@ -84,13 +97,14 @@ func JobKey(userID, guildID int64) string {
 	return fmt.Sprintf("%d-%d", userID, guildID)
 }
 
-func CrontabGenerateJob(jobType string, targets map[string]*Job, mu *sync.Mutex, output chan *Job, t int) {
+func CrontabGenerateJob(jobType string, targets map[string]*Job, mu *sync.Mutex, output chan *Job, cycleTimeHandler func(*Job) (int64, error), t int) {
 	logPrefix := "CrontabGenerateJob-" + jobType
 	for {
 		start := time.Now()
 		now := start.Unix()
 
 		needProcess := []*Job{}
+		needResetProcess := []*Job{}
 
 		mu.Lock()
 		for k, job := range targets {
@@ -102,12 +116,35 @@ func CrontabGenerateJob(jobType string, targets map[string]*Job, mu *sync.Mutex,
 		count := len(targets)
 		mu.Unlock()
 
-		for _, job := range needProcess {
-			output <- job
+		needProcessNum := len(needProcess)
+		if needProcessNum > 0 {
+			//循环定时器
+			if cycleTimeHandler != nil {
+				//单独处理防止加锁时间过长
+				for _, job := range needProcess {
+					if next, err := cycleTimeHandler(job); err == nil {
+						job.ActionTime = next
+						needResetProcess = append(needResetProcess, job)
+					}
+				}
+				//重新设置时间
+				if len(needResetProcess) > 0 {
+					mu.Lock()
+					for _, job := range needProcess {
+						k := JobKey(job.UserID, job.GuildID)
+						targets[k] = job
+					}
+					mu.Unlock()
+				}
+			}
+
+			for _, job := range needProcess {
+				output <- job
+			}
 		}
 
 		cost := time.Since(start).Nanoseconds() / 1000000
-		log.Get("club-dispatch").Info(logPrefix, "total:", count, "need to process num:", len(needProcess), "cost:", cost, "ms")
+		log.Get("club-dispatch").Info(logPrefix, "total:", count, "needNum:", needProcessNum, "resetNun:", len(needResetProcess), "cost:", cost, "ms")
 
 		time.Sleep(time.Duration(t) * time.Second)
 	}
@@ -116,17 +153,20 @@ func CrontabGenerateJob(jobType string, targets map[string]*Job, mu *sync.Mutex,
 func Startup() {
 	go UpdateRobotJobs(10)
 
-	go CrontabGenerateJob(JOB_TYPE_FIRSTIN, firstInCrontabJob, firstInCrontabJobMu, firstInProcessChannel, 10)
-	go CrontabGenerateJob(JOB_TYPE_REQUEST, requestCrontabJob, requestCrontabJobMu, requestProcessChannel, 10)
-	go CrontabGenerateJob(JOB_TYPE_REQUEST_CHAT, requestChatCrontabJob, requestChatCrontabJobMu, requestChatProcessChannel, 10)
-	go CrontabGenerateJob(JOB_TYPE_HELP, helpCrontabJob, helpCrontabJobMu, helpProcessChannel, 10)
-	go CrontabGenerateJob(JOB_TYPE_ACTIVITY, activityCrontabJob, activityCrontabJobMu, activityProcessChannel, 10)
+	go CrontabGenerateJob(JOB_TYPE_FIRSTIN, firstInCrontabJob, firstInCrontabJobMu, firstInProcessChannel, nil, 10)
+	go CrontabGenerateJob(JOB_TYPE_REQUEST, requestCrontabJob, requestCrontabJobMu, requestProcessChannel, nil, 10)
+	go CrontabGenerateJob(JOB_TYPE_REQUEST_CHAT, requestChatCrontabJob, requestChatCrontabJobMu, requestChatProcessChannel, nil, 10)
+	go CrontabGenerateJob(JOB_TYPE_HELP, helpCrontabJob, helpCrontabJobMu, helpProcessChannel, nil, 10)
+	go CrontabGenerateJob(JOB_TYPE_OWN_AI, OwnActionJob, OwnActionJobMu, OwnProcessChannel, cycleTimeHandlerOwnAi, 10)
+	//go CrontabGenerateJob(JOB_TYPE_ACTIVITY, activityCrontabJob, activityCrontabJobMu, activityProcessChannel, nil,10)
 
 	go JobActionProcess(JOB_TYPE_FIRSTIN, firstInProcessChannel, firstInActionHandler, false)
-	//go JobActionProcess(JOB_TYPE_REQUEST, requestProcessChannel, nil)
-	//go JobActionProcess(JOB_TYPE_REQUEST_CHAT, requestChatProcessChannel, nil)
+	go JobActionProcess(JOB_TYPE_REQUEST, requestProcessChannel, requestActionHandler, true)
+	go JobActionProcess(JOB_TYPE_REQUEST_CHAT, requestChatProcessChannel, requestChatActionHandler, true)
 	go JobActionProcess(JOB_TYPE_HELP, helpProcessChannel, helpActionHandler, true)
 	//go JobActionProcess(JOB_TYPE_ACTIVITY, helpProcessChannel, nil)
+
+	go JobActionProcess(JOB_TYPE_DELETE_GUILD, deleteGuildChannel, deleteActionHandler, false)
 }
 
 func UpdateRobotJobs(t int) error {
@@ -146,10 +186,16 @@ func UpdateRobotJobs(t int) error {
 			//获取uid和工会维度数据
 			uids := []int64{}
 			guildIDMaps := make(map[int64]struct{})
+			guildIDUserCountMaps := make(map[int64]int)
 			for _, v := range userMap {
 				uids = append(uids, v.UserID)
 				guildIDMaps[v.GuildID] = struct{}{}
+				if _, ok := guildIDUserCountMaps[v.GuildID]; !ok {
+					guildIDUserCountMaps[v.GuildID] = 0
+				}
+				guildIDUserCountMaps[v.GuildID]++
 			}
+
 			guildIDs := []int64{}
 			for k, _ := range guildIDMaps {
 				guildIDs = append(guildIDs, k)
@@ -178,9 +224,38 @@ func UpdateRobotJobs(t int) error {
 				filterGuildDeleteMap[v.ID] = v.DeletedAt.Valid
 			}
 
+			//判断是否全部是机器人
+			guildRobotUserCountMaps := make(map[int64]int)
+			for _, v := range userMap {
+				ut, ok := filterUserTypeMaps[v.UserID]
+				if !ok {
+					continue
+				}
+				if ut == service.USERTYPE_CLUB_ROBOT_SERVICE {
+					if _, ok := guildRobotUserCountMaps[v.GuildID]; !ok {
+						guildRobotUserCountMaps[v.GuildID] = 0
+					}
+					guildRobotUserCountMaps[v.GuildID]++
+				}
+			}
+			//获取需要删除的任务
+			filterNeedDeleteGuildMaps := make(map[int64]bool)
+			for k, allNum := range guildIDUserCountMaps {
+				if robotNum, ok := guildRobotUserCountMaps[k]; ok && allNum == robotNum {
+					if isDel, okk := filterGuildDeleteMap[k]; okk && !isDel {
+						filterNeedDeleteGuildMaps[k] = true
+						deleteGuildChannel <- &Job{GuildID: k, RobotNum: robotNum}
+					}
+				}
+			}
+
 			//获取可用robot
 			robotUsers := []model.GuildUserMap{}
 			for _, v := range userMap {
+				if n, ok := filterNeedDeleteGuildMaps[v.GuildID]; ok && n {
+					continue
+				}
+
 				ut, ok := filterUserTypeMaps[v.UserID]
 				if !ok {
 					continue
@@ -214,12 +289,13 @@ func UpdateRobotJobs(t int) error {
 			DeleteJob(requestCrontabJob, requestCrontabJobMu, robotNewJobsMap)
 			DeleteJob(requestChatCrontabJob, requestChatCrontabJobMu, robotNewJobsMap)
 			DeleteJob(helpCrontabJob, helpCrontabJobMu, robotNewJobsMap)
-			DeleteJob(activityCrontabJob, activityCrontabJobMu, robotNewJobsMap)
+			//DeleteJob(activityCrontabJob, activityCrontabJobMu, robotNewJobsMap)
+			DeleteJob(OwnActionJob, OwnActionJobMu, robotNewJobsMap)
 
 			//create job
-			CreateJob(requestCrontabJob, requestCrontabJobMu, robotNewJobsMap, nil)
+			CreateJob(requestCrontabJob, requestCrontabJobMu, robotNewJobsMap, requestActiveTimeHandler)
 			CreateJob(helpCrontabJob, helpCrontabJobMu, robotNewJobsMap, helpActiveTimeHandler)
-			CreateJob(activityCrontabJob, activityCrontabJobMu, robotNewJobsMap, nil)
+			//CreateJob(activityCrontabJob, activityCrontabJobMu, robotNewJobsMap, nil)
 
 			logMsg = "success"
 			break

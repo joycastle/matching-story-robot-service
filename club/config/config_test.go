@@ -70,6 +70,8 @@ func TestRobotTeamConfig(t *testing.T) {
 	if !ok3 {
 		t.Fatal("GetJoinTalkTimeGapByRand error")
 	}
+
+	fmt.Println(GetHelpTalkTimeGapByRand())
 }
 
 func TestRobotTeamChat(t *testing.T) {

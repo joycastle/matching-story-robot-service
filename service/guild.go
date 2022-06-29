@@ -5,6 +5,14 @@ import (
 	"github.com/joycastle/matching-story-robot-service/model"
 )
 
+func DeleteGuild(id int64) error {
+	var ret model.Guild
+	if r := mysql.Get("default-master").Delete(&ret, id); r.Error != nil {
+		return r.Error
+	}
+	return nil
+}
+
 func GetGuildInfoByGuildID(guildID int64) (model.Guild, error) {
 	var ret model.Guild
 	if r := mysql.Get("default-slave").First(&ret, guildID); r.Error != nil {

@@ -6,6 +6,14 @@ import (
 	"gorm.io/gorm"
 )
 
+func GetHelpRequestByGuildIDAndUserID(guildID, uid int64) ([]model.GuildHelpRequest, error) {
+	var rets []model.GuildHelpRequest
+	if r := mysql.Get("default-slave").Where("guild_id = ? AND requester_id = ?", guildID, uid).Find(&rets); r.Error != nil {
+		return rets, r.Error
+	}
+	return rets, nil
+}
+
 //获取未完成的帮助
 func GetGuildHelpRequestNotComplete(guildID int64) ([]model.GuildHelpRequest, error) {
 	var (
