@@ -117,12 +117,9 @@ func GetRobotIconByRand() string {
 func GetLikeNumByRand() int {
 	min := configIRobotTeamConfig.GetInitialLikeByIndex(0)
 	max := configIRobotTeamConfig.GetInitialLikeByIndex(1)
-	step := max - min
-	if step < 0 {
-		step = step * -1
-	}
-	//rand.Seed(time.Now().UnixNano())
-	return min + rand.Intn(step+1)
+
+	mina, maxa := Compare2Int(min, max)
+	return mina + rand.Intn(maxa-mina+1)
 }
 
 type GuildLevelInfo struct {
@@ -167,15 +164,13 @@ func GetLevelInfo(users []model.User) GuildLevelInfo {
 func GetLevelByRand(guildInfo model.Guild, userInfos []model.User) int {
 	levelInfo := GetLevelInfo(userInfos)
 
-	cmin := configIRobotTeamConfig.GetLevelRangeByIndex(0)
-	cmax := configIRobotTeamConfig.GetLevelRangeByIndex(1)
-	step := cmax - cmin
-	if step < 0 {
-		step = step * -1
-	}
+	min := configIRobotTeamConfig.GetLevelRangeByIndex(0)
+	max := configIRobotTeamConfig.GetLevelRangeByIndex(1)
+	mina, maxa := Compare2Int(min, max)
+
 	//随机值
 	//rand.Seed(time.Now().UnixNano())
-	randStep := cmin + rand.Intn(step+1)
+	randStep := mina + rand.Intn(maxa-mina+1)
 
 	//随机加减策略
 	if rand.Intn(100) >= 50 {
@@ -198,12 +193,9 @@ func GetLevelByRand(guildInfo model.Guild, userInfos []model.User) int {
 func GetActiveTimeByRand() int64 {
 	min := configIRobotTeamConfig.GetInitialTimeRangeByIndex(0)
 	max := configIRobotTeamConfig.GetInitialTimeRangeByIndex(1)
-	step := max - min
-	if step < 0 {
-		step = step * -1
-	}
-	//rand.Seed(time.Now().UnixNano())
-	return int64(min + rand.Intn(step+1))
+
+	mina, maxa := Compare2Int(min, max)
+	return int64(mina + rand.Intn(maxa-mina+1))
 }
 
 //获取机器人上线A
@@ -220,63 +212,41 @@ func GetNormalUserNum() int {
 func GetGenerateRobotNumByRand() int {
 	cmin := configIRobotTeamConfig.GetGenerateRobotNumByIndex(0)
 	cmax := configIRobotTeamConfig.GetGenerateRobotNumByIndex(1)
-	step := cmax - cmin
-	if step < 0 {
-		step = step * -1
-	}
-	//随机值
-	//rand.Seed(time.Now().UnixNano())
-	return cmin + rand.Intn(step+1)
+
+	mina, maxa := Compare2Int(cmin, cmax)
+	return mina + rand.Intn(maxa-mina+1)
 }
 
 //获取机器人帮助延迟时间
 func GetStrengthHelpTimeByRand() int64 {
 	cmin := configIRobotTeamConfig.GetHelpTimegapByIndex(0)
 	cmax := configIRobotTeamConfig.GetHelpTimegapByIndex(1)
-	step := cmax - cmin
-	if step < 0 {
-		step = step * -1
-	}
-	//随机值
-	//rand.Seed(time.Now().UnixNano())
-	return int64(cmin + rand.Intn(step+1))
+
+	mina, maxa := Compare2Int(cmin, cmax)
+	return int64(mina + rand.Intn(maxa-mina+1))
 }
 
 //获取初次进入机器人问候语延迟
 func GetJoinTalkTimeGapByRand() int {
 	cmin := configIRobotTeamConfig.GetJoinTalkTimegapByIndex(0)
 	cmax := configIRobotTeamConfig.GetJoinTalkTimegapByIndex(1)
-	step := cmax - cmin
-	if step < 0 {
-		step = step * -1
-	}
-	//随机值
-	//rand.Seed(time.Now().UnixNano())
-	return cmin + rand.Intn(step+1)
+	mina, maxa := Compare2Int(cmin, cmax)
+	return mina + rand.Intn(maxa-mina+1)
 }
 
 //获取机器人请求体力延迟
 func GetStrengthRequestByRand() int64 {
 	cmin := configIRobotTeamConfig.GetLifeRequestTimegapByIndex(0)
 	cmax := configIRobotTeamConfig.GetLifeRequestTimegapByIndex(1)
-	step := cmax - cmin
-	if step < 0 {
-		step = step * -1
-	}
-	//随机值
-	//rand.Seed(time.Now().UnixNano())
-	return int64(cmin + rand.Intn(step+1))
+
+	mina, maxa := Compare2Int(cmin, cmax)
+	return int64(mina + rand.Intn(maxa-mina+1))
 }
 
 //获取发送体力请求之后的延迟
 func GetHelpTalkTimeGapByRand() int {
 	cmin := configIRobotTeamConfig.GetHelpTalkTimegapByIndex(0)
 	cmax := configIRobotTeamConfig.GetHelpTalkTimegapByIndex(1)
-	step := cmax - cmin
-	if step < 0 {
-		step = step * -1
-	}
-	//随机值
-	//rand.Seed(time.Now().UnixNano())
-	return cmin + rand.Intn(step+1)
+	mina, maxa := Compare2Int(cmin, cmax)
+	return mina + rand.Intn(maxa-mina+1)
 }
