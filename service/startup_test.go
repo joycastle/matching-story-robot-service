@@ -71,7 +71,7 @@ func init() {
 
 	//init grpc
 	config.Grpc = make(map[string]string)
-	config.Grpc["chat"] = "127.0.0.1:9001"
+	config.Grpc["chat"] = "http://127.0.0.1:8081"
 
 	redis.InitRedis(redisConfigs)
 }

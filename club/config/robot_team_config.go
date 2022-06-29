@@ -1,10 +1,9 @@
-package club
+package config
 
 import (
 	"fmt"
 	"math"
 	"math/rand"
-	"time"
 
 	"github.com/joycastle/matching-story-robot-service/confmanager"
 	"github.com/joycastle/matching-story-robot-service/confmanager/csvauto"
@@ -47,6 +46,17 @@ func ReadRobotTeamConfigFromConfManager() error {
 	if configIRobotTeamConfig.GetGenerateRobotNumLen() != 2 {
 		return fmt.Errorf("confmanager robotTeamConfig -> generate_robot_num only 2 parameter")
 	}
+
+	//read robotTeamConfig -> join_talk_timegap
+	if configIRobotTeamConfig.GetJoinTalkTimegapLen() != 2 {
+		return fmt.Errorf("confmanager robotTeamConfig -> join_talk_timegap only 2 parameter")
+	}
+
+	//read robotTeamConfig -> life_request_timegap
+	if configIRobotTeamConfig.GetLifeRequestTimegapLen() != 2 {
+		return fmt.Errorf("confmanager robotTeamConfig -> life_request_timegap only 2 parameter")
+	}
+
 	// read RobotName
 	if num, err := confMgr.GetConfRobotNameNum(); err != nil {
 		return fmt.Errorf("confmanager read RobotName error:%s", err.Error())
@@ -67,7 +77,7 @@ func ReadRobotTeamConfigFromConfManager() error {
 }
 
 //获取机器人名称，existsNames 排除掉的名字
-func getRobotNameByRand(existsNames ...string) string {
+func GetRobotNameByRand(existsNames ...string) string {
 	var rangelist []string
 	var filterMap map[string]struct{}
 	if len(existsNames) > 0 {
@@ -89,29 +99,29 @@ func getRobotNameByRand(existsNames ...string) string {
 		return "Empty"
 	}
 
-	rand.Seed(time.Now().UnixNano())
+	//rand.Seed(time.Now().UnixNano())
 
 	return rangelist[rand.Intn(len(rangelist))]
 }
 
 //获取机器人头像
-func getRobotIconByRand() string {
+func GetRobotIconByRand() string {
 	//头像索引客户端配置
 	appMinIndex := 1
 	appMaxIndex := 14
-	rand.Seed(time.Now().UnixNano())
+	//rand.Seed(time.Now().UnixNano())
 	return fmt.Sprintf("%d", appMinIndex+rand.Intn(appMaxIndex))
 }
 
 //获取随机点赞数
-func getLikeNumByRand() int {
+func GetLikeNumByRand() int {
 	min := configIRobotTeamConfig.GetInitialLikeByIndex(0)
 	max := configIRobotTeamConfig.GetInitialLikeByIndex(1)
 	step := max - min
 	if step < 0 {
 		step = step * -1
 	}
-	rand.Seed(time.Now().UnixNano())
+	//rand.Seed(time.Now().UnixNano())
 	return min + rand.Intn(step+1)
 }
 
@@ -122,7 +132,7 @@ type GuildLevelInfo struct {
 }
 
 //获取工会关卡信息
-func getLevelInfo(users []model.User) GuildLevelInfo {
+func GetLevelInfo(users []model.User) GuildLevelInfo {
 	var (
 		gli        GuildLevelInfo
 		totalLevel int = 0
@@ -154,8 +164,8 @@ func getLevelInfo(users []model.User) GuildLevelInfo {
 }
 
 //获取随机关卡数
-func getLevelByRand(guildInfo model.Guild, userInfos []model.User) int {
-	levelInfo := getLevelInfo(userInfos)
+func GetLevelByRand(guildInfo model.Guild, userInfos []model.User) int {
+	levelInfo := GetLevelInfo(userInfos)
 
 	cmin := configIRobotTeamConfig.GetLevelRangeByIndex(0)
 	cmax := configIRobotTeamConfig.GetLevelRangeByIndex(1)
@@ -164,7 +174,7 @@ func getLevelByRand(guildInfo model.Guild, userInfos []model.User) int {
 		step = step * -1
 	}
 	//随机值
-	rand.Seed(time.Now().UnixNano())
+	//rand.Seed(time.Now().UnixNano())
 	randStep := cmin + rand.Intn(step+1)
 
 	//随机加减策略
@@ -185,29 +195,29 @@ func getLevelByRand(guildInfo model.Guild, userInfos []model.User) int {
 }
 
 //获取随机检测时间
-func getActiveTimeByRand() int64 {
+func GetActiveTimeByRand() int64 {
 	min := configIRobotTeamConfig.GetInitialTimeRangeByIndex(0)
 	max := configIRobotTeamConfig.GetInitialTimeRangeByIndex(1)
 	step := max - min
 	if step < 0 {
 		step = step * -1
 	}
-	rand.Seed(time.Now().UnixNano())
-	return time.Now().Unix() + int64(min+rand.Intn(step))
+	//rand.Seed(time.Now().UnixNano())
+	return int64(min + rand.Intn(step+1))
 }
 
 //获取机器人上线A
-func getRobotMaxLimitNum() int {
+func GetRobotMaxLimitNum() int {
 	return configIRobotTeamConfig.GetRobotNumMaxlimit()
 }
 
 //获取真是用户数量B
-func getNormalUserNum() int {
+func GetNormalUserNum() int {
 	return configIRobotTeamConfig.GetTeammemberNumLimit()
 }
 
 //获取单词生成机器人的数量
-func getGenerateRobotNumByRand() int {
+func GetGenerateRobotNumByRand() int {
 	cmin := configIRobotTeamConfig.GetGenerateRobotNumByIndex(0)
 	cmax := configIRobotTeamConfig.GetGenerateRobotNumByIndex(1)
 	step := cmax - cmin
@@ -215,6 +225,45 @@ func getGenerateRobotNumByRand() int {
 		step = step * -1
 	}
 	//随机值
-	rand.Seed(time.Now().UnixNano())
+	//rand.Seed(time.Now().UnixNano())
 	return cmin + rand.Intn(step+1)
+}
+
+//获取机器人帮助延迟时间
+func GetStrengthHelpTimeByRand() int64 {
+	cmin := configIRobotTeamConfig.GetHelpTimegapByIndex(0)
+	cmax := configIRobotTeamConfig.GetHelpTimegapByIndex(1)
+	step := cmax - cmin
+	if step < 0 {
+		step = step * -1
+	}
+	//随机值
+	//rand.Seed(time.Now().UnixNano())
+	return int64(cmin + rand.Intn(step+1))
+}
+
+//获取初次进入机器人问候语延迟
+func GetJoinTalkTimeGapByRand() int {
+	cmin := configIRobotTeamConfig.GetJoinTalkTimegapByIndex(0)
+	cmax := configIRobotTeamConfig.GetJoinTalkTimegapByIndex(1)
+	step := cmax - cmin
+	if step < 0 {
+		step = step * -1
+	}
+	//随机值
+	//rand.Seed(time.Now().UnixNano())
+	return cmin + rand.Intn(step+1)
+}
+
+//获取机器人请求体力延迟
+func GetStrengthRequestByRand() int64 {
+	cmin := configIRobotTeamConfig.GetLifeRequestTimegapByIndex(0)
+	cmax := configIRobotTeamConfig.GetLifeRequestTimegapByIndex(1)
+	step := cmax - cmin
+	if step < 0 {
+		step = step * -1
+	}
+	//随机值
+	//rand.Seed(time.Now().UnixNano())
+	return int64(cmin + rand.Intn(step+1))
 }

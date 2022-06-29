@@ -1,9 +1,8 @@
-package club
+package config
 
 import (
 	"fmt"
 	"math/rand"
-	"time"
 
 	"github.com/joycastle/matching-story-robot-service/confmanager"
 )
@@ -38,19 +37,19 @@ func ReadRobotTeamChatFromConfManager() error {
 		}
 	}
 
-	_, ok1 := chatMsgMapping[1]
-	_, ok2 := chatMsgMapping[2]
-	if !ok1 || !ok2 {
+	m1, ok1 := chatMsgMapping[1]
+	m2, ok2 := chatMsgMapping[2]
+	if !ok1 || !ok2 || len(m1) == 0 || len(m2) == 0 {
 		return fmt.Errorf("confmanager robotTeamChat contents must content type 1 and type 2")
 	}
 
 	return nil
 }
 
-func getChatMsgByRand(index int) string {
+func GetChatMsgByRand(index int) string {
 	msgs := chatMsgMapping[index]
 	length := len(msgs)
 
-	rand.Seed(time.Now().UnixNano())
+	//rand.Seed(time.Now().UnixNano())
 	return msgs[rand.Intn(length)]
 }

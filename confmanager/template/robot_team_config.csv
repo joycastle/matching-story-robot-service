@@ -1,4 +1,4 @@
-﻿ID,level_range,initial_help,initial_like,initial_time_range,robot_num_maxlimit,teammember_num_limit,generate_robot_num,robot_num_minlimit,robot_kick_timerange,robot_kick_level,robot_kick_activeusernum,robot_kick_robotnum,life_request_timegap,Help_timegap
-INT,INT_ARRAY,INT,INT_ARRAY,INT_ARRAY,INT,INT,INT_ARRAY,INT,INT_ARRAY,INT_ARRAY,INT,INT_ARRAY,INT_ARRAY,INT_ARRAY
-#,机器人生成时的等级加减范围值,机器人生成时的初始帮助数,机器人生成时的初始点赞数,机器人生成检测时间间隔（秒）（X1-X2）,机器人加入条件：机器人数量上限（A）,机器人加入条件：俱乐部真实用户数小于该值（B）,单次生成机器人的数量(Y1-Y2),机器人清退条件：机器人数量下限（C）,机器人清退条件：清退检测时间（M1|M2）秒,机器人清退条件：前24小时俱乐部活跃用户推关数（Z）,机器人清退条件：前24小时俱乐部满足关卡条件的活跃用户数（N）,机器人清退条件：单次清退机器人数量,机器人生命请求延迟（秒）,机器人帮助点体力延迟（秒）
-1,10|40,0,5|15,18000|36000,15,15,1|2,5,86400|172800,3,10,1|1,300|600,300|1800
+﻿ID,level_range,initial_help,initial_like,initial_time_range,robot_num_maxlimit,teammember_num_limit,generate_robot_num,robot_num_minlimit,robot_kick_timerange,robot_kick_level,robot_kick_activeusernum,robot_kick_robotnum,life_request_timegap,Help_timegap,join_talk_timegap,help_talk_timegap
+INT,INT_ARRAY,INT,INT_ARRAY,INT_ARRAY,INT,INT,INT_ARRAY,INT,INT_ARRAY,INT_ARRAY,INT,INT_ARRAY,INT_ARRAY,INT_ARRAY,INT_ARRAY,INT_ARRAY
+#,机器人生成时的等级加减范围值,机器人生成时的初始帮助数,机器人生成时的初始点赞数,机器人生成检测时间间隔（秒）（X1-X2）,机器人加入条件：机器人数量上限（A）,机器人加入条件：俱乐部真实用户数小于该值（B）,单次生成机器人的数量(Y1-Y2),机器人清退条件：机器人数量下限（C）,机器人清退条件：清退检测时间（M1|M2）秒,机器人清退条件：前24小时俱乐部活跃用户推关数（Z）,机器人清退条件：前24小时俱乐部满足关卡条件的活跃用户数（N）,机器人清退条件：单次清退机器人数量,机器人生命请求延迟（秒）,机器人帮助点体力延迟（秒）,机器人初次入会发送问候语延迟（秒）语言表类型1,机器人请求体力后发送语言延迟（秒）语言表类型2
+1,10|40,0,5|15,18000|36000,15,15,1|2,5,86400|172800,3,10,1|1,300|600,300|1800,60|120,60|180

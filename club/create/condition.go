@@ -1,8 +1,9 @@
-package club
+package create
 
 import (
 	"fmt"
 
+	"github.com/joycastle/matching-story-robot-service/club/config"
 	"github.com/joycastle/matching-story-robot-service/model"
 )
 
@@ -19,16 +20,16 @@ func IsTheGuildCanUsingRobot(guildInfo model.Guild, robotUsers []model.User, nor
 		return "The club has been deleted", false
 	}
 
-	if guildInfo.IsOpen == 2 {
+	if guildInfo.IsOpen != 2 {
 		return "The club not allowed to join", false
 	}
 
-	robotMaxLimitNum := getRobotMaxLimitNum()
+	robotMaxLimitNum := config.GetRobotMaxLimitNum()
 	if len(robotUsers) >= robotMaxLimitNum {
-		return fmt.Sprintf("The robot number has reached the maximum limit of %d", robotMaxLimitNum), false
+		return fmt.Sprintf("The robot number has reached the maxmum limit of %d", robotMaxLimitNum), false
 	}
 
-	normalUserLimitNum := getNormalUserNum()
+	normalUserLimitNum := config.GetNormalUserNum()
 	if len(normalUsers) >= normalUserLimitNum {
 		return fmt.Sprintf("The normal number has exceeded the open limit of %d", normalUserLimitNum), false
 	}

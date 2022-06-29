@@ -1,17 +1,19 @@
-package club
+package action
 
 import (
+	"testing"
 	"time"
 
 	"github.com/joycastle/casual-server-lib/mysql"
 	"github.com/joycastle/casual-server-lib/redis"
+	"github.com/joycastle/matching-story-robot-service/club/config"
 	"github.com/joycastle/matching-story-robot-service/confmanager"
 )
 
 func init() {
 	//init configmanager
 	confMgr := confmanager.GetConfManagerVer()
-	err := confMgr.LoadCsv("../confmanager/template")
+	err := confMgr.LoadCsv("../../confmanager/template")
 	if err != nil {
 		panic(err)
 	}
@@ -70,17 +72,9 @@ func init() {
 
 	redis.InitRedis(redisConfigs)
 
-	//InitConfig
-	if err := ReadRobotTeamConfigFromConfManager(); err != nil {
-		panic(err)
-	}
+	config.ReadConfig()
+}
 
-	if len(configRobotNames) <= 0 {
-		panic("configRobotNamsArray Empty")
-	}
-
-	//robot chat msg config
-	if err := ReadRobotTeamChatFromConfManager(); err != nil {
-		panic(err)
-	}
+func TestMMM(t *testing.T) {
+	UpdateRobotJobs(10)
 }

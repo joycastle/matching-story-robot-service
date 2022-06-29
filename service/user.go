@@ -20,7 +20,7 @@ const (
 )
 
 //创建工会机器人
-func CreateGuildRobot(name, headIcon string, likeCnt, level int) (model.User, error) {
+func CreateGuildRobotUser(name, headIcon string, likeCnt, level int) (model.User, error) {
 	var u model.User
 	u.UserName = name
 	u.UserHeadIcon = headIcon
@@ -66,4 +66,48 @@ func BatchGetUserInfoByUserID(uids []int64) ([]model.User, error) {
 		return users, r.Error
 	}
 	return users, nil
+}
+
+//获取用户分布
+func GetUserInfoWithTypeByUids(uids []int64) (map[string][]model.User, error) {
+	users, err := BatchGetUserInfoByUserID(uids)
+	if err != nil {
+		return nil, err
+	}
+
+	m := make(map[string][]model.User)
+
+	for _, u := range users {
+		m[u.UserType] = append(m[u.UserType], u)
+	}
+	return m, nil
+}
+
+func GetUserTypes(uids []int64) ([]model.User, error) {
+	var out []model.User
+
+	if len(uids) == 0 {
+		return out, nil
+	}
+
+	sliceSize := 1000
+	var listArraySlice [][]int64
+	listArraySlice = make([][]int64, len(uids)/sliceSize+1)
+
+	for k, v := range uids {
+		index := k / sliceSize
+		listArraySlice[index] = append(listArraySlice[index], v)
+	}
+
+	sqlTpl := "SELECT user_id, user_type FROM `user_table` WHERE `user_id` IN ? LIMIT ?;"
+
+	for _, vs := range listArraySlice {
+		var ret []model.User
+		if r := mysql.Get("default-slave").Raw(sqlTpl, vs, sliceSize).Scan(&ret); r.Error != nil {
+			return out, r.Error
+		}
+		out = append(out, ret...)
+	}
+
+	return out, nil
 }

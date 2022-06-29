@@ -18,6 +18,8 @@ type RobotTeamConfig struct {
 	RobotKickRobotnum      []int //机器人清退条件：单次清退机器人数量
 	LifeRequestTimegap     []int //机器人生命请求延迟（秒）
 	HelpTimegap            []int //机器人帮助点体力延迟（秒）
+	JoinTalkTimegap        []int //机器人初次入会发送问候语延迟（秒）语言表类型1
+	HelpTalkTimegap        []int //机器人请求体力后发送语言延迟（秒）语言表类型2
 }
 
 //IRobotTeamConfig auto
@@ -46,6 +48,10 @@ type IRobotTeamConfig interface {
 	GetLifeRequestTimegapByIndex(index int) int
 	GetHelpTimegapLen() int
 	GetHelpTimegapByIndex(index int) int
+	GetJoinTalkTimegapLen() int
+	GetJoinTalkTimegapByIndex(index int) int
+	GetHelpTalkTimegapLen() int
+	GetHelpTalkTimegapByIndex(index int) int
 }
 
 //GetID auto
@@ -166,4 +172,24 @@ func (r *RobotTeamConfig) GetHelpTimegapLen() int {
 //GetHelpTimegapByIndex auto
 func (r *RobotTeamConfig) GetHelpTimegapByIndex(index int) int {
 	return r.HelpTimegap[index]
+}
+
+//GetJoinTalkTimegapLen auto
+func (r *RobotTeamConfig) GetJoinTalkTimegapLen() int {
+	return len(r.JoinTalkTimegap)
+}
+
+//GetJoinTalkTimegapByIndex auto
+func (r *RobotTeamConfig) GetJoinTalkTimegapByIndex(index int) int {
+	return r.JoinTalkTimegap[index]
+}
+
+//GetHelpTalkTimegapLen auto
+func (r *RobotTeamConfig) GetHelpTalkTimegapLen() int {
+	return len(r.HelpTalkTimegap)
+}
+
+//GetHelpTalkTimegapByIndex auto
+func (r *RobotTeamConfig) GetHelpTalkTimegapByIndex(index int) int {
+	return r.HelpTalkTimegap[index]
 }

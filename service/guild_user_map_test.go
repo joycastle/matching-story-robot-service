@@ -39,7 +39,7 @@ func Test_JoinToGuild(t *testing.T) {
 	likeCnt := 88
 	level := 99
 
-	u, err := CreateGuildRobot(name, icon, likeCnt, level)
+	u, err := CreateGuildRobotUser(name, icon, likeCnt, level)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -69,4 +69,17 @@ func Test_JoinToGuild(t *testing.T) {
 	if len(disMap[USERTYPE_CLUB_ROBOT_SERVICE]) != len(disMap2[USERTYPE_CLUB_ROBOT_SERVICE])-1 {
 		t.Fatal("3")
 	}
+}
+
+func TestBatchGetGuildUserIdsByGuildIDs(t *testing.T) {
+	m, err := BatchGetGuildUserIdsByGuildIDs([]int64{9068658676465664, 9194785835319296})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(m) != 2 {
+		t.Fatal("")
+	}
+}
+
+func TestGetAllGuildUserMapInfos(t *testing.T) {
 }
