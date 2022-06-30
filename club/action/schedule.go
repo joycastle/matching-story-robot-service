@@ -32,38 +32,40 @@ type Job struct {
 }
 
 var (
+	capacityMap     int = 10000
+	capacityChannel int = 2000
+
 	//firstIn job other operation see action_first_in.go
 	firstInCrontabJob     map[string]*Job = make(map[string]*Job, 1000)
 	firstInCrontabJobMu   *sync.Mutex     = new(sync.Mutex)
 	firstInProcessChannel chan *Job       = make(chan *Job, 1000)
 
 	//request job other operation see action_request.go
-	requestCrontabJob     map[string]*Job = make(map[string]*Job, 5000)
+	requestCrontabJob     map[string]*Job = make(map[string]*Job, capacityMap)
 	requestCrontabJobMu   *sync.Mutex     = new(sync.Mutex)
-	requestProcessChannel chan *Job       = make(chan *Job, 5000)
+	requestProcessChannel chan *Job       = make(chan *Job, capacityChannel)
 
 	//request chat job other operation see action_request.go
-	requestChatCrontabJob     map[string]*Job = make(map[string]*Job, 5000)
+	requestChatCrontabJob     map[string]*Job = make(map[string]*Job, 1000)
 	requestChatCrontabJobMu   *sync.Mutex     = new(sync.Mutex)
-	requestChatProcessChannel chan *Job       = make(chan *Job, 5000)
+	requestChatProcessChannel chan *Job       = make(chan *Job, 1000)
 
 	//help job other operation see action_help.go
-	helpCrontabJob     map[string]*Job = make(map[string]*Job, 5000)
+	helpCrontabJob     map[string]*Job = make(map[string]*Job, capacityMap)
 	helpCrontabJobMu   *sync.Mutex     = new(sync.Mutex)
-	helpProcessChannel chan *Job       = make(chan *Job, 5000)
-
-	//activity job other operation see action_activity.go
-	//activityCrontabJob     map[string]*Job = make(map[string]*Job, 5000)
-	//activityCrontabJobMu   *sync.Mutex     = new(sync.Mutex)
-	//activityProcessChannel chan *Job       = make(chan *Job, 5000)
+	helpProcessChannel chan *Job       = make(chan *Job, capacityChannel)
 
 	//delete guild
 	deleteGuildChannel chan *Job = make(chan *Job, 100)
 
 	//using for ownaction
-	OwnActionCrontabJob     map[string]*Job = make(map[string]*Job, 5000)
-	OwnActionCrontabJobMu   *sync.Mutex     = new(sync.Mutex)
-	OwnActionProcessChannel chan *Job       = make(chan *Job, 5000)
+	ownActionCrontabJob     map[string]*Job = make(map[string]*Job, capacityMap)
+	ownActionCrontabJobMu   *sync.Mutex     = new(sync.Mutex)
+	ownActionProcessChannel chan *Job       = make(chan *Job, capacityChannel)
+
+	//data source for update robot action
+	RobotActionUpdateCrontabJob   map[string]*Job = make(map[string]*Job, capacityMap)
+	RobotActionUpdateCrontabJobMu *sync.Mutex     = new(sync.Mutex)
 )
 
 func DeleteJob(targets map[string]*Job, mu *sync.Mutex, newTargets map[string]*Job) int {
@@ -166,15 +168,18 @@ func Startup() {
 	go CrontabGenerateJob(JOB_TYPE_REQUEST, requestCrontabJob, requestCrontabJobMu, requestProcessChannel, nil, 10)
 	go CrontabGenerateJob(JOB_TYPE_REQUEST_CHAT, requestChatCrontabJob, requestChatCrontabJobMu, requestChatProcessChannel, nil, 10)
 	go CrontabGenerateJob(JOB_TYPE_HELP, helpCrontabJob, helpCrontabJobMu, helpProcessChannel, nil, 10)
-	go CrontabGenerateJob(JOB_TYPE_OWN_AI, OwnActionCrontabJob, OwnActionCrontabJobMu, OwnActionProcessChannel, cycleTimeHandlerOwnAi, 10)
+	go CrontabGenerateJob(JOB_TYPE_OWN_AI, ownActionCrontabJob, ownActionCrontabJobMu, ownActionProcessChannel, cycleTimeHandlerOwnAi, 10)
 
 	go JobActionProcess(JOB_TYPE_FIRSTIN, firstInProcessChannel, firstInActionHandler, false)
 	go JobActionProcess(JOB_TYPE_REQUEST, requestProcessChannel, requestActionHandler, true)
 	go JobActionProcess(JOB_TYPE_REQUEST_CHAT, requestChatProcessChannel, requestChatActionHandler, true)
 	go JobActionProcess(JOB_TYPE_HELP, helpProcessChannel, helpActionHandler, true)
-	go JobActionProcess(JOB_TYPE_OWN_AI, OwnActionProcessChannel, ownActionHandler, true)
+	go JobActionProcess(JOB_TYPE_OWN_AI, ownActionProcessChannel, ownActionHandler, true)
 
 	go JobActionProcess(JOB_TYPE_DELETE_GUILD, deleteGuildChannel, deleteActionHandler, false)
+
+	//更新配置周一0点
+	go UpdateRobotConfigMonday(RobotActionUpdateCrontabJob, RobotActionUpdateCrontabJobMu)
 }
 
 func UpdateRobotJobs(t int) error {
@@ -297,13 +302,13 @@ func UpdateRobotJobs(t int) error {
 			DeleteJob(requestCrontabJob, requestCrontabJobMu, robotNewJobsMap)
 			DeleteJob(requestChatCrontabJob, requestChatCrontabJobMu, robotNewJobsMap)
 			DeleteJob(helpCrontabJob, helpCrontabJobMu, robotNewJobsMap)
-			//DeleteJob(activityCrontabJob, activityCrontabJobMu, robotNewJobsMap)
-			DeleteJob(OwnActionCrontabJob, OwnActionCrontabJobMu, robotNewJobsMap)
+			DeleteJob(ownActionCrontabJob, ownActionCrontabJobMu, robotNewJobsMap)
+			DeleteJob(RobotActionUpdateCrontabJob, RobotActionUpdateCrontabJobMu, robotNewJobsMap)
 
 			//create job
 			CreateJob(requestCrontabJob, requestCrontabJobMu, robotNewJobsMap, requestActiveTimeHandler)
 			CreateJob(helpCrontabJob, helpCrontabJobMu, robotNewJobsMap, helpActiveTimeHandler)
-			CreateJob(OwnActionCrontabJob, OwnActionCrontabJobMu, robotNewJobsMap, defaultActiveTimeHandler)
+			CreateJob(ownActionCrontabJob, ownActionCrontabJobMu, robotNewJobsMap, defaultActiveTimeHandler)
 
 			logMsg = "success"
 			break
