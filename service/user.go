@@ -2,6 +2,7 @@ package service
 
 import (
 	"fmt"
+	"strings"
 	"time"
 
 	"github.com/joycastle/casual-server-lib/mysql"
@@ -110,4 +111,56 @@ func GetUserTypes(uids []int64) ([]model.User, error) {
 	}
 
 	return out, nil
+}
+
+func GetUserInfosWithField(uids []int64, fileds []string) ([]model.User, error) {
+	var out []model.User
+
+	if len(uids) == 0 {
+		return out, nil
+	}
+
+	sliceSize := 1000
+	var listArraySlice [][]int64
+	listArraySlice = make([][]int64, len(uids)/sliceSize+1)
+
+	for k, v := range uids {
+		index := k / sliceSize
+		listArraySlice[index] = append(listArraySlice[index], v)
+	}
+
+	filedMap := make(map[string]struct{})
+	filedMap["user_id"] = struct{}{}
+	filedMap["user_type"] = struct{}{}
+	for _, v := range fileds {
+		filedMap[v] = struct{}{}
+	}
+	newFileds := []string{}
+	for k, _ := range filedMap {
+		newFileds = append(newFileds, k)
+	}
+
+	sqlTpl := fmt.Sprintf("SELECT %s FROM `user_table` WHERE `user_id` IN ? LIMIT ?;", strings.Join(newFileds, ","))
+
+	for _, vs := range listArraySlice {
+		var ret []model.User
+		if r := mysql.Get("default-slave").Debug().Raw(sqlTpl, vs, sliceSize).Scan(&ret); r.Error != nil {
+			return out, r.Error
+		}
+		out = append(out, ret...)
+	}
+
+	return out, nil
+}
+
+func UpdateUserLevelByUid(uid int64, step int) error {
+	if step == 0 {
+		return fmt.Errorf("step is zero")
+	}
+	var u model.User
+	sql := fmt.Sprintf("UPDATE `user_table` SET `user_level` = `user_level` + %d WHERE `user_id` = ? LIMIT 1;", step)
+	if r := mysql.Get("default-master").Debug().Raw(sql, uid).Scan(&u); r.Error != nil {
+		return r.Error
+	}
+	return nil
 }

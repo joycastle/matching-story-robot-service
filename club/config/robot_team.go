@@ -3,6 +3,9 @@ package config
 import (
 	"fmt"
 	"math/rand"
+	"time"
+
+	"github.com/joycastle/casual-server-lib/util"
 
 	"github.com/joycastle/matching-story-robot-service/confmanager"
 )
@@ -102,8 +105,6 @@ func ReadRobotTeamFromConfManager() error {
 		}
 	}
 
-	GetRule2TargetByRand(1009)
-
 	return nil
 }
 
@@ -136,8 +137,12 @@ func GetRule1TargetByRand(aid int) int {
 	return min + rand.Intn(max-min+1)
 }
 
-//获取rule2目标值
+//获取rule2目标值, 必须用GetRobotActiveDaysByActionID判断，才能准确
 func GetRule2TargetByRand(aid int) int {
+	if len(activeDayMap[aid]) <= 1 {
+		return 0
+	}
+
 	weekMin := 10
 	weekMax := 0
 	for week, _ := range activeDayMap[aid] {
@@ -148,7 +153,33 @@ func GetRule2TargetByRand(aid int) int {
 			weekMax = week
 		}
 	}
-	total := (weekMax - weekMin) * 86400
-	fmt.Println("aaaaaaaaa", weekMin, weekMax, total)
-	return 0
+
+	now := time.Now()
+	currentStamp := now.Unix()
+	mondayStamp := util.WeekMondayTimestamp(now)
+	disStamp := (weekMin - 1) * 86400
+	filterFirstDay := mondayStamp + int64(disStamp)
+
+	totalSeconds := (weekMax - weekMin + 1) * 86400
+	proportionTime := RangeIndexWithSliceStep(activeSleepRule2TimeMap[aid], totalSeconds)
+	index := -1
+	//fmt.Println(proportionTime, weekMax, weekMin)
+	//fmt.Println(util.FromUnixtime(currentStamp).Format("2006-01-02 15:04:05"))
+	for k, v := range proportionTime {
+		min, max := ValueWithRangeKey(k)
+		//fmt.Println(util.FromUnixtime(filterFirstDay + int64(min)).Format("2006-01-02 15:04:05"))
+		//fmt.Println(util.FromUnixtime(filterFirstDay + int64(max)).Format("2006-01-02 15:04:05"))
+		if currentStamp >= filterFirstDay+int64(min) && currentStamp <= filterFirstDay+int64(max) {
+			index = v
+			break
+		}
+	}
+
+	if index < 0 {
+		return 0
+	}
+
+	length := len(activeSleepRule2TargetMap[aid][index])
+
+	return activeSleepRule2TargetMap[aid][index][rand.Intn(length)]
 }

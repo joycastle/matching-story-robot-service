@@ -69,6 +69,9 @@ func GetGuildUserTypeDistribution(guildID int64) (map[string][]model.User, error
 	return m, nil
 }
 
+func GetUserLevelByGuildID() {
+}
+
 //加入工会
 func JoinToGuild(guildID, uid int64) error {
 	var gum model.GuildUserMap

@@ -72,3 +72,59 @@ func ParseStringType(v string) [][]int {
 	}
 	return ret
 }
+
+func RangeIndexWithSlice(weights []int) (map[string]int, int) {
+	m := make(map[string]int)
+	lastMax := 0
+	for index, v := range weights {
+		min := lastMax
+		max := min + v - 1
+		m[fmt.Sprintf("%d-%d", min, max)] = index
+		lastMax = max + 1
+	}
+	return m, lastMax
+}
+
+func RangeIndexWithSliceStep(weights []int, total int) map[string]int {
+	if len(weights) == 0 || total <= 0 {
+		return make(map[string]int)
+	}
+
+	totalIndex := 0
+	for _, v := range weights {
+		totalIndex = totalIndex + v
+	}
+
+	step := float64(total) / float64(totalIndex)
+
+	ret := make(map[string]int)
+
+	var lastValue float64
+	lastMax := 0
+	for index, v := range weights {
+		min := lastMax
+		max := min + v - 1
+		lastMax = max + 1
+
+		minValue := lastValue
+		maxValue := float64(max+1) * step
+		lastValue = maxValue + 1
+
+		key := RangeKey(int(minValue), int(maxValue))
+		ret[key] = index
+	}
+
+	return ret
+}
+
+func ValueWithRangeKey(k string) (int, int) {
+	arr := strings.Split(k, "-")
+	min, _ := strconv.Atoi(arr[0])
+	max, _ := strconv.Atoi(arr[1])
+	return Compare2Int(min, max)
+}
+
+func RangeKey(a, b int) string {
+	min, max := Compare2Int(a, b)
+	return fmt.Sprintf("%d-%d", min, max)
+}

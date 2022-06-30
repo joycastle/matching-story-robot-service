@@ -2,10 +2,12 @@ package action
 
 import (
 	"fmt"
+	"math/rand"
 	"sync"
 	"time"
 
 	"github.com/joycastle/casual-server-lib/log"
+	"github.com/joycastle/casual-server-lib/util"
 	"github.com/joycastle/matching-story-robot-service/model"
 	"github.com/joycastle/matching-story-robot-service/service"
 )
@@ -59,9 +61,9 @@ var (
 	deleteGuildChannel chan *Job = make(chan *Job, 100)
 
 	//using for ownaction
-	OwnActionJob      map[string]*Job = make(map[string]*Job, 5000)
-	OwnActionJobMu    *sync.Mutex     = new(sync.Mutex)
-	OwnProcessChannel chan *Job       = make(chan *Job, 5000)
+	OwnActionCrontabJob     map[string]*Job = make(map[string]*Job, 5000)
+	OwnActionCrontabJobMu   *sync.Mutex     = new(sync.Mutex)
+	OwnActionProcessChannel chan *Job       = make(chan *Job, 5000)
 )
 
 func DeleteJob(targets map[string]*Job, mu *sync.Mutex, newTargets map[string]*Job) int {
@@ -84,6 +86,8 @@ func CreateJob(targets map[string]*Job, mu *sync.Mutex, newTargets map[string]*J
 		if _, ok := targets[k]; !ok {
 			if actionTimeHandler != nil {
 				newJob.ActionTime = actionTimeHandler()
+			} else {
+				newJob.ActionTime = defaultActiveTimeHandler()
 			}
 			targets[k] = newJob
 			c = c + 1
@@ -122,10 +126,15 @@ func CrontabGenerateJob(jobType string, targets map[string]*Job, mu *sync.Mutex,
 			if cycleTimeHandler != nil {
 				//单独处理防止加锁时间过长
 				for _, job := range needProcess {
-					if next, err := cycleTimeHandler(job); err == nil {
-						job.ActionTime = next
-						needResetProcess = append(needResetProcess, job)
+					next, err := cycleTimeHandler(job)
+					fmt.Println(logPrefix, job, util.FromUnixtime(job.ActionTime).Format("2006-01-02 15:04:05"), util.FromUnixtime(next).Format("2006-01-02 15:04:05"), err)
+					if err != nil {
+						log.Get("club-dispatch").Fatal(logPrefix, "ActiveTime set error using default ActiveTime:", err)
+						next = defaultActiveTimeHandler()
 					}
+
+					job.ActionTime = next
+					needResetProcess = append(needResetProcess, job)
 				}
 				//重新设置时间
 				if len(needResetProcess) > 0 {
@@ -157,14 +166,13 @@ func Startup() {
 	go CrontabGenerateJob(JOB_TYPE_REQUEST, requestCrontabJob, requestCrontabJobMu, requestProcessChannel, nil, 10)
 	go CrontabGenerateJob(JOB_TYPE_REQUEST_CHAT, requestChatCrontabJob, requestChatCrontabJobMu, requestChatProcessChannel, nil, 10)
 	go CrontabGenerateJob(JOB_TYPE_HELP, helpCrontabJob, helpCrontabJobMu, helpProcessChannel, nil, 10)
-	go CrontabGenerateJob(JOB_TYPE_OWN_AI, OwnActionJob, OwnActionJobMu, OwnProcessChannel, cycleTimeHandlerOwnAi, 10)
-	//go CrontabGenerateJob(JOB_TYPE_ACTIVITY, activityCrontabJob, activityCrontabJobMu, activityProcessChannel, nil,10)
+	go CrontabGenerateJob(JOB_TYPE_OWN_AI, OwnActionCrontabJob, OwnActionCrontabJobMu, OwnActionProcessChannel, cycleTimeHandlerOwnAi, 10)
 
 	go JobActionProcess(JOB_TYPE_FIRSTIN, firstInProcessChannel, firstInActionHandler, false)
 	go JobActionProcess(JOB_TYPE_REQUEST, requestProcessChannel, requestActionHandler, true)
 	go JobActionProcess(JOB_TYPE_REQUEST_CHAT, requestChatProcessChannel, requestChatActionHandler, true)
 	go JobActionProcess(JOB_TYPE_HELP, helpProcessChannel, helpActionHandler, true)
-	//go JobActionProcess(JOB_TYPE_ACTIVITY, helpProcessChannel, nil)
+	go JobActionProcess(JOB_TYPE_OWN_AI, OwnActionProcessChannel, ownActionHandler, true)
 
 	go JobActionProcess(JOB_TYPE_DELETE_GUILD, deleteGuildChannel, deleteActionHandler, false)
 }
@@ -290,12 +298,12 @@ func UpdateRobotJobs(t int) error {
 			DeleteJob(requestChatCrontabJob, requestChatCrontabJobMu, robotNewJobsMap)
 			DeleteJob(helpCrontabJob, helpCrontabJobMu, robotNewJobsMap)
 			//DeleteJob(activityCrontabJob, activityCrontabJobMu, robotNewJobsMap)
-			DeleteJob(OwnActionJob, OwnActionJobMu, robotNewJobsMap)
+			DeleteJob(OwnActionCrontabJob, OwnActionCrontabJobMu, robotNewJobsMap)
 
 			//create job
 			CreateJob(requestCrontabJob, requestCrontabJobMu, robotNewJobsMap, requestActiveTimeHandler)
 			CreateJob(helpCrontabJob, helpCrontabJobMu, robotNewJobsMap, helpActiveTimeHandler)
-			//CreateJob(activityCrontabJob, activityCrontabJobMu, robotNewJobsMap, nil)
+			CreateJob(OwnActionCrontabJob, OwnActionCrontabJobMu, robotNewJobsMap, defaultActiveTimeHandler)
 
 			logMsg = "success"
 			break
@@ -339,4 +347,8 @@ func JobActionProcess(jobType string, ch chan *Job, actionHandler func(*Job) (st
 		cost := time.Since(start).Nanoseconds() / 1000000
 		log.Get("club-action").Info(logPrefix, logMsg, logSufix, "cost:", cost, "ms")
 	}
+}
+
+func defaultActiveTimeHandler() int64 {
+	return time.Now().Unix() + int64(120+rand.Intn(301))
 }

@@ -14,6 +14,7 @@ func CreateRobotForGuild(uid int64, utype int32, actionID int64) (model.Robot, e
 	robot.ConfID = utype
 	robot.GroupID = actionID
 	robot.CreateTime = time.Now().Unix()
+	robot.ActNum = 0
 
 	if err := mysql.Get("default-master").Create(&robot); err.Error != nil || err.RowsAffected != 1 {
 		return robot, fmt.Errorf("%s affected:%d", err.Error, err.RowsAffected)
@@ -31,4 +32,19 @@ func GetRobotForGuild(uid int64) (model.Robot, error) {
 	}
 
 	return robot, nil
+}
+
+func UpdateRobotActiveNumByUid(uid int64, step int) error {
+
+	robotID := fmt.Sprintf("club_%d", uid)
+
+	if step == 0 {
+		return fmt.Errorf("step is zero")
+	}
+	var robot model.Robot
+	sql := fmt.Sprintf("UPDATE `robot_table` SET `act_num` = `act_num` + %d WHERE `robot_id` = ? LIMIT 1;", step)
+	if r := mysql.Get("default-master").Debug().Raw(sql, robotID).Scan(&robot); r.Error != nil {
+		return r.Error
+	}
+	return nil
 }
