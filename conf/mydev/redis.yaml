@@ -1,7 +1,7 @@
 # server-lib-redis
 s-redis:
   default:
-    Addr: 192.168.1.178:6379
+    Addr: 127.0.0.1:6379
     Password: '123456'
     MaxActive: 64
     MaxIdle: 16

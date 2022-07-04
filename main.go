@@ -19,6 +19,10 @@ func main() {
 	runEnv := flag.String("env", "dev", "dev(本机开发环境), pre(预发布环境), prod(线上环境), other_env(其他开发配置名称)")
 	flag.Parse()
 
+	if *runEnv == "" {
+		panic("环境选择错误")
+	}
+
 	configFileEnv := filepath.Join("./conf/", *runEnv)
 	configFileCommon := filepath.Join("./conf/common")
 	if err := config.InitConfig(configFileEnv, configFileCommon); err != nil {

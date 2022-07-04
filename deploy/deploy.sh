@@ -26,7 +26,7 @@ fi
 
 if [ ! -d "$CodeConfPath" ]; then
     echo "not found conf path $CodeConfPath"
-	exit
+	exit -1
 fi
 
 echo "DockerfilePath: "$DockerfilePath
@@ -44,7 +44,7 @@ if [ -d "$ConfmanagerPath" ]; then
 fi
 
 echo "更新confmanager配置"
-git clone --branch $ConfmanagerPath --depth 1 git@codeup.aliyun.com:62b023a03e81781f3ad195c6/Server_V2_Config.git $ConfmanagerPath
+git clone --branch $ConfManagerBranchName --depth 1 git@codeup.aliyun.com:62b023a03e81781f3ad195c6/Server_V2_Config.git $ConfmanagerPath
 cd $ConfmanagerPath || exit
 RELEASE_VERSION=$(sed -n 1p $ConfmanagerPath/RELEASE_VERSION)
 echo "当前发行版本号：""$RELEASE_VERSION"
@@ -61,7 +61,7 @@ echo "docker run ......"
 #docker run 
 docker run -d --restart=always \
 --name $ContainerName \
---entrypoint /app/matching-story-robot-service -env=$RUNENV \
+--env RUNENV=$RUNENV \
 -p 18088:8088 \
 -v $LogPath:/app/var/logs \
 $DockerImageName \
