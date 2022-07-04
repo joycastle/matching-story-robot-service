@@ -6,11 +6,6 @@ on:
         description: 'Environment to deploy.(Select:dev,pre,production,dev1)'
         required: true
         default: 'dev'
-      branch-name:
-        description: 'Branch name to select in (dev,dev1,pre) environment'
-        required: true
-        default: 'dev'
-
 jobs:
   deploy-dev:
     name: Deploy robot-dev
@@ -23,7 +18,7 @@ jobs:
       - name: Check out repository code
         uses: actions/checkout@v2
         with:
-          ref: ${{ github.event.inputs.branch-name }}
+          ref: ${{ github.ref }}
       - run: echo "💡 The ${{ github.repository }} repository has been cloned to the runner."
       - run: echo "🖥️ The workflow is now ready to test your code on the runner."
 
