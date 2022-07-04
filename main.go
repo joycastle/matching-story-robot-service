@@ -12,6 +12,7 @@ import (
 	"github.com/joycastle/casual-server-lib/redis"
 	"github.com/joycastle/matching-story-robot-service/club"
 	"github.com/joycastle/matching-story-robot-service/confmanager"
+	"github.com/joycastle/matching-story-robot-service/qa"
 )
 
 func main() {
@@ -21,6 +22,11 @@ func main() {
 
 	if *runEnv == "" {
 		panic("环境选择错误")
+	}
+
+	//开启QA调试模式
+	if *runEnv != "prod" {
+		go qa.StartQaDebugMode("0.0.0.0:8088")
 	}
 
 	configFileEnv := filepath.Join("./conf/", *runEnv)

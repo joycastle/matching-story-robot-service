@@ -11,7 +11,6 @@ s-mysql:
     maxlifetime: 300s
     slowsqltime: 500ms
     slowlog: slowsql
-    errorlog: error
     statlog: run
   default-slave:
     addr: "mm-v2-pre-open-cluster.cluster-cwrho42ewumn.ca-central-1.rds.amazonaws.com:3306"
@@ -24,5 +23,4 @@ s-mysql:
     maxlifetime: 300s
     slowsqltime: 500ms
     slowlog: slowsql
-    errorlog: error
     statlog: run

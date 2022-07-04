@@ -10,5 +10,4 @@ s-redis:
     ReadTimeout: 500ms
     WriteTimeout: 1000ms
     TestInterval: 60s
-    ErrorLog: error
     StatLog: stat

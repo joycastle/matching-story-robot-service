@@ -48,24 +48,6 @@ func GetAllGuildInfoFromDB() ([]model.Guild, error) {
 	return list, nil
 }
 
-func GetAllGuildInfoFromDBWithSliceArray() ([][]model.Guild, error) {
-	list, err := GetAllGuildInfoFromDB()
-	if err != nil {
-		return nil, err
-	}
-
-	sliceSize := 200
-	var listArraySlice [][]model.Guild
-	listArraySlice = make([][]model.Guild, len(list)/sliceSize+1)
-
-	for k, v := range list {
-		index := k / sliceSize
-		listArraySlice[index] = append(listArraySlice[index], v)
-	}
-
-	return listArraySlice, nil
-}
-
 func GetGuildDeleteInfos(gids []int64) ([]model.Guild, error) {
 	var out []model.Guild
 

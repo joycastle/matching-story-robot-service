@@ -9,8 +9,8 @@ logs:
   club-action:
     output: var/logs/club/action.log-*-*-*
     level: ALL
-  slowlog:
-    output: var/logs/slowlog.log-*-*-*
+  slowsql:
+    output: var/logs/slowsql.log-*-*-*
     level: ALL
   error:
     output: var/logs/error.log-*-*-*
