@@ -1,28 +1,28 @@
 # server-lib-mysql
 s-mysql:
   default-master:
-    addr: 127.0.0.1
+    addr: "172.31.1.83:3306"
     username: root
     password: '123456'
     database: db_game
     options: charset=utf8mb4&parseTime=True
     maxidle: 16
-    maxopen: 128
+    maxopen: 64
     maxlifetime: 300s
-    slowsqltime: 2s
+    slowsqltime: 500ms
     slowlog: slowsql
     errorlog: error
     statlog: run
   default-slave:
-    addr: 127.0.0.1
+    addr: "172.31.1.83:3306"
     username: root
     password: '123456'
     database: db_game
     options: charset=utf8mb4&parseTime=True
     maxidle: 16
-    maxopen: 128
+    maxopen: 64
     maxlifetime: 300s
-    slowsqltime: 2s
+    slowsqltime: 500ms
     slowlog: slowsql
     errorlog: error
     statlog: run

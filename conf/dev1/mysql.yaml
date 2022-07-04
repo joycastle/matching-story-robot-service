@@ -1,10 +1,10 @@
 # server-lib-mysql
 s-mysql:
   default-master:
-    addr: "mm-v2-prod.cluster-cwrho42ewumn.ca-central-1.rds.amazonaws.com:3306"
+    addr: "172.31.10.206:3361"
     username: admin
-    password: "A33cqXJw5VulNya"
-    database: db_game
+    password: '123456'
+    database: preonlinegame 
     options: charset=utf8mb4&parseTime=True
     maxidle: 16
     maxopen: 64
@@ -14,10 +14,10 @@ s-mysql:
     errorlog: error
     statlog: run
   default-slave:
-    addr: "mm-v2-prod.cluster-cwrho42ewumn.ca-central-1.rds.amazonaws.com:3306"
+    addr: "172.31.10.206:3361"
     username: admin
-    password: "A33cqXJw5VulNya"
-    database: db_game
+    password: '123456'
+    database: preonlinegame
     options: charset=utf8mb4&parseTime=True
     maxidle: 16
     maxopen: 64

@@ -19,54 +19,54 @@ var (
 func ReadRobotTeamConfigFromConfManager() error {
 	confMgr, err := confmanager.GetConfManagerVer().GetConfManager()
 	if err != nil {
-		return fmt.Errorf("confmanager initialization error:%s", err.Error())
+		return errConfManangerInit("robotTeamConfig", err)
 	}
 
 	//read robotTeamConfig
 	if num, err := confMgr.GetConfRobotTeamConfigNum(); err != nil {
-		return fmt.Errorf("confmanager read RobotTeamConfig error:%s", err.Error())
-	} else if num > 1 {
-		return fmt.Errorf("confmanager RobotTeamConfig only need 2 parameter")
+		return errConfManangerRead("robotTeamConfig", err)
+	} else if num != 1 {
+		return errLineNumLimit("robotTeamConfig", 1)
 	}
 
 	if v, err := confMgr.GetConfRobotTeamConfigByIndex(0); err != nil {
-		return fmt.Errorf("confmanager RobotTeamConfig example initialization error:%s", err.Error())
+		return errConfManangerRead("robotTeamConfig", err)
 	} else {
 		configIRobotTeamConfig = v
 	}
 	//read robotTeamConfig -> initial_time_range
 	if configIRobotTeamConfig.GetInitialTimeRangeLen() != 2 {
-		return fmt.Errorf("confmanager robotTeamConfig -> initial_time_range only 2 parameter")
+		return errDataArrayNumLimit("robotTeamConfig", 1, "initial_time_range", 2)
 	}
 	//read robotTeamConfig -> initial_like
 	if configIRobotTeamConfig.GetInitialLikeLen() != 2 {
-		return fmt.Errorf("confmanager robotTeamConfig -> initial_like only 2 parameter")
+		return errDataArrayNumLimit("robotTeamConfig", 1, "initial_like", 2)
 	}
 	//read robotTeamConfig -> generate_robot_num
 	if configIRobotTeamConfig.GetGenerateRobotNumLen() != 2 {
-		return fmt.Errorf("confmanager robotTeamConfig -> generate_robot_num only 2 parameter")
+		return errDataArrayNumLimit("robotTeamConfig", 1, "generate_robot_num", 2)
 	}
 
 	//read robotTeamConfig -> join_talk_timegap
 	if configIRobotTeamConfig.GetJoinTalkTimegapLen() != 2 {
-		return fmt.Errorf("confmanager robotTeamConfig -> join_talk_timegap only 2 parameter")
+		return errDataArrayNumLimit("robotTeamConfig", 1, "join_talk_timegap", 2)
 	}
 
 	//read robotTeamConfig -> life_request_timegap
 	if configIRobotTeamConfig.GetLifeRequestTimegapLen() != 2 {
-		return fmt.Errorf("confmanager robotTeamConfig -> life_request_timegap only 2 parameter")
+		return errDataArrayNumLimit("robotTeamConfig", 1, "life_request_timegap", 2)
 	}
 
 	// read RobotName
 	if num, err := confMgr.GetConfRobotNameNum(); err != nil {
-		return fmt.Errorf("confmanager read RobotName error:%s", err.Error())
+		return errConfManangerRead("robotTeamConfig", err)
 	} else if num <= 0 {
-		return fmt.Errorf("confmanager RobotName is empty")
+		return errLineNumEmpty("robotTeamConfig")
 	} else {
 		//read RobotName to Array
 		for i := 0; i < num; i++ {
 			if oneRob, err := confMgr.GetConfRobotNameByIndex(i); err != nil {
-				return fmt.Errorf("confmanager read robot name error:%s", err.Error())
+				return errConfManangerRead("robotTeamConfig", err)
 			} else {
 				configRobotNames = append(configRobotNames, oneRob.GetName())
 			}

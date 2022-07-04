@@ -1,0 +1,3 @@
+s-grpc:
+  default:
+    addr: "http://172.31.10.206:8081"

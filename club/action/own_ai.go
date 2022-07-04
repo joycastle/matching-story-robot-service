@@ -43,7 +43,10 @@ func cycleTimeHandlerOwnAi(job *Job) (int64, error) {
 	}
 
 	actionTimes := int(robotConfig.ActNum)
-	ts := config.GetSleepTimeByActionTimesByRand(actionID, actionTimes)
+	ts, err := config.GetSleepTimeByActionTimesByRand(actionID, actionTimes)
+	if err != nil {
+		return 0, err
+	}
 
 	return time.Now().Unix() + int64(ts), nil
 }
@@ -63,7 +66,10 @@ func ownActionHandler(job *Job) (string, error) {
 		return "", errors.New(fmt.Sprintf("action_id not found from robot_team.csv"))
 	}
 
-	activeDaysMap := config.GetRobotActiveDaysByActionID(int(actionID))
+	activeDaysMap, err := config.GetRobotActiveDaysByActionID(int(actionID))
+	if err != nil {
+		return "", err
+	}
 
 	if len(activeDaysMap) == 0 {
 		return "", errors.New(fmt.Sprintf("active day config not found active_id:%d", actionID))
@@ -104,19 +110,28 @@ func ownActionHandler(job *Job) (string, error) {
 	}
 
 	//rule1判断
-	rule1Limit := config.GetRule1TargetByRand(int(actionID))
+	rule1Limit, err := config.GetRule1TargetByRand(int(actionID))
+	if err != nil {
+		return "", err
+	}
 	if (currentUserLevel - normalUserMaxLevel) >= rule1Limit {
 		return "", fmt.Errorf("Rule1,robot userlevel :%d Exceed normal userlevelmax:%d, limit:%d,will sleep", currentUserLevel, normalUserMaxLevel, rule1Limit)
 	}
 
 	//rule2判断
-	rule2Limit := config.GetRule2TargetByRand(int(actionID))
+	rule2Limit, err := config.GetRule2TargetByRand(int(actionID))
+	if err != nil {
+		return "", err
+	}
 	if rule2Limit <= 0 || currentUserLevel > rule2Limit {
 		return "", fmt.Errorf("Rule2, robot userlevel :%d Exceed limit:%d,will sleep", currentUserLevel, rule2Limit)
 	}
 
 	//增加关卡
-	step := config.GetStepByActionTimesByRand(int(actionID), int(robotConfig.ActNum))
+	step, err := config.GetStepByActionTimesByRand(int(actionID), int(robotConfig.ActNum))
+	if err != nil {
+		return "", err
+	}
 
 	if err := service.UpdateUserLevelByUid(job.UserID, step); err != nil {
 		return "", err

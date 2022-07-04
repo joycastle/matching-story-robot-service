@@ -20,25 +20,25 @@ var (
 func ReadRobotTeamInitialFromConfManager() error {
 	confMgr, err := confmanager.GetConfManagerVer().GetConfManager()
 	if err != nil {
-		return fmt.Errorf("confmanager initialization error:%s", err.Error())
+		return errConfManangerInit("RobotTeamInitial", err)
 	}
 
 	//read robotTeamInitial
 	if num, err := confMgr.GetConfRobotTeamInitialNum(); err != nil {
-		return fmt.Errorf("confmanager read RobotTeamInitial error:%s", err.Error())
+		return errConfManangerInit("RobotTeamInitial", err)
 	} else if num <= 0 {
-		return fmt.Errorf("confmanager RobotTeamInitial is empty")
+		return errLineNumEmpty("RobotTeamInitial")
 	} else {
 		//init data
 		for i := 0; i < num; i++ {
 			iface, err := confMgr.GetConfRobotTeamInitialByIndex(i)
 			if err != nil {
-				return fmt.Errorf("confmanager RobotTeamInitial initialization error:%s", err.Error())
+				return errConfManangerRead("RobotTeamInitial", err)
 			}
 
 			length := iface.GetLevelRangeLen()
 			if length <= 0 || length >= 3 {
-				return fmt.Errorf("confmanager RobotTeamInitial <level_range> content error in index:%d, only need 1 or 2 params", i)
+				return errDataOnlyNeedLimit("RobotTeamInitial", i, "level_range", 1, 2)
 			}
 
 			v0 := 0
@@ -84,12 +84,12 @@ func ReadRobotTeamInitialFromConfManager() error {
 	m[len(robotAiddMap)] = struct{}{}
 
 	if len(m) != 1 {
-		return fmt.Errorf("confmanager RobotTeamInitial data error")
+		return errDataResultNotMatch("RobotTeamInitial", "level_range", "robot_type", "robot_weight", "robot_ai_d")
 	}
 
 	for i := 0; i < len(levelRangeMap); i++ {
 		if len(robotTypeMap[i]) != len(robotWightMap[i]) || len(robotTypeMap[i]) != len(robotAiddMap[i]) {
-			return fmt.Errorf("confmanager RobotTeamInitial data error index:%d", i)
+			return errDataArrayNumNotMatch("RobotTeamInitial", i, "level_range", "robot_type", "robot_weight", "robot_ai_d")
 		}
 	}
 

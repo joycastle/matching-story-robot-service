@@ -1,0 +1,20 @@
+# server-lib-log
+logs:
+  club-create:
+    output: var/logs/club/create.log-*-*-*
+    level: ALL
+  club-dispatch:
+    output: var/logs/club/dispatch.log-*-*-*
+    level: ALL
+  club-action:
+    output: var/logs/club/action.log-*-*-*
+    level: ALL
+  slowlog:
+    output: var/logs/slowlog.log-*-*-*
+    level: ALL
+  error:
+    output: var/logs/error.log-*-*-*
+    level: ALL
+  run:
+    output: var/logs/run.log-*-*-*
+    level: ALL

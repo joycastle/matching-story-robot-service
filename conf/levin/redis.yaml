@@ -1,8 +1,8 @@
 # server-lib-redis
 s-redis:
   default:
-    Addr: "mm-v2-pre.2ddbmg.clustercfg.cac1.cache.amazonaws.com:6379"
-    Password: ""
+    Addr: 127.0.0.1:6379,127.0.0.1:6379,127.0.0.1:6379
+    Password: '123456'
     MaxActive: 64
     MaxIdle: 16
     IdleTimeout: 240s

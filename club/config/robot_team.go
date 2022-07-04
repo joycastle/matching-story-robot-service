@@ -24,20 +24,20 @@ var (
 func ReadRobotTeamFromConfManager() error {
 	confMgr, err := confmanager.GetConfManagerVer().GetConfManager()
 	if err != nil {
-		return fmt.Errorf("confmanager initialization error:%s", err.Error())
+		return errConfManangerInit("RobotTeam", err)
 	}
 
 	//read robotTeamInitial
 	if num, err := confMgr.GetConfRobotTeamNum(); err != nil {
-		return fmt.Errorf("confmanager read RobotTeam error:%s", err.Error())
+		return errConfManangerRead("RobotTeam", err)
 	} else if num <= 0 {
-		return fmt.Errorf("confmanager RobotTeam is empty")
+		return errLineNumEmpty("RobotTeam")
 	} else {
 		//init data
 		for i := 0; i < num; i++ {
 			iface, err := confMgr.GetConfRobotTeamByIndex(i)
 			if err != nil {
-				return fmt.Errorf("confmanager RobotTeam initialization error:%s", err.Error())
+				return errConfManangerRead("RobotTeam", err)
 			}
 
 			//activeDayMap init
@@ -64,7 +64,7 @@ func ReadRobotTeamFromConfManager() error {
 			activeSleepTimeMap[id] = tmpa
 
 			if len(tmpa) != len(tmppp) {
-				return fmt.Errorf("confmanager RobotTeam data error ID:%d", id)
+				return errDataArrayNumNotMatch("RobotTeam", id, "time_gap", "avtive_range")
 			}
 
 			//activeStepMap
@@ -75,7 +75,7 @@ func ReadRobotTeamFromConfManager() error {
 			activeStepMap[id] = tmpb
 
 			if len(tmpa) != len(tmpb) {
-				return fmt.Errorf("confmanager RobotTeam data error leve_range ID:%d", id)
+				return errDataArrayNumNotMatch("RobotTeam", id, "time_gap", "level_range")
 			}
 
 			//activeSleepRule1Map
@@ -84,7 +84,7 @@ func ReadRobotTeamFromConfManager() error {
 				tmpc = append(tmpc, iface.GetRobotSleepRule1ByIndex(j))
 			}
 			if len(tmpc) != 2 {
-				return fmt.Errorf("confmanager RobotTeam data error rule1 ID:%d", id)
+				return errDataArrayNumLimit("RobotTeam", id, "robot_sleep_rule1", 2)
 			}
 			activeSleepRule1Map[id] = tmpc
 
@@ -98,8 +98,9 @@ func ReadRobotTeamFromConfManager() error {
 				tmpe = append(tmpe, iface.GetRobotSleepRule2TimeByIndex(j))
 			}
 			if len(tmpe) != len(tmpd) {
-				return fmt.Errorf("confmanager RobotTeam data error rule2 ID:%d", id)
+				return errDataArrayNumNotMatch("RobotTeam", id, "robot_sleep_rule2_time", "robot_sleep_rule2_target")
 			}
+
 			activeSleepRule2TimeMap[id] = tmpe
 
 		}
@@ -109,38 +110,68 @@ func ReadRobotTeamFromConfManager() error {
 }
 
 //获取活跃天数
-func GetRobotActiveDaysByActionID(aid int) map[int]struct{} {
+func GetRobotActiveDaysByActionID(aid int) (map[int]struct{}, error) {
 	if _, ok := activeDayMap[aid]; ok {
-		return activeDayMap[aid]
+		return activeDayMap[aid], nil
 	}
-	return make(map[int]struct{})
+	return nil, errParseIndexNotFound("robotTeam", "activeDayMap", fmt.Sprintf("%d", aid))
 }
 
 //根据次数获取延时时间
-func GetSleepTimeByActionTimesByRand(aid, t int) int {
-	arr := activeSleepTimeMap[aid][RangeIndexLORC(activeRangeTimesIndexMap[aid], t)]
-	min, max := Compare2Int(arr[0], arr[1])
-	return min + rand.Intn(max-min+1)
+func GetSleepTimeByActionTimesByRand(aid, t int) (int, error) {
+	arr, ok := activeSleepTimeMap[aid]
+	if !ok {
+		return 0, errParseIndexNotFound("robotTeam", "activeSleepTimeMap", fmt.Sprintf("%d", aid))
+	}
+
+	arr2, ok := activeRangeTimesIndexMap[aid]
+	if !ok {
+		return 0, errParseIndexNotFound("robotTeam", "activeRangeTimesIndexMap", fmt.Sprintf("%d", aid))
+	}
+
+	ret := arr[RangeIndexLORC(arr2, t)]
+	min, max := Compare2Int(ret[0], ret[1])
+	return min + rand.Intn(max-min+1), nil
 }
 
 //根据次数获取步长
-func GetStepByActionTimesByRand(aid, t int) int {
-	arr := activeStepMap[aid][RangeIndexLORC(activeRangeTimesIndexMap[aid], t)]
-	min, max := Compare2Int(arr[0], arr[1])
-	return min + rand.Intn(max-min+1)
+func GetStepByActionTimesByRand(aid, t int) (int, error) {
+	arr, ok := activeStepMap[aid]
+	if !ok {
+		return 0, errParseIndexNotFound("robotTeam", "activeStepMap", fmt.Sprintf("%d", aid))
+	}
+
+	arr2, ok := activeRangeTimesIndexMap[aid]
+	if !ok {
+		return 0, errParseIndexNotFound("robotTeam", "activeRangeTimesIndexMap", fmt.Sprintf("%d", aid))
+	}
+
+	k := RangeIndexLORC(arr2, t)
+	ret := arr[k]
+
+	//arr := activeStepMap[aid][RangeIndexLORC(activeRangeTimesIndexMap[aid], t)]
+	min, max := Compare2Int(ret[0], ret[1])
+	return min + rand.Intn(max-min+1), nil
 }
 
 //获取rule1目标值
-func GetRule1TargetByRand(aid int) int {
-	arr := activeSleepRule1Map[aid]
+func GetRule1TargetByRand(aid int) (int, error) {
+	arr, ok := activeSleepRule1Map[aid]
+	if !ok {
+		return 0, errParseIndexNotFound("robotTeam", "activeSleepRule1Map", fmt.Sprintf("%d", aid))
+	}
 	min, max := Compare2Int(arr[0], arr[1])
-	return min + rand.Intn(max-min+1)
+	return min + rand.Intn(max-min+1), nil
 }
 
 //获取rule2目标值, 必须用GetRobotActiveDaysByActionID判断，才能准确
-func GetRule2TargetByRand(aid int) int {
-	if len(activeDayMap[aid]) <= 1 {
-		return 0
+func GetRule2TargetByRand(aid int) (int, error) {
+	v, ok := activeDayMap[aid]
+	if !ok {
+		return 0, errParseIndexNotFound("robotTeam", "activeDayMap", fmt.Sprintf("%d", aid))
+	}
+	if len(v) <= 1 {
+		return 0, errParseIndexLimit("robotTeam", fmt.Sprintf("%d", aid), "activeDayMap", 2)
 	}
 
 	weekMin := 10
@@ -176,10 +207,10 @@ func GetRule2TargetByRand(aid int) int {
 	}
 
 	if index < 0 {
-		return 0
+		return 0, errParseIndexNotFound("robotTeam", "activeSleepRule2TargetMap", fmt.Sprintf("%d", aid))
 	}
 
 	length := len(activeSleepRule2TargetMap[aid][index])
 
-	return activeSleepRule2TargetMap[aid][index][rand.Intn(length)]
+	return activeSleepRule2TargetMap[aid][index][rand.Intn(length)], nil
 }

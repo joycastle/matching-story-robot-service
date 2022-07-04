@@ -2,7 +2,6 @@ package main
 
 import (
 	"flag"
-	"fmt"
 	"os"
 	"os/signal"
 	"path/filepath"
@@ -17,17 +16,18 @@ import (
 
 func main() {
 	//run params
-	runEnv := flag.String("env", "dev", "dev(本机开发环境), pre(预发布环境), prod(线上环境)")
+	runEnv := flag.String("env", "dev", "dev(本机开发环境), pre(预发布环境), prod(线上环境), other_env(其他开发配置名称)")
 	flag.Parse()
 
-	configFile := filepath.Join("./conf/", *runEnv)
-	fmt.Println(configFile)
-	if err := config.InitConfig(configFile); err != nil {
+	configFileEnv := filepath.Join("./conf/", *runEnv)
+	configFileCommon := filepath.Join("./conf/common")
+	if err := config.InitConfig(configFileEnv, configFileCommon); err != nil {
 		panic(err)
 	}
 
 	//print configs
-	log.Infof("server-lib config filePath: %s", configFile)
+	log.Infof("server-lib config env filePath: %s", configFileEnv)
+	log.Infof("server-lib config common filePath: %s", configFileCommon)
 	log.Infof("server-lib log config: %v", config.Logs)
 	log.Infof("server-lib redis config: %v", config.Redis)
 	log.Infof("server-lib mysql config: %v", config.Mysql)
