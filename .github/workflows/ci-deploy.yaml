@@ -27,7 +27,7 @@ jobs:
           ls ${{ github.workspace }}
 
       - name: 开始部署    
-        run: /usr/bin/sh deploy.sh  ${{ github.event.inputs.job }}
+        run: /usr/bin/sh deploy/deploy.sh  ${{ github.event.inputs.job }}
 
       - name: 查看启动日志
         run: docker logs ${{ github.event.inputs.job }}-matching-story-robot-service
