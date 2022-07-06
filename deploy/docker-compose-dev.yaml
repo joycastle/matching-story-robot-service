@@ -9,6 +9,6 @@ services:
     command: -env dev
     container_name: matching-story-robot-service
     ports:
-      - "18088:8088"
+      - "18088:7088"
     volumes:
       - /home/ec2-user/var/run/logs/matching-story-robot-service:/app/var/logs

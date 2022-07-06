@@ -26,7 +26,7 @@ func main() {
 
 	//开启QA调试模式
 	if *runEnv != "prod" {
-		go qa.StartQaDebugMode("0.0.0.0:8088")
+		go qa.StartQaDebugMode("0.0.0.0:7088")
 	}
 
 	configFileEnv := filepath.Join("./conf/", *runEnv)
