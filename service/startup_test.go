@@ -1,25 +1,42 @@
 package service
 
 import (
+	"testing"
 	"time"
 
 	"github.com/joycastle/casual-server-lib/config"
 	"github.com/joycastle/casual-server-lib/mysql"
 	"github.com/joycastle/casual-server-lib/redis"
-	"github.com/joycastle/matching-story-robot-service/confmanager"
 )
 
 var isConfiged bool = false
 
+func TestGetGuildRequestInfosWithFiledsByGuildIDs(t *testing.T) {
+	testinit()
+	_, err := GetGuildRequestInfosWithFiledsByGuildIDs([]int64{9068658676465664, 9187840659292160}, []string{"done"})
+	if err != nil {
+		t.Fatal(err)
+	}
+}
+
+func TestGetGuildResponeInfosWithFiledsByHelpIDs(t *testing.T) {
+	testinit()
+	_, err := GetGuildResponeInfosWithFiledsByHelpIDs([]int64{9207422417633280}, []string{"responder_id", "time"})
+	if err != nil {
+		t.Fatal(err)
+	}
+}
+
+func TestGetUserInfosWithField(t *testing.T) {
+	testinit()
+	_, err := GetUserInfosWithField([]int64{48000060, 213000100, 3675}, []string{"user_name"})
+	if err != nil {
+		t.Fatal(err)
+	}
+}
+
 func testinit() {
 	if !isConfiged {
-		//init configmanager
-		confMgr := confmanager.GetConfManagerVer()
-		err := confMgr.LoadCsv("../confmanager/template")
-		if err != nil {
-			panic(err)
-		}
-
 		//init mysql
 		mysqlConfigs := map[string]mysql.MysqlConf{
 			"default-master": mysql.MysqlConf{

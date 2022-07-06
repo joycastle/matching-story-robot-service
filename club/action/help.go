@@ -4,6 +4,7 @@ import (
 	"errors"
 	"time"
 
+	"github.com/joycastle/casual-server-lib/util"
 	"github.com/joycastle/matching-story-robot-service/club/config"
 	"github.com/joycastle/matching-story-robot-service/model"
 	"github.com/joycastle/matching-story-robot-service/service"
@@ -15,10 +16,19 @@ func helpActiveTimeHandler() int64 {
 
 func helpActionHandler(job *Job) (string, error) {
 	//未完成的帮助
-	notCompleteRequest, err := service.GetGuildHelpRequestNotComplete(job.GuildID)
+	allRequest, err := service.GetGuildRequestInfosWithFiledsByGuildIDs([]int64{job.GuildID}, []string{"total", "count", "requester_id", "guild_id", "time"})
 	if err != nil {
 		return "", err
 	}
+
+	timeFilter := util.TimeStamp("2022-06-01 00:00:00")
+	var notCompleteRequest []model.GuildHelpRequest
+	for _, v := range allRequest {
+		if v.Total != v.Count && v.Time >= timeFilter {
+			notCompleteRequest = append(notCompleteRequest, v)
+		}
+	}
+
 	if len(notCompleteRequest) == 0 {
 		return "", errors.New("no new request")
 	}
@@ -33,7 +43,7 @@ func helpActionHandler(job *Job) (string, error) {
 	if len(users) == 0 {
 		return "", errors.New("no new reasonable request")
 	}
-	userTypes, err := service.GetUserTypes(users)
+	userTypes, err := service.GetUserInfosWithField(users, []string{"user_type"})
 	if err != nil {
 		return "", err
 	}
@@ -57,7 +67,7 @@ func helpActionHandler(job *Job) (string, error) {
 		}
 	}
 	//查看请求帮助记录
-	respones, err := service.BatchGetResponesUsers(requestIds)
+	respones, err := service.GetGuildResponeInfosWithFiledsByHelpIDs(requestIds, []string{"responder_id"})
 	if err != nil {
 		return "", err
 	}

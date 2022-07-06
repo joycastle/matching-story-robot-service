@@ -9,6 +9,7 @@ import (
 	"github.com/joycastle/matching-story-robot-service/club/action"
 	"github.com/joycastle/matching-story-robot-service/club/config"
 	"github.com/joycastle/matching-story-robot-service/model"
+	"github.com/joycastle/matching-story-robot-service/qa"
 	"github.com/joycastle/matching-story-robot-service/service"
 )
 
@@ -38,9 +39,22 @@ func taskUpdate(t int) {
 				break
 			}
 
+			if qa.OpenQaDebug() {
+				debugIdsMap := qa.GetGuildIDMap()
+				qaList := []model.Guild{}
+				for _, v := range list {
+					if _, ok := debugIdsMap[v.ID]; ok {
+						qaList = append(qaList, v)
+					}
+				}
+				list = qaList
+			}
+
 			var (
-				deleteJob []model.Guild
-				newJob    []model.Guild
+				deleteJob    []model.Guild
+				newJob       []model.Guild
+				deleteActNum int = 0
+				newActNum    int = 0
 			)
 
 			for _, v := range list {
@@ -55,7 +69,10 @@ func taskUpdate(t int) {
 			if len(deleteJob) > 0 {
 				taskMu.Lock()
 				for _, v := range deleteJob {
-					delete(taskMapping, v.ID)
+					if _, ok := taskMapping[v.ID]; ok {
+						delete(taskMapping, v.ID)
+						deleteActNum++
+					}
 				}
 				taskMu.Unlock()
 			}
@@ -64,12 +81,15 @@ func taskUpdate(t int) {
 			if len(newJob) > 0 {
 				taskMu.Lock()
 				for _, v := range newJob {
-					taskMapping[v.ID] = time.Now().Unix() + config.GetActiveTimeByRand()
+					if _, ok := taskMapping[v.ID]; !ok {
+						taskMapping[v.ID] = time.Now().Unix() + config.GetActiveTimeByRand()
+						newActNum++
+					}
 				}
 				taskMu.Unlock()
 			}
 
-			logMsg = logMsg + " " + fmt.Sprintf("deleteJob:%d, newJob:%d", len(deleteJob), len(newJob))
+			logMsg = logMsg + " " + fmt.Sprintf("deleteJob:%d, newJob:%d, delActNum:%d, newActNum:%d", len(deleteJob), len(newJob), deleteActNum, newActNum)
 			break
 		}
 
@@ -90,9 +110,9 @@ func taskCrontab(t int) {
 
 		taskMu.Lock()
 		for guildID, activeTime := range taskMapping {
-			if now-activeTime >= 0 || guildID == 125323777000079360 {
+			if now-activeTime >= 0 {
 				needProcess = append(needProcess, guildID)
-				taskMapping[guildID] = config.GetActiveTimeByRand()
+				taskMapping[guildID] = time.Now().Unix() + config.GetActiveTimeByRand()
 			}
 		}
 		total := len(taskMapping)
@@ -194,7 +214,7 @@ func taskProcess() {
 				action.CreateFirstInJob(ru.UserID, guilID)
 			}
 
-			logMsg = fmt.Sprintf("CreateRobot targetNum:%d, createOkNum:%d %v, Join club success", newNum, len(newRobots), newRobotsUid)
+			logMsg = fmt.Sprintf("CreateRobot Success targetNum:%d, createOkNum:%d %v, Join club success", newNum, len(newRobots), newRobotsUid)
 			break
 		}
 

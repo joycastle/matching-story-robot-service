@@ -9,6 +9,7 @@ import (
 	"github.com/joycastle/casual-server-lib/log"
 	"github.com/joycastle/casual-server-lib/util"
 	"github.com/joycastle/matching-story-robot-service/model"
+	"github.com/joycastle/matching-story-robot-service/qa"
 	"github.com/joycastle/matching-story-robot-service/service"
 )
 
@@ -196,6 +197,23 @@ func UpdateRobotJobs(t int) error {
 				break
 			}
 
+			//是否开启QA调试功能
+			if qa.OpenQaDebug() {
+				debugIdsMap := qa.GetGuildIDMap()
+				targetUserMap := []model.GuildUserMap{}
+				for _, v := range userMap {
+					if _, ok := debugIdsMap[v.GuildID]; ok {
+						targetUserMap = append(targetUserMap, v)
+					}
+				}
+				userMap = targetUserMap
+			}
+
+			if len(userMap) == 0 {
+				logMsg = "no data to process"
+				break
+			}
+
 			//获取uid和工会维度数据
 			uids := []int64{}
 			guildIDMaps := make(map[int64]struct{})
@@ -215,7 +233,7 @@ func UpdateRobotJobs(t int) error {
 			}
 
 			//获取用户类型数据
-			userTypes, err := service.GetUserTypes(uids)
+			userTypes, err := service.GetUserInfosWithField(uids, []string{"user_type"})
 			if err != nil {
 				logMsg = "GetUserTypes Error: " + err.Error()
 				break
@@ -227,9 +245,9 @@ func UpdateRobotJobs(t int) error {
 			}
 
 			//过滤工会状态
-			guildDeleteInfos, err := service.GetGuildDeleteInfos(guildIDs)
+			guildDeleteInfos, err := service.GetGuildInfosWithField(guildIDs, []string{"deleted_at"})
 			if err != nil {
-				logMsg = "GetGuildDeleteInfos Error: " + err.Error()
+				logMsg = "GetGuildInfosWithField Error: " + err.Error()
 				break
 			}
 			filterGuildDeleteMap := make(map[int64]bool, len(guildIDs))

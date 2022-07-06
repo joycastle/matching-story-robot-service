@@ -17,7 +17,7 @@ LogPath=$CodePath/var/logs
 ConfManagerBranchName=dev
 
 if [[ "$RUNENV" == "pre" || "$RUNENV" == "prod" || "$RUNENV" == "dev" || "$RUNENV" == "dev1" ]];then
-	LogPath="/home/ec2-user/run/matching-story-robot-service/logs"
+	LogPath="/home/ec2-user/var/run/logs/matching-story-robot-service"
 fi
 
 if [[ "$RUNENV" == "prod" ]];then
@@ -58,12 +58,20 @@ echo "docker rm $ContainerName"
 docker rm $ContainerName
 
 echo "docker run ......"
-#docker run 
-docker run -d --restart=always \
---name $ContainerName \
---env RUNENV=$RUNENV \
--p 18088:8088 \
--v $LogPath:/app/var/logs \
-$DockerImageName \
+
+if [[ "$RUNENV" == "prod" ]];then
+	docker run -d --restart=always \
+	--name $ContainerName \
+	--env RUNENV=$RUNENV \
+	-v $LogPath:/app/var/logs \
+	$DockerImageName 
+else
+	docker run -d --restart=always \
+	--name $ContainerName \
+	--env RUNENV=$RUNENV \
+	-p 18088:8088 \
+	-v $LogPath:/app/var/logs \
+	$DockerImageName 
+fi
 
 echo "运行日志路径:$LogPath"

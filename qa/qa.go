@@ -3,6 +3,7 @@ package qa
 import (
 	"fmt"
 	"net/http"
+	"strings"
 	"sync"
 
 	"github.com/joycastle/casual-server-lib/log"
@@ -59,8 +60,11 @@ func (qd *QaDebug) Update(key string, value string) error {
 		return fmt.Errorf("服务端没有配置该变量的使用，设置无效")
 	} else {
 		if v.Type == "int" {
-			if !IsAllNumber(value) {
-				return fmt.Errorf("不能包含非数字字符，设置无效")
+			vals := strings.Split(value, ",")
+			for _, val := range vals {
+				if !IsAllNumber(val) {
+					return fmt.Errorf("不能包含非数字字符，设置无效")
+				}
 			}
 		}
 		v.Value = value

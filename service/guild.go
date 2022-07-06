@@ -1,6 +1,9 @@
 package service
 
 import (
+	"fmt"
+	"strings"
+
 	"github.com/joycastle/casual-server-lib/mysql"
 	"github.com/joycastle/matching-story-robot-service/model"
 )
@@ -48,25 +51,38 @@ func GetAllGuildInfoFromDB() ([]model.Guild, error) {
 	return list, nil
 }
 
-func GetGuildDeleteInfos(gids []int64) ([]model.Guild, error) {
+func GetGuildInfosWithField(ids []int64, fileds []string) ([]model.Guild, error) {
 	var out []model.Guild
 
-	if len(gids) == 0 {
+	if len(ids) == 0 {
 		return out, nil
 	}
 
 	sliceSize := 1000
 	var listArraySlice [][]int64
-	listArraySlice = make([][]int64, len(gids)/sliceSize+1)
+	listArraySlice = make([][]int64, len(ids)/sliceSize+1)
 
-	for k, v := range gids {
+	for k, v := range ids {
 		index := k / sliceSize
 		listArraySlice[index] = append(listArraySlice[index], v)
 	}
 
-	sqlTpl := "SELECT `id`,`deleted_at` FROM `guild` WHERE `id` IN ? LIMIT ?;"
+	filedMap := make(map[string]struct{})
+	filedMap["id"] = struct{}{}
+	for _, v := range fileds {
+		filedMap[v] = struct{}{}
+	}
+	newFileds := []string{}
+	for k, _ := range filedMap {
+		newFileds = append(newFileds, k)
+	}
+
+	sqlTpl := fmt.Sprintf("SELECT %s FROM `guild` WHERE `id` IN ? LIMIT ?;", strings.Join(newFileds, ","))
 
 	for _, vs := range listArraySlice {
+		if len(vs) == 0 {
+			continue
+		}
 		var ret []model.Guild
 		if r := mysql.Get("default-slave").Raw(sqlTpl, vs, sliceSize).Scan(&ret); r.Error != nil {
 			return out, r.Error

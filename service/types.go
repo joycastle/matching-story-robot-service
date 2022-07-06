@@ -24,3 +24,20 @@ func init() {
 		reflect.Uint64: struct{}{},
 	}
 }
+
+func MergeFileds(fileds []string, defaultFileds ...string) []string {
+	filedMap := make(map[string]struct{})
+	for _, v := range defaultFileds {
+		filedMap[v] = struct{}{}
+	}
+	for _, v := range fileds {
+		filedMap[v] = struct{}{}
+	}
+
+	newFileds := []string{}
+	for k, _ := range filedMap {
+		newFileds = append(newFileds, "`"+k+"`")
+	}
+
+	return newFileds
+}

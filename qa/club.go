@@ -22,3 +22,19 @@ func GetGuildIDMap() map[int64]struct{} {
 	}
 	return m
 }
+
+func GetGuildIDSlice() []int64 {
+	var ret []int64
+	list := strings.Split(qaDebug.Get("guild_id"), ",")
+	for _, v := range list {
+		i64, _ := strconv.ParseInt(v, 10, 64)
+		ret = append(ret, i64)
+	}
+	return ret
+}
+
+func IsExistsInQaDebug(guildID int64) bool {
+	m := GetGuildIDMap()
+	_, ok := m[guildID]
+	return ok
+}

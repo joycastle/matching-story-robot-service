@@ -4,7 +4,9 @@ import (
 	"errors"
 	"time"
 
+	"github.com/joycastle/casual-server-lib/util"
 	"github.com/joycastle/matching-story-robot-service/club/config"
+	"github.com/joycastle/matching-story-robot-service/model"
 	"github.com/joycastle/matching-story-robot-service/service"
 )
 
@@ -18,9 +20,17 @@ func requestActiveTimeHandler() int64 {
 
 func requestActionHandler(job *Job) (string, error) {
 	//获取我的请求记录
-	requestRecord, err := service.GetHelpRequestByGuildIDAndUserID(job.GuildID, job.UserID)
+	list, err := service.GetHelpRequestByGuildIDAndUserID(job.GuildID, job.UserID)
 	if err != nil {
 		return "", err
+	}
+
+	timeFilter := util.TimeStamp("2022-06-01 00:00:00")
+	requestRecord := []model.GuildHelpRequest{}
+	for _, v := range list {
+		if v.Time >= timeFilter {
+			requestRecord = append(requestRecord, v)
+		}
 	}
 
 	need := false
