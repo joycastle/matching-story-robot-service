@@ -35,7 +35,7 @@ func GetGuildUserTypeDistribution(guildID int64) (map[string][]model.User, error
 		return nil, err
 	}
 
-	users, err := GetUserInfosWithField(uids, []string{})
+	users, err := GetUserInfosWithField(uids, []string{"user_level"})
 	if err != nil {
 		return nil, err
 	}
