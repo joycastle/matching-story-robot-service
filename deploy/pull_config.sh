@@ -31,4 +31,4 @@ tail -n 2 "$RELEASE_VERSION"/teamchesttime.csv
 
 echo "========================================================================================================="
 
-cd "$RELEASE_VERSION" && cp ./* "$DIR"/../confmanager/template
+cd "$RELEASE_VERSION" && cp ./* "$DIR"/confmanager/template
