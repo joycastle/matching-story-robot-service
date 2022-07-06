@@ -1,0 +1,12 @@
+version: "3.3"
+services:
+  dev:
+    build:
+      context: ../
+      dockerfile: Dockerfile
+    restart: always
+    entrypoint: ./matching-story-robot-service
+    command: -env dev
+    container_name: matching-story-robot-service
+    volumes:
+      - /home/ec2-user/var/run/logs/matching-story-robot-service:/app/var/logs

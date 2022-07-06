@@ -26,13 +26,16 @@ jobs:
         run: |
           ls ${{ github.workspace }}
 
-      - name: 开始部署    
-        run: /usr/bin/sh deploy/deploy.sh  ${{ github.event.inputs.job }}
+      - name: 拉取git配置
+        run: bash deploy/pull_config.sh dev
 
-      - name: 查看启动日志
-        run: docker logs ${{ github.event.inputs.job }}-matching-story-robot-service
+      - name: 编译镜像 
+        run: docker-compose -f deploy/docker-compose-dev.yaml build
 
-      - name: 查看docker运行状态
-        run: docker ps
+      - run: docker-compose -f deploy/docker-compose-dev.yaml stop
+      - run: docker-compose -f deploy/docker-compose-dev.yaml up -d
+
+      - name: 查看服务状态
+        run: docker-compose -f deploy/docker-compose-dev.yaml logs | tail -n 20
 
       - run: echo "🍏 This job's status is ${{ job.status }}."
