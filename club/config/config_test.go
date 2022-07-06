@@ -110,3 +110,7 @@ func TestRobotTeamInitial(t *testing.T) {
 func TestRobotTeam(t *testing.T) {
 	fmt.Println(GetRobotActiveDaysByActionID(1009))
 }
+
+func TestGetActiveTimeByRand(t *testing.T) {
+	fmt.Println("GetActiveTimeByRand", GetActiveTimeByRand())
+}

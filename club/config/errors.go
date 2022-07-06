@@ -43,9 +43,9 @@ func errDataResultEmpty(confType string, typ string) error {
 
 //data parse
 func errParseIndexNotFound(confType string, inmap string, index string) error {
-	return fmt.Errorf("config: index %d not found in %s, conf_type:%s", index, inmap, confType)
+	return fmt.Errorf("config: index %s not found in %s, conf_type:%s", index, inmap, confType)
 }
 
 func errParseIndexLimit(confType string, index string, inmap string, limit int) error {
-	return fmt.Errorf("config: index %d only need %s number in %s, conf_type:%s", index, limit, inmap, confType)
+	return fmt.Errorf("config: index %s only need %d number in %s, conf_type:%s", index, limit, inmap, confType)
 }

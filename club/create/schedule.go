@@ -113,6 +113,8 @@ func taskCrontab(t int) {
 			if now-activeTime >= 0 {
 				needProcess = append(needProcess, guildID)
 				taskMapping[guildID] = time.Now().Unix() + config.GetActiveTimeByRand()
+
+				log.Get("run").Debug(now, activeTime, taskMapping[guildID])
 			}
 		}
 		total := len(taskMapping)
