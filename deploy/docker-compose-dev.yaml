@@ -4,6 +4,7 @@ services:
     build:
       context: ../
       dockerfile: Dockerfile
+    image: matching-story-robot-service:latest
     restart: always
     entrypoint: ./matching-story-robot-service
     command: -env dev

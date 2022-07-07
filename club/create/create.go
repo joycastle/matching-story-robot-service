@@ -27,7 +27,7 @@ func CreateRobot(guildInfo model.Guild, robotUsers []model.User, normalUsers []m
 	userLevel := config.GetLevelByRand(guildInfo, normalUsers)
 
 	//create user
-	u, err := service.CreateGuildRobotUser(userName, userHeadIcon, userLikeCount, userLevel)
+	u, err := service.CreateGuildRobotUserRPC(userName, userHeadIcon, userLikeCount, userLevel)
 	if err != nil {
 		return u, err
 	}

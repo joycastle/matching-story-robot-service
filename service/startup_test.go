@@ -1,6 +1,7 @@
 package service
 
 import (
+	"fmt"
 	"testing"
 	"time"
 
@@ -33,6 +34,11 @@ func TestGetUserInfosWithField(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
+}
+
+func TestCreateGuildRobotUserRPC(t *testing.T) {
+	testinit()
+	fmt.Println(CreateGuildRobotUserRPC("111111", "2", 1999, 88))
 }
 
 func testinit() {
@@ -89,7 +95,7 @@ func testinit() {
 
 		//init grpc
 		config.Grpc = make(map[string]string)
-		config.Grpc["chat"] = "http://127.0.0.1:8081"
+		config.Grpc["default"] = "http://127.0.0.1:8081"
 
 		redis.InitRedis(redisConfigs)
 

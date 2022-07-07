@@ -26,11 +26,18 @@ func init() {
 }
 
 func MergeFileds(fileds []string, defaultFileds ...string) []string {
+	defautAll := []string{"*"}
 	filedMap := make(map[string]struct{})
 	for _, v := range defaultFileds {
+		if v == "*" {
+			return defautAll
+		}
 		filedMap[v] = struct{}{}
 	}
 	for _, v := range fileds {
+		if v == "*" {
+			return defautAll
+		}
 		filedMap[v] = struct{}{}
 	}
 
