@@ -116,7 +116,7 @@ func GetGuildActionReport(guildiD int64) string {
 	ret := ""
 	for k, vs := range m {
 		for _, v := range vs {
-			ret += fmt.Sprintf("guild_id:%d, uid:%d, msg:%s\n", guildiD, k, v)
+			ret += fmt.Sprintf("guild_id:%d, uid:%d, msg:%v\n", guildiD, k, v)
 		}
 	}
 	return ret
