@@ -3,6 +3,7 @@ package qa
 import (
 	"fmt"
 	"net/http"
+	"strconv"
 	"strings"
 	"sync"
 
@@ -98,6 +99,7 @@ func (qd *QaDebug) GetOptions() string {
 	result = result + "1.多个值可用英文逗号【,】分割， 如：/set?key=guild_id&value=9064735890735104,9130434411626496,9194785835319296\n"
 	result = result + "2./qaclose 关闭调试功能\n"
 	result = result + "3./qaopen 打开调试功能\n"
+	result = result + "3./action?guild_id=9064735890735104 查看机器人行动\n"
 	return result
 }
 
@@ -126,6 +128,18 @@ func StartQaDebugMode(addr string) {
 	http.HandleFunc("/qaclose", func(w http.ResponseWriter, r *http.Request) {
 		IsOpenQaDebug = false
 		fmt.Fprintf(w, "已关闭调试功能")
+		log.Get("run").Info("QaDebug-SET", "qa-close")
+	})
+
+	http.HandleFunc("/action", func(w http.ResponseWriter, r *http.Request) {
+		values := r.URL.Query()
+		guildID := values.Get("guild_id")
+		if !IsAllNumber(guildID) {
+			fmt.Fprintf(w, "参数不合法")
+			return
+		}
+		guild_id, _ := strconv.ParseInt(guildID, 10, 64)
+		fmt.Fprintf(w, GetGuildActionReport(guild_id))
 		log.Get("run").Info("QaDebug-SET", "qa-close")
 	})
 

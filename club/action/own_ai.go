@@ -9,6 +9,7 @@ import (
 	"github.com/joycastle/casual-server-lib/log"
 	"github.com/joycastle/casual-server-lib/util"
 	"github.com/joycastle/matching-story-robot-service/club/config"
+	"github.com/joycastle/matching-story-robot-service/qa"
 	"github.com/joycastle/matching-story-robot-service/service"
 )
 
@@ -76,12 +77,14 @@ func ownActionHandler(job *Job) (string, error) {
 	}
 
 	if _, ok := activeDaysMap[-1]; ok && len(activeDaysMap) == 1 {
+		qa.AddGuildActionError(job.GuildID, job.UserID, "非活跃天不活跃")
 		return "", errors.New("active day config is [-1], not take effect")
 	}
 
 	todayWeek := time.Now().Weekday()
 	todayWeekInt := weedDaysConfig[todayWeek]
 	if _, ok := activeDaysMap[todayWeekInt]; !ok {
+		qa.AddGuildActionError(job.GuildID, job.UserID, "不是活跃天数")
 		return "", errors.New(fmt.Sprintf("today:week:%d is not a active day, %v, active_id:%d", todayWeekInt, activeDaysMap, actionID))
 	}
 
@@ -115,6 +118,7 @@ func ownActionHandler(job *Job) (string, error) {
 		return "", err
 	}
 	if (currentUserLevel - normalUserMaxLevel) >= rule1Limit {
+		qa.AddGuildActionError(job.GuildID, job.UserID, fmt.Sprintf("Rule1,robot userlevel :%d Exceed normal userlevelmax:%d, limit:%d,will sleep", currentUserLevel, normalUserMaxLevel, rule1Limit))
 		return "", fmt.Errorf("Rule1,robot userlevel :%d Exceed normal userlevelmax:%d, limit:%d,will sleep", currentUserLevel, normalUserMaxLevel, rule1Limit)
 	}
 
@@ -124,6 +128,7 @@ func ownActionHandler(job *Job) (string, error) {
 		return "", err
 	}
 	if rule2Limit <= 0 || currentUserLevel > rule2Limit {
+		qa.AddGuildActionError(job.GuildID, job.UserID, fmt.Sprintf("Rule2, robot userlevel :%d Exceed limit:%d,will sleep", currentUserLevel, rule2Limit))
 		return "", fmt.Errorf("Rule2, robot userlevel :%d Exceed limit:%d,will sleep", currentUserLevel, rule2Limit)
 	}
 
@@ -141,6 +146,8 @@ func ownActionHandler(job *Job) (string, error) {
 	if err := service.UpdateRobotActiveNumByUid(job.UserID, 1); err != nil {
 		return "", err
 	}
+
+	qa.AddGuildAction(job.GuildID, job.UserID, currentUserLevel, currentUserLevel+step, int(robotConfig.ActNum), int(robotConfig.ActNum)+1)
 
 	return "", nil
 }
