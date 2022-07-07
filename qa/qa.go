@@ -129,7 +129,6 @@ func StartQaDebugMode(addr string) {
 		log.Get("run").Info("QaDebug-SET", "qa-close")
 	})
 
-	IsOpenQaDebug = true
 	http.ListenAndServe(addr, nil)
 }
 
