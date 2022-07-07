@@ -99,6 +99,7 @@ func GetGuildActionReport(guildiD int64) string {
 	m := make(map[int64][]QaClubAction)
 	clubActionMapMu.Lock()
 	if _, ok := clubActionMap[guildiD]; !ok {
+		clubActionMapMu.Unlock()
 		return fmt.Sprintf("当前工会未记录:%d", guildiD)
 	}
 
