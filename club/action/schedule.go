@@ -7,9 +7,7 @@ import (
 	"time"
 
 	"github.com/joycastle/casual-server-lib/log"
-	"github.com/joycastle/casual-server-lib/util"
 	"github.com/joycastle/matching-story-robot-service/model"
-	"github.com/joycastle/matching-story-robot-service/qa"
 	"github.com/joycastle/matching-story-robot-service/service"
 )
 
@@ -21,16 +19,10 @@ const (
 	JOB_TYPE_ACTIVITY     = "Activity"
 
 	JOB_TYPE_DELETE_GUILD = "DeleteGuild"
+	JOB_TYPE_MONDAY       = "MondayUpdate"
 
 	JOB_TYPE_OWN_AI = "OwnAI"
 )
-
-type Job struct {
-	GuildID    int64
-	UserID     int64
-	ActionTime int64
-	RobotNum   int
-}
 
 var (
 	capacityMap     int = 10000
@@ -82,16 +74,15 @@ func DeleteJob(targets map[string]*Job, mu *sync.Mutex, newTargets map[string]*J
 	return c
 }
 
-func CreateJob(targets map[string]*Job, mu *sync.Mutex, newTargets map[string]*Job, actionTimeHandler func() int64) int {
+func CreateJob(targets map[string]*Job, mu *sync.Mutex, newTargets map[string]*Job, actionTimeHandler func() (int64, *Result)) int {
 	c := 0
 	mu.Lock()
 	for k, newJob := range newTargets {
 		if _, ok := targets[k]; !ok {
-			if actionTimeHandler != nil {
-				newJob.ActionTime = actionTimeHandler()
-			} else {
-				newJob.ActionTime = defaultActiveTimeHandler()
+			if actionTimeHandler == nil {
+				actionTimeHandler = defaultActiveTimeHandler
 			}
+			newJob.ActionTime, _ = actionTimeHandler()
 			targets[k] = newJob
 			c = c + 1
 		}
@@ -104,23 +95,24 @@ func JobKey(userID, guildID int64) string {
 	return fmt.Sprintf("%d-%d", userID, guildID)
 }
 
-func CrontabGenerateJob(jobType string, targets map[string]*Job, mu *sync.Mutex, output chan *Job, cycleTimeHandler func(*Job) (int64, error), t int) {
-	logPrefix := "CrontabGenerateJob-" + jobType
+func CrontabGenerateJob(jobType string, targets map[string]*Job, mu *sync.Mutex, output chan *Job, cycleTimeHandler func(*Job) (int64, *Result), t int) {
 	for {
 		start := time.Now()
 		now := start.Unix()
+		logger := NewCrontabLog(jobType)
 
 		needProcess := []*Job{}
 		needResetProcess := []*Job{}
+		total := 0
 
 		mu.Lock()
 		for k, job := range targets {
-			if now-job.ActionTime >= 0 || k == "130714000009-125323777000079360" {
+			if now-job.ActionTime >= 0 {
 				needProcess = append(needProcess, job)
 				delete(targets, k)
 			}
 		}
-		count := len(targets)
+		total = len(targets)
 		mu.Unlock()
 
 		needProcessNum := len(needProcess)
@@ -129,13 +121,11 @@ func CrontabGenerateJob(jobType string, targets map[string]*Job, mu *sync.Mutex,
 			if cycleTimeHandler != nil {
 				//单独处理防止加锁时间过长
 				for _, job := range needProcess {
-					next, err := cycleTimeHandler(job)
-					fmt.Println(logPrefix, job, util.FromUnixtime(job.ActionTime).Format("2006-01-02 15:04:05"), util.FromUnixtime(next).Format("2006-01-02 15:04:05"), err)
-					if err != nil {
-						log.Get("club-dispatch").Fatal(logPrefix, "ActiveTime set error using default ActiveTime:", err)
-						next = defaultActiveTimeHandler()
+					next, ar := cycleTimeHandler(job)
+					if ar.Code != 0 {
+						logger.AddExtra(ar)
+						next, _ = defaultActiveTimeHandler()
 					}
-
 					job.ActionTime = next
 					needResetProcess = append(needResetProcess, job)
 				}
@@ -146,6 +136,7 @@ func CrontabGenerateJob(jobType string, targets map[string]*Job, mu *sync.Mutex,
 						k := JobKey(job.UserID, job.GuildID)
 						targets[k] = job
 					}
+					total = len(targets)
 					mu.Unlock()
 				}
 			}
@@ -155,9 +146,10 @@ func CrontabGenerateJob(jobType string, targets map[string]*Job, mu *sync.Mutex,
 			}
 		}
 
-		cost := time.Since(start).Nanoseconds() / 1000000
-		log.Get("club-dispatch").Info(logPrefix, "total:", count, "needNum:", needProcessNum, "resetNun:", len(needResetProcess), "cost:", cost, "ms")
+		logger.SetTotal(total).SetNew(needProcessNum).SetReset(len(needResetProcess))
 
+		cost := time.Since(start).Nanoseconds() / 1000000
+		log.Get("club-dispatch").Info("Crontab", logger.String(), "cost:", cost, "ms")
 		time.Sleep(time.Duration(t) * time.Second)
 	}
 }
@@ -184,33 +176,19 @@ func Startup() {
 }
 
 func UpdateRobotJobs(t int) error {
-	logPrefix := "UpdateRobotJobs: "
 	for {
 		start := time.Now()
-		logMsg := ""
+		logger := NewUpdateJobLog()
 
 		for {
-
 			userMap, err := service.GetAllGuildUserMapInfos()
 			if err != nil {
-				logMsg = "GetAllGuildUserMapInfo Error: " + err.Error()
+				logger.SetState(ErrorText(100).Detail("guild_user_name", err.Error()).String())
 				break
 			}
 
-			//是否开启QA调试功能
-			if qa.OpenQaDebug() {
-				debugIdsMap := qa.GetGuildIDMap()
-				targetUserMap := []model.GuildUserMap{}
-				for _, v := range userMap {
-					if _, ok := debugIdsMap[v.GuildID]; ok {
-						targetUserMap = append(targetUserMap, v)
-					}
-				}
-				userMap = targetUserMap
-			}
-
 			if len(userMap) == 0 {
-				logMsg = "no data to process"
+				logger.SetState(ErrorText(101).Detail("guild_user_name", err.Error()).String())
 				break
 			}
 
@@ -235,7 +213,7 @@ func UpdateRobotJobs(t int) error {
 			//获取用户类型数据
 			userTypes, err := service.GetUserInfosWithField(uids, []string{"user_type"})
 			if err != nil {
-				logMsg = "GetUserTypes Error: " + err.Error()
+				logger.SetState(ErrorText(100).Detail("user_table", err.Error()).String())
 				break
 			}
 
@@ -247,7 +225,7 @@ func UpdateRobotJobs(t int) error {
 			//过滤工会状态
 			guildDeleteInfos, err := service.GetGuildInfosWithField(guildIDs, []string{"deleted_at"})
 			if err != nil {
-				logMsg = "GetGuildInfosWithField Error: " + err.Error()
+				logger.SetState(ErrorText(100).Detail("guild", err.Error()).String())
 				break
 			}
 			filterGuildDeleteMap := make(map[int64]bool, len(guildIDs))
@@ -316,62 +294,58 @@ func UpdateRobotJobs(t int) error {
 			}
 
 			//delete job
-			DeleteJob(firstInCrontabJob, firstInCrontabJobMu, robotNewJobsMap)
-			DeleteJob(requestCrontabJob, requestCrontabJobMu, robotNewJobsMap)
-			DeleteJob(requestChatCrontabJob, requestChatCrontabJobMu, robotNewJobsMap)
-			DeleteJob(helpCrontabJob, helpCrontabJobMu, robotNewJobsMap)
-			DeleteJob(ownActionCrontabJob, ownActionCrontabJobMu, robotNewJobsMap)
-			DeleteJob(RobotActionUpdateCrontabJob, RobotActionUpdateCrontabJobMu, robotNewJobsMap)
+			logger.AddDeleteInfo(JOB_TYPE_FIRSTIN, DeleteJob(firstInCrontabJob, firstInCrontabJobMu, robotNewJobsMap))
+			logger.AddDeleteInfo(JOB_TYPE_REQUEST, DeleteJob(requestCrontabJob, requestCrontabJobMu, robotNewJobsMap))
+			logger.AddDeleteInfo(JOB_TYPE_REQUEST_CHAT, DeleteJob(requestChatCrontabJob, requestChatCrontabJobMu, robotNewJobsMap))
+			logger.AddDeleteInfo(JOB_TYPE_HELP, DeleteJob(helpCrontabJob, helpCrontabJobMu, robotNewJobsMap))
+			logger.AddDeleteInfo(JOB_TYPE_OWN_AI, DeleteJob(ownActionCrontabJob, ownActionCrontabJobMu, robotNewJobsMap))
+			logger.AddDeleteInfo(JOB_TYPE_MONDAY, DeleteJob(RobotActionUpdateCrontabJob, RobotActionUpdateCrontabJobMu, robotNewJobsMap))
 
 			//create job
-			CreateJob(requestCrontabJob, requestCrontabJobMu, robotNewJobsMap, requestActiveTimeHandler)
-			CreateJob(helpCrontabJob, helpCrontabJobMu, robotNewJobsMap, helpActiveTimeHandler)
-			CreateJob(ownActionCrontabJob, ownActionCrontabJobMu, robotNewJobsMap, defaultActiveTimeHandler)
-
-			logMsg = "success"
+			logger.AddCreateInfo(JOB_TYPE_REQUEST, CreateJob(requestCrontabJob, requestCrontabJobMu, robotNewJobsMap, requestActiveTimeHandler))
+			logger.AddCreateInfo(JOB_TYPE_HELP, CreateJob(helpCrontabJob, helpCrontabJobMu, robotNewJobsMap, helpActiveTimeHandler))
+			logger.AddCreateInfo(JOB_TYPE_OWN_AI, CreateJob(ownActionCrontabJob, ownActionCrontabJobMu, robotNewJobsMap, defaultActiveTimeHandler))
 			break
 		}
 
 		cost := time.Since(start).Nanoseconds() / 1000000
-		log.Get("club-dispatch").Info(logPrefix, logMsg, "cost:", cost, "ms")
+		log.Get("club-dispatch").Info("UpdateRobotJobs", logger.String(), "cost:", cost, "ms")
 		time.Sleep(time.Duration(t) * time.Second)
 	}
 }
 
-func JobActionProcess(jobType string, ch chan *Job, actionHandler func(*Job) (string, error), useCommon bool) {
-	logPrefix := "JobActionProcess-" + jobType
+func JobActionProcess(jobType string, ch chan *Job, actionHandler func(*Job) *Result, useCommon bool) {
 	for {
 		job := <-ch
 		start := time.Now()
-		logSufix := fmt.Sprintf("gid:%d,uid:%d", job.GuildID, job.UserID)
-		logMsg := ""
+		logger := NewScheduleLog(job, jobType)
 		for {
 			if actionHandler == nil {
-				logMsg = "no action handler"
+				logger.SetError("action handler not exits")
 				break
 			}
+
+			var actionResult *Result
+
 			//common process
 			if useCommon {
-				if err := robotActionBeforeCheck(job); err != nil {
-					logMsg = "robotActionBeforeCheck Error: " + err.Error()
+				actionResult = robotActionBeforeCheck(job)
+				if actionResult.Code != 0 {
+					logger.SetResult(actionResult)
 					break
 				}
 			}
 
 			//specialized
-			report, err := actionHandler(job)
-			if err != nil {
-				logMsg = "action failure: " + err.Error()
-				break
-			}
-			logMsg = "action success: " + report
+			actionResult = actionHandler(job)
+			logger.SetResult(actionResult)
 			break
 		}
 		cost := time.Since(start).Nanoseconds() / 1000000
-		log.Get("club-action").Info(logPrefix, logMsg, logSufix, "cost:", cost, "ms")
+		log.Get("club-action").Info(logger.String(), "cost:", cost, "ms")
 	}
 }
 
-func defaultActiveTimeHandler() int64 {
-	return time.Now().Unix() + int64(120+rand.Intn(301))
+func defaultActiveTimeHandler() (int64, *Result) {
+	return time.Now().Unix() + int64(120+rand.Intn(301)), ActionSuccess()
 }

@@ -1,18 +1,15 @@
 package action
 
 import (
-	"errors"
-	"fmt"
-
 	"github.com/joycastle/matching-story-robot-service/service"
 )
 
-func robotActionBeforeCheck(job *Job) error {
+func robotActionBeforeCheck(job *Job) *Result {
 	//判断是否被踢出工会
 	if u, err := service.GetGuildInfoByIDAndUid(job.GuildID, job.UserID); err != nil {
-		return err
+		return ErrorText(100).Detail("robotActionBeforeCheck", err)
 	} else if u.GuildID <= 0 {
-		return errors.New(fmt.Sprintf("already kick out the guild"))
+		return ErrorText(101).Detail("robotActionBeforeCheck")
 	}
-	return nil
+	return ActionSuccess().Detail("robotActionBeforeCheck")
 }

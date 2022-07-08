@@ -1,7 +1,6 @@
 package create
 
 import (
-	"fmt"
 	"sync"
 	"time"
 
@@ -9,7 +8,6 @@ import (
 	"github.com/joycastle/matching-story-robot-service/club/action"
 	"github.com/joycastle/matching-story-robot-service/club/config"
 	"github.com/joycastle/matching-story-robot-service/model"
-	"github.com/joycastle/matching-story-robot-service/qa"
 	"github.com/joycastle/matching-story-robot-service/service"
 )
 
@@ -26,28 +24,15 @@ func Startup() {
 }
 
 func taskUpdate(t int) {
-	logPrefix := "taskUpdate: "
 	for {
 		start := time.Now()
-		logMsg := ""
-		//usage like do{}while()
+		logger := NewUpdateLog()
 		for {
 			//get all club
 			list, err := service.GetAllGuildInfoFromDB()
 			if err != nil {
-				logMsg = "GetAllGuildInfoFromDB Error: " + err.Error()
+				logger.SetErrmsg(ResultError(100).Detail("guild", err.Error()).String())
 				break
-			}
-
-			if qa.OpenQaDebug() {
-				debugIdsMap := qa.GetGuildIDMap()
-				qaList := []model.Guild{}
-				for _, v := range list {
-					if _, ok := debugIdsMap[v.ID]; ok {
-						qaList = append(qaList, v)
-					}
-				}
-				list = qaList
 			}
 
 			var (
@@ -89,20 +74,18 @@ func taskUpdate(t int) {
 				taskMu.Unlock()
 			}
 
-			logMsg = logMsg + " " + fmt.Sprintf("deleteJob:%d, newJob:%d, delActNum:%d, newActNum:%d", len(deleteJob), len(newJob), deleteActNum, newActNum)
+			logger.SetNew(len(newJob)).SetNewAct(newActNum).SetDelete(len(deleteJob)).SetDeleteAct(deleteActNum)
 			break
 		}
 
 		cost := time.Since(start).Nanoseconds() / 1000000
-		log.Get("club-create").Info(logPrefix, logMsg, "cost:", cost, "ms")
+		log.Get("club-create").Info("UpdateJob", logger.String(), "cost:", cost, "ms")
 		time.Sleep(time.Duration(t) * time.Second)
 	}
 }
 
 func taskCrontab(t int) {
-	logPrefix := "taskCrontab: "
 	for {
-
 		start := time.Now()
 		now := start.Unix()
 
@@ -122,37 +105,30 @@ func taskCrontab(t int) {
 			taskChannel <- activeTaskGuilID
 		}
 
+		logger := NewCrontabLog().SetTotal(total).SetNew(len(needProcess))
 		cost := time.Since(start).Nanoseconds() / 1000000
-		log.Get("club-create").Info(logPrefix, fmt.Sprintf("total:%d, needProcess:%d", total, len(needProcess)), "cost:", cost, "ms")
-
+		log.Get("club-create").Info("Crontab", logger.String(), "cost:", cost, "ms")
 		time.Sleep(time.Duration(t) * time.Second)
 	}
 }
 
 func taskProcess() {
-	logPrefix := "taskProcess: "
 	for {
-
 		guilID := <-taskChannel
-
 		start := time.Now()
-
-		var logMsg string
-
-		logSuffix := fmt.Sprintf("gid:%d", guilID)
-
+		logger := ResultSuccess().Detail("gid", guilID)
 		for {
 			//1.从DB获取工会信息
 			guildInfo, err := service.GetGuildInfoByGuildID(guilID)
 			if err != nil {
-				logMsg = "GetGuildInfoByGuildID error: " + err.Error()
+				logger.SetCode(100).Detail("guild_table", err.Error())
 				break
 			}
 
 			//2.获取机器人和真实用户分布
 			userDistributions, err := service.GetGuildUserTypeDistribution(guilID)
 			if err != nil {
-				logMsg = "service.GetGuildUserTypeDistribution error: " + err.Error()
+				logger.SetCode(100).Detail("user_table", err.Error())
 				break
 			}
 
@@ -168,7 +144,7 @@ func taskProcess() {
 			//3.判断是否满足创建机器人的条件
 			reason, ok := IsTheGuildCanUsingRobot(guildInfo, robotUsers, normalUsers)
 			if !ok {
-				logMsg = reason
+				logger.SetCode(500).Detail(reason)
 				break
 			}
 
@@ -189,7 +165,7 @@ func taskProcess() {
 			isCreateOk := true
 			for i := 0; i < newNum; i++ {
 				if rbtUser, err := CreateRobot(guildInfo, robotUsers, normalUsers); err != nil {
-					logMsg = "CreateRobot error: " + err.Error()
+					logger.SetCode(501).Detail("rpc", err.Error())
 					isCreateOk = false
 					break
 				} else {
@@ -208,17 +184,17 @@ func taskProcess() {
 			//5.加入工会
 			for _, ru := range newRobots {
 				if _, err := service.SendJoinToGuildRPC(ru.AccountID, ru.UserID, guilID); err != nil {
-					logMsg = fmt.Sprintf("robotUser:%d, SendJoinToGuildRPC Error: %s", ru.UserID, err.Error())
+					logger.SetCode(502).Detail(err.Error(), "robotUserId", ru.UserID)
 					break
 				}
 				action.CreateFirstInJob(ru.UserID, guilID)
 			}
 
-			logMsg = fmt.Sprintf("CreateRobot Success targetNum:%d, createOkNum:%d %v, Join club success", newNum, len(newRobots), newRobotsUid)
+			logger.Detail("targetNum", newNum, "createNum", len(newRobots), newRobotsUid)
 			break
 		}
 
 		cost := time.Since(start).Nanoseconds() / 1000000
-		log.Get("club-create").Info(logPrefix, logMsg, logSuffix, "cost:", cost, "ms")
+		log.Get("club-create").Info("Create", logger.String(), "cost:", cost, "ms")
 	}
 }

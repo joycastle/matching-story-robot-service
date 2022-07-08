@@ -1,7 +1,6 @@
 package action
 
 import (
-	"errors"
 	"time"
 
 	"github.com/joycastle/casual-server-lib/util"
@@ -14,15 +13,16 @@ var (
 	freezingTime int64 = 3600 * 7 //冷冻时间
 )
 
-func requestActiveTimeHandler() int64 {
-	return time.Now().Unix() + config.GetStrengthRequestByRand()
+func requestActiveTimeHandler() (int64, *Result) {
+	rnd := config.GetStrengthRequestByRand()
+	return time.Now().Unix() + rnd, ActionSuccess().Detail("rnd", rnd)
 }
 
-func requestActionHandler(job *Job) (string, error) {
+func requestActionHandler(job *Job) *Result {
 	//获取我的请求记录
 	list, err := service.GetHelpRequestByGuildIDAndUserID(job.GuildID, job.UserID)
 	if err != nil {
-		return "", err
+		return ErrorText(100).Detail("guild_help_respone", err.Error())
 	}
 
 	timeFilter := util.TimeStamp("2022-06-01 00:00:00")
@@ -50,14 +50,14 @@ func requestActionHandler(job *Job) (string, error) {
 	}
 
 	if !need {
-		return "", errors.New("not exceeded freeze time")
+		return ErrorText(4000).Detail("freezingTime", "7hour")
 	}
 
 	if resp, err := service.SendRequestRPC("REQUEST", job.UserID, job.GuildID); err != nil {
-		return "", err
+		return ErrorText(400).Detail(resp)
 	} else {
 		//发送私信
 		CreateRequestChatJob(job.UserID, job.GuildID)
-		return resp.Data, nil
+		return ActionSuccess().Detail("rpcrespone", resp)
 	}
 }

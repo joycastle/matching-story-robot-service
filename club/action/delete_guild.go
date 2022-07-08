@@ -1,14 +1,12 @@
 package action
 
 import (
-	"fmt"
-
 	"github.com/joycastle/matching-story-robot-service/service"
 )
 
-func deleteActionHandler(job *Job) (string, error) {
+func deleteActionHandler(job *Job) *Result {
 	if err := service.DeleteGuild(job.GuildID); err != nil {
-		return fmt.Sprintf("DeleteFailed,RobotNum:%d", job.RobotNum), err
+		return ErrorText(104).Detail(err, "RobotNum", job.RobotNum)
 	}
-	return fmt.Sprintf("DeleteOK,RobotNum:%d", job.RobotNum), nil
+	return ActionSuccess().Detail("RobotNum", job.RobotNum)
 }

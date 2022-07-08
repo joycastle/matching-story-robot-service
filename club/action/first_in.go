@@ -9,10 +9,9 @@ import (
 
 func CreateFirstInJob(userID, guildID int64) {
 	job := &Job{
-		GuildID: guildID,
-		UserID:  userID,
-		///ActionTime: time.Now().Unix() + int64(config.GetJoinTalkTimeGapByRand()),
-		ActionTime: time.Now().Unix() + 10,
+		GuildID:    guildID,
+		UserID:     userID,
+		ActionTime: time.Now().Unix() + int64(config.GetJoinTalkTimeGapByRand()),
 	}
 
 	k := JobKey(userID, guildID)
@@ -22,11 +21,11 @@ func CreateFirstInJob(userID, guildID int64) {
 	firstInCrontabJobMu.Unlock()
 }
 
-func firstInActionHandler(job *Job) (string, error) {
+func firstInActionHandler(job *Job) *Result {
 	chatMsg := config.GetChatMsgByRand(1)
 	respone, err := service.SendChatMessageRPC("firstInGuildProcess", job.UserID, job.GuildID, chatMsg)
 	if err != nil {
-		return "", err
+		return ErrorText(400).Detail(err.Error(), "chatMsg", chatMsg, "respone", respone)
 	}
-	return respone.Data, nil
+	return ActionSuccess().Detail(respone.Data, "chatMsg", chatMsg)
 }

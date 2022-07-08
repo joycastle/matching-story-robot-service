@@ -1,15 +1,12 @@
 package action
 
 import (
-	"errors"
-	"fmt"
 	"sync"
 	"time"
 
 	"github.com/joycastle/casual-server-lib/log"
 	"github.com/joycastle/casual-server-lib/util"
 	"github.com/joycastle/matching-story-robot-service/club/config"
-	"github.com/joycastle/matching-story-robot-service/qa"
 	"github.com/joycastle/matching-story-robot-service/service"
 )
 
@@ -27,76 +24,77 @@ func init() {
 	weedDaysConfig[time.Saturday] = 6
 }
 
-func cycleTimeHandlerOwnAi(job *Job) (int64, error) {
+func cycleTimeHandlerOwnAi(job *Job) (int64, *Result) {
 	robotConfig, err := service.GetRobotForGuild(job.UserID)
 	if err != nil {
-		return 0, err
+		return 0, ErrorText(100).Detail("robot_table", err.Error())
 	}
 
 	if robotConfig.ID <= 0 {
-		return 0, errors.New(fmt.Sprintf("not found robot info"))
+		return 0, ErrorText(101).Detail("robot_table", job.UserID)
 	}
 
 	actionID := int(robotConfig.GroupID)
 
 	if actionID <= 0 {
-		return 0, errors.New(fmt.Sprintf("action_id not found from robot_team.csv"))
+		return 0, ErrorText(103).Detail("group_id", "as action_id")
 	}
 
 	actionTimes := int(robotConfig.ActNum)
 	ts, err := config.GetSleepTimeByActionTimesByRand(actionID, actionTimes)
 	if err != nil {
-		return 0, err
+		return 0, ErrorText(200).Detail("sleep time", err.Error(), "actionID", actionID, "actionTimes", actionTimes)
 	}
 
-	return time.Now().Unix() + int64(ts), nil
+	return time.Now().Unix() + int64(ts), ActionSuccess()
 }
 
-func ownActionHandler(job *Job) (string, error) {
+func ownActionHandler(job *Job) *Result {
 	robotConfig, err := service.GetRobotForGuild(job.UserID)
 	if err != nil {
-		return "", err
+		return ErrorText(100).Detail("robot_rable", err.Error())
 	}
 
 	if robotConfig.ID <= 0 {
-		return "", errors.New(fmt.Sprintf("not found robot info"))
+		return ErrorText(101).Detail("robot_table", job.UserID)
 	}
 
 	actionID := robotConfig.GroupID
 	if actionID <= 0 {
-		return "", errors.New(fmt.Sprintf("action_id not found from robot_team.csv"))
+		return ErrorText(103).Detail("group_id", "as action_id")
 	}
 
 	activeDaysMap, err := config.GetRobotActiveDaysByActionID(int(actionID))
 	if err != nil {
-		return "", err
+		return ErrorText(200).Detail("active_days", err.Error())
 	}
 
 	if len(activeDaysMap) == 0 {
-		return "", errors.New(fmt.Sprintf("active day config not found active_id:%d", actionID))
+		return ErrorText(201).Detail("active_days", actionID)
 	}
 
 	if _, ok := activeDaysMap[-1]; ok && len(activeDaysMap) == 1 {
-		qa.AddGuildActionError(job.GuildID, job.UserID, "非活跃天不活跃")
-		return "", errors.New("active day config is [-1], not take effect")
+		return ErrorText(1000).Detail("activeDaysMap", activeDaysMap)
 	}
 
 	todayWeek := time.Now().Weekday()
 	todayWeekInt := weedDaysConfig[todayWeek]
 	if _, ok := activeDaysMap[todayWeekInt]; !ok {
-		qa.AddGuildActionError(job.GuildID, job.UserID, "不是活跃天数")
-		return "", errors.New(fmt.Sprintf("today:week:%d is not a active day, %v, active_id:%d", todayWeekInt, activeDaysMap, actionID))
+		return ErrorText(1001).Detail(
+			"action_id", actionID,
+			"todayWeek", todayWeek,
+			"avtiveDays", activeDaysMap[todayWeekInt])
 	}
 
 	//获取最高积分
 	//1.获取工会成员
 	uids, err := service.GetGuildUserIds(job.GuildID)
 	if err != nil {
-		return "", err
+		return ErrorText(100).Detail("guild_user_map", err.Error())
 	}
 	userInfos, err := service.GetUserInfosWithField(uids, []string{"user_level"})
 	if err != nil {
-		return "", err
+		return ErrorText(100).Detail("user_table", err.Error())
 	}
 	normalUserMaxLevel := 0
 	currentUserLevel := 0
@@ -115,41 +113,41 @@ func ownActionHandler(job *Job) (string, error) {
 	//rule1判断
 	rule1Limit, err := config.GetRule1TargetByRand(int(actionID))
 	if err != nil {
-		return "", err
+		return ErrorText(200).Detail("rule1", err.Error())
 	}
 	if (currentUserLevel - normalUserMaxLevel) >= rule1Limit {
-		qa.AddGuildActionError(job.GuildID, job.UserID, fmt.Sprintf("Rule1,robot userlevel :%d Exceed normal userlevelmax:%d, limit:%d,will sleep", currentUserLevel, normalUserMaxLevel, rule1Limit))
-		return "", fmt.Errorf("Rule1,robot userlevel :%d Exceed normal userlevelmax:%d, limit:%d,will sleep", currentUserLevel, normalUserMaxLevel, rule1Limit)
+		return ErrorText(1002).Detail(
+			"currentUserLevel", currentUserLevel,
+			"normalUserMaxLevel", normalUserMaxLevel,
+			"rule1Limit", rule1Limit)
 	}
 
 	//rule2判断
 	rule2Limit, err := config.GetRule2TargetByRand(int(actionID))
 	if err != nil {
-		return "", err
+		return ErrorText(200).Detail("rule2", err.Error())
 	}
 	if rule2Limit <= 0 || currentUserLevel > rule2Limit {
-		qa.AddGuildActionError(job.GuildID, job.UserID, fmt.Sprintf("Rule2, robot userlevel :%d Exceed limit:%d,will sleep", currentUserLevel, rule2Limit))
-		return "", fmt.Errorf("Rule2, robot userlevel :%d Exceed limit:%d,will sleep", currentUserLevel, rule2Limit)
+		return ErrorText(1003).Detail(
+			"currentUserLevel", currentUserLevel,
+			"rule2Limit", rule2Limit)
 	}
 
 	//增加关卡
 	step, err := config.GetStepByActionTimesByRand(int(actionID), int(robotConfig.ActNum))
 	if err != nil {
-		return "", err
+		return ErrorText(200).Detail("LeveStep", err.Error(), "act_num", robotConfig.ActNum)
 	}
 
 	if err := service.UpdateUserLevelByUid(job.UserID, step); err != nil {
-		return "", err
+		return ErrorText(102).Detail("user_table", err.Error())
 	}
-
 	//增加次数
 	if err := service.UpdateRobotActiveNumByUid(job.UserID, 1); err != nil {
-		return "", err
+		return ErrorText(102).Detail("robot_table", err.Error())
 	}
 
-	qa.AddGuildAction(job.GuildID, job.UserID, currentUserLevel, currentUserLevel+step, int(robotConfig.ActNum), int(robotConfig.ActNum)+1)
-
-	return "", nil
+	return ActionSuccess()
 }
 
 func UpdateRobotConfigMonday(targets map[string]*Job, mu *sync.Mutex) {
