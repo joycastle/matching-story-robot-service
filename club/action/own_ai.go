@@ -92,12 +92,13 @@ func ownActionHandler(job *Job) *Result {
 	if err != nil {
 		return ErrorText(100).Detail("guild_user_map", err.Error())
 	}
-	userInfos, err := service.GetUserInfosWithField(uids, []string{"user_level"})
+	userInfos, err := service.GetUserInfosWithField(uids, []string{"user_level", "account_id"})
 	if err != nil {
 		return ErrorText(100).Detail("user_table", err.Error())
 	}
 	normalUserMaxLevel := 0
 	currentUserLevel := 0
+	userAccountID := ""
 	for _, v := range userInfos {
 		if v.UserType == service.USERTYPE_NORMAL {
 			if normalUserMaxLevel < v.UserLevel {
@@ -106,8 +107,13 @@ func ownActionHandler(job *Job) *Result {
 		} else {
 			if v.UserID == job.UserID {
 				currentUserLevel = v.UserLevel
+				userAccountID = v.AccountID
 			}
 		}
+	}
+
+	if len(userAccountID) == 0 {
+		return ErrorText(101).Detail("user_table", "account not found")
 	}
 
 	//rule1判断
@@ -147,7 +153,13 @@ func ownActionHandler(job *Job) *Result {
 		return ErrorText(102).Detail("robot_table", err.Error())
 	}
 
-	return ActionSuccess()
+	//增加积分
+	rpcRet, err := service.SendUpdateScoreRPC(userAccountID, job.UserID, step)
+	if err != nil {
+		return ErrorText(400).Detail("update_score", err.Error())
+	}
+
+	return ActionSuccess().Detail("update_score_rpc", rpcRet)
 }
 
 func UpdateRobotConfigMonday(targets map[string]*Job, mu *sync.Mutex) {

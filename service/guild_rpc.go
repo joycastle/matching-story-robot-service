@@ -165,3 +165,41 @@ func SendJoinToGuildRPC(accountID string, userID int64, guildID int64) (*Matchin
 
 	return output, nil
 }
+
+func SendUpdateScoreRPC(accountID string, userID int64, score int) (*MatchingRPCResponse, error) {
+	data := url.Values{}
+
+	data.Set("req_id", fmt.Sprintf("%d", time.Now().UnixNano()/1000000))
+	data.Set("from", "robot-service")
+	data.Set("account_id", accountID)
+	data.Set("user_id", fmt.Sprintf("%d", userID))
+	data.Set("lang_type", "1")
+	data.Set("device_type", "9")
+
+	data.Set("score", fmt.Sprintf("%d", score))
+
+	rpcHost := config.Grpc["default"]
+
+	resp, err := http.PostForm(rpcHost+"/guild/updatescore", data)
+	if err != nil {
+		return nil, err
+	}
+	defer resp.Body.Close()
+
+	body, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return nil, err
+	}
+
+	output := &MatchingRPCResponse{}
+
+	if err := json.Unmarshal(body, output); err != nil {
+		return nil, fmt.Errorf(err.Error() + string(body))
+	}
+
+	if output.Code != 0 {
+		return output, errors.New(output.Data + " " + output.Errmsg)
+	}
+
+	return output, nil
+}

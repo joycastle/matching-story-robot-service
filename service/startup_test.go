@@ -12,6 +12,13 @@ import (
 
 var isConfiged bool = false
 
+func TestRpc(t *testing.T) {
+	testinit()
+	if _, err := SendUpdateScoreRPC("0D6492BD89961065BFAA95FE15486FED", 257000100, 12); err != nil {
+		t.Fatal(err)
+	}
+}
+
 func TestGetGuildRequestInfosWithFiledsByGuildIDs(t *testing.T) {
 	testinit()
 	_, err := GetGuildRequestInfosWithFiledsByGuildIDs([]int64{9068658676465664, 9187840659292160}, []string{"done"})
