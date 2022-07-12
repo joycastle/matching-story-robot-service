@@ -7,6 +7,7 @@ import (
 	"path/filepath"
 
 	"github.com/joycastle/casual-server-lib/config"
+	"github.com/joycastle/casual-server-lib/faketime"
 	"github.com/joycastle/casual-server-lib/log"
 	"github.com/joycastle/casual-server-lib/mysql"
 	"github.com/joycastle/casual-server-lib/redis"
@@ -24,6 +25,9 @@ func main() {
 	}
 
 	//开启QA调试模式
+	if *runEnv != "prod" {
+		faketime.DebubForHttp(1122)
+	}
 
 	configFileEnv := filepath.Join("./conf/", *runEnv)
 	configFileCommon := filepath.Join("./conf/common")

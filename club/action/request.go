@@ -1,8 +1,7 @@
 package action
 
 import (
-	"time"
-
+	"github.com/joycastle/casual-server-lib/faketime"
 	"github.com/joycastle/casual-server-lib/util"
 	"github.com/joycastle/matching-story-robot-service/club/config"
 	"github.com/joycastle/matching-story-robot-service/model"
@@ -15,7 +14,7 @@ var (
 
 func requestActiveTimeHandler() (int64, *Result) {
 	rnd := config.GetStrengthRequestByRand()
-	return time.Now().Unix() + rnd, ActionSuccess().Detail("rnd", rnd)
+	return faketime.Now().Unix() + rnd, ActionSuccess().Detail("rnd", rnd)
 }
 
 func requestActionHandler(job *Job) *Result {
@@ -44,7 +43,7 @@ func requestActionHandler(job *Job) *Result {
 			}
 		}
 
-		if time.Now().Unix()-maxTime > freezingTime {
+		if faketime.Now().Unix()-maxTime > freezingTime {
 			need = true
 		}
 	}

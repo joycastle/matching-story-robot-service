@@ -6,6 +6,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/joycastle/casual-server-lib/faketime"
 	"github.com/joycastle/casual-server-lib/log"
 	"github.com/joycastle/matching-story-robot-service/model"
 	"github.com/joycastle/matching-story-robot-service/service"
@@ -97,7 +98,7 @@ func JobKey(userID, guildID int64) string {
 
 func CrontabGenerateJob(jobType string, targets map[string]*Job, mu *sync.Mutex, output chan *Job, cycleTimeHandler func(*Job) (int64, *Result), t int) {
 	for {
-		start := time.Now()
+		start := faketime.Now()
 		now := start.Unix()
 		logger := NewCrontabLog(jobType)
 
@@ -148,7 +149,7 @@ func CrontabGenerateJob(jobType string, targets map[string]*Job, mu *sync.Mutex,
 
 		logger.SetTotal(total).SetNew(needProcessNum).SetReset(len(needResetProcess))
 
-		cost := time.Since(start).Nanoseconds() / 1000000
+		cost := faketime.Since(start).Nanoseconds() / 1000000
 		log.Get("club-dispatch").Info("Crontab", logger.String(), "cost:", cost, "ms")
 		time.Sleep(time.Duration(t) * time.Second)
 	}
@@ -347,5 +348,5 @@ func JobActionProcess(jobType string, ch chan *Job, actionHandler func(*Job) *Re
 }
 
 func defaultActiveTimeHandler() (int64, *Result) {
-	return time.Now().Unix() + int64(120+rand.Intn(301)), ActionSuccess()
+	return faketime.Now().Unix() + int64(120+rand.Intn(301)), ActionSuccess()
 }

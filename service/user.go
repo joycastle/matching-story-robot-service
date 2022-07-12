@@ -3,7 +3,6 @@ package service
 import (
 	"fmt"
 	"strings"
-	"time"
 
 	"github.com/joycastle/casual-server-lib/mysql"
 	"github.com/joycastle/matching-story-robot-service/lib"
@@ -19,37 +18,6 @@ const (
 	COUNTRY_CN = "cn"
 	COUNTRY_EN = "en"
 )
-
-//创建工会机器人
-func CreateGuildRobotUser(name, headIcon string, likeCnt, level int) (model.User, error) {
-	var u model.User
-	u.UserName = name
-	u.UserHeadIcon = headIcon
-	u.UserLikeCount = uint(likeCnt)
-	u.UserLevel = level
-
-	u.UserCountryData = COUNTRY_CN
-	u.DeviceType = DEVICE_TYPE_CLUB_ROBOT
-	u.UserType = USERTYPE_CLUB_ROBOT_SERVICE
-
-	u.UserHelp = 0
-	u.CreateTime = time.Now().Unix()
-	u.UpdateTime = u.CreateTime
-
-	if id, err := lib.GenerateUserID(); err != nil {
-		return u, err
-	} else {
-		u.UserID = id
-	}
-
-	u.AccountID = lib.Md5(fmt.Sprintf("%d", u.UserID))
-
-	if err := mysql.Get("default-master").Create(&u); err.Error != nil || err.RowsAffected != 1 {
-		return u, fmt.Errorf("%s affected:%d", err.Error, err.RowsAffected)
-	}
-
-	return u, nil
-}
 
 func GetUserInfosWithField(uids []int64, fileds []string) ([]model.User, error) {
 	var out []model.User

@@ -1,8 +1,7 @@
 package action
 
 import (
-	"time"
-
+	"github.com/joycastle/casual-server-lib/faketime"
 	"github.com/joycastle/matching-story-robot-service/club/config"
 	"github.com/joycastle/matching-story-robot-service/service"
 )
@@ -11,7 +10,7 @@ func CreateFirstInJob(userID, guildID int64) {
 	job := &Job{
 		GuildID:    guildID,
 		UserID:     userID,
-		ActionTime: time.Now().Unix() + int64(config.GetJoinTalkTimeGapByRand()),
+		ActionTime: faketime.Now().Unix() + int64(config.GetJoinTalkTimeGapByRand()),
 	}
 
 	k := JobKey(userID, guildID)

@@ -4,6 +4,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/joycastle/casual-server-lib/faketime"
 	"github.com/joycastle/casual-server-lib/log"
 	"github.com/joycastle/casual-server-lib/util"
 	"github.com/joycastle/matching-story-robot-service/club/config"
@@ -46,7 +47,7 @@ func cycleTimeHandlerOwnAi(job *Job) (int64, *Result) {
 		return 0, ErrorText(200).Detail("sleep time", err.Error(), "actionID", actionID, "actionTimes", actionTimes)
 	}
 
-	return time.Now().Unix() + int64(ts), ActionSuccess()
+	return faketime.Now().Unix() + int64(ts), ActionSuccess()
 }
 
 func ownActionHandler(job *Job) *Result {
@@ -77,7 +78,7 @@ func ownActionHandler(job *Job) *Result {
 		return ErrorText(1000).Detail("activeDaysMap", activeDaysMap)
 	}
 
-	todayWeek := time.Now().Weekday()
+	todayWeek := faketime.Now().Weekday()
 	todayWeekInt := weedDaysConfig[todayWeek]
 	if _, ok := activeDaysMap[todayWeekInt]; !ok {
 		return ErrorText(1001).Detail(
@@ -166,7 +167,7 @@ func UpdateRobotConfigMonday(targets map[string]*Job, mu *sync.Mutex) {
 	for {
 		now := time.Now()
 		nowStamp := now.Unix()
-		mondayStamp := util.WeekMondayTimestamp(time.Now())
+		mondayStamp := util.WeekMondayTimestamp(now)
 		sunStamp := mondayStamp + 86400*7
 		timeDuration := sunStamp - nowStamp
 		time.Sleep(time.Duration(timeDuration) * time.Second)

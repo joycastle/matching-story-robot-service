@@ -11,5 +11,6 @@ services:
     container_name: matching-story-robot-service
     ports:
       - "18088:7088"
+      - "1122:1122"
     volumes:
       - /home/ec2-user/var/run/logs/matching-story-robot-service:/app/var/logs

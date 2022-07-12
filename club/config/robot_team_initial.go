@@ -109,7 +109,6 @@ func getLevelRangeIndex(level int) int {
 }
 
 func getWeightIndex(weights []int) int {
-	//rand.Seed(time.Now().UnixNano())
 	m := make(map[string]int)
 	lastMax := 0
 	maxx := 0
@@ -146,7 +145,6 @@ func GetRobotActionIDByRand(level int, utype int32) int64 {
 	index := getLevelRangeIndex(level)
 	actionIds := robotAiddMap[index][utype-1]
 	length := len(actionIds)
-	//rand.Seed(time.Now().UnixNano())
 	return int64(actionIds[rand.Intn(length)])
 }
 

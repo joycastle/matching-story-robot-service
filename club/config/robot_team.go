@@ -3,8 +3,8 @@ package config
 import (
 	"fmt"
 	"math/rand"
-	"time"
 
+	"github.com/joycastle/casual-server-lib/faketime"
 	"github.com/joycastle/casual-server-lib/util"
 
 	"github.com/joycastle/matching-story-robot-service/confmanager"
@@ -185,7 +185,7 @@ func GetRule2TargetByRand(aid int) (int, error) {
 		}
 	}
 
-	now := time.Now()
+	now := faketime.Now()
 	currentStamp := now.Unix()
 	mondayStamp := util.WeekMondayTimestamp(now)
 	disStamp := (weekMin - 1) * 86400

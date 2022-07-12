@@ -4,6 +4,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/joycastle/casual-server-lib/faketime"
 	"github.com/joycastle/casual-server-lib/log"
 	"github.com/joycastle/matching-story-robot-service/club/action"
 	"github.com/joycastle/matching-story-robot-service/club/config"
@@ -25,7 +26,7 @@ func Startup() {
 
 func taskUpdate(t int) {
 	for {
-		start := time.Now()
+		start := faketime.Now()
 		logger := NewUpdateLog()
 		for {
 			//get all club
@@ -67,7 +68,7 @@ func taskUpdate(t int) {
 				taskMu.Lock()
 				for _, v := range newJob {
 					if _, ok := taskMapping[v.ID]; !ok {
-						taskMapping[v.ID] = time.Now().Unix() + config.GetActiveTimeByRand()
+						taskMapping[v.ID] = faketime.Now().Unix() + config.GetActiveTimeByRand()
 						newActNum++
 					}
 				}
@@ -78,15 +79,16 @@ func taskUpdate(t int) {
 			break
 		}
 
-		cost := time.Since(start).Nanoseconds() / 1000000
+		cost := faketime.Since(start).Nanoseconds() / 1000000
 		log.Get("club-create").Info("UpdateJob", logger.String(), "cost:", cost, "ms")
+
 		time.Sleep(time.Duration(t) * time.Second)
 	}
 }
 
 func taskCrontab(t int) {
 	for {
-		start := time.Now()
+		start := faketime.Now()
 		now := start.Unix()
 
 		var needProcess []int64
@@ -95,7 +97,7 @@ func taskCrontab(t int) {
 		for guildID, activeTime := range taskMapping {
 			if now-activeTime >= 0 {
 				needProcess = append(needProcess, guildID)
-				taskMapping[guildID] = time.Now().Unix() + config.GetActiveTimeByRand()
+				taskMapping[guildID] = faketime.Now().Unix() + config.GetActiveTimeByRand()
 			}
 		}
 		total := len(taskMapping)
@@ -106,7 +108,7 @@ func taskCrontab(t int) {
 		}
 
 		logger := NewCrontabLog().SetTotal(total).SetNew(len(needProcess))
-		cost := time.Since(start).Nanoseconds() / 1000000
+		cost := faketime.Since(start).Nanoseconds() / 1000000
 		log.Get("club-create").Info("Crontab", logger.String(), "cost:", cost, "ms")
 		time.Sleep(time.Duration(t) * time.Second)
 	}

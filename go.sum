@@ -162,6 +162,8 @@ github.com/joycastle/casual-server-lib v0.0.0-20220704090838-650580b6b809 h1:IiZ
 github.com/joycastle/casual-server-lib v0.0.0-20220704090838-650580b6b809/go.mod h1:w4ksdqOz0T7TV5qF9a5Kd9UIFuBu+T2LNxgFvQ/1xaM=
 github.com/joycastle/casual-server-lib v0.0.0-20220704094027-4598ba1269a8 h1:LXTeEXsshVKATznagwv/n2DdijfcR10PGXgi7H7A4QM=
 github.com/joycastle/casual-server-lib v0.0.0-20220704094027-4598ba1269a8/go.mod h1:w4ksdqOz0T7TV5qF9a5Kd9UIFuBu+T2LNxgFvQ/1xaM=
+github.com/joycastle/casual-server-lib v0.0.0-20220712035402-394a1e6fd6d3 h1:wzbPrIAz02Aa7UnMqCW+SxxeN4SkYysQGoFzUftyDm8=
+github.com/joycastle/casual-server-lib v0.0.0-20220712035402-394a1e6fd6d3/go.mod h1:w4ksdqOz0T7TV5qF9a5Kd9UIFuBu+T2LNxgFvQ/1xaM=
 github.com/jstemmer/go-junit-report v0.0.0-20190106144839-af01ea7f8024/go.mod h1:6v2b51hI/fHJwM22ozAgKL4VKDeJcHhJFhtBdhmNjmU=
 github.com/jstemmer/go-junit-report v0.9.1/go.mod h1:Brl9GWCQeLvo8nXZwPNNblvFj/XSXhF0NWZEnDohbsk=
 github.com/kisielk/gotool v1.0.0/go.mod h1:XhKaO+MFFWcvkIS/tQcRk01m1F5IRFswLeQ+oQHNcck=

@@ -8,25 +8,18 @@ import (
 	"github.com/joycastle/matching-story-robot-service/confmanager"
 )
 
-var global bool = false
-
-func ConfigInit() {
-	if global {
-		return
-	}
+func TestMain(m *testing.M) {
 	//init configmanager
 	if err := confmanager.GetConfManagerVer().LoadCsv("../../confmanager/template"); err != nil {
 		panic(err)
 	}
-
 	if err := Startup(); err != nil {
 		panic(err)
 	}
-	global = true
+	m.Run()
 }
 
 func TestRobotTeamConfig(t *testing.T) {
-	ConfigInit()
 	if GetRobotMaxLimitNum() <= 0 || GetNormalUserNum() <= 0 {
 		t.Fatal("")
 	}
@@ -80,7 +73,6 @@ func TestRobotTeamConfig(t *testing.T) {
 }
 
 func TestRobotTeamChat(t *testing.T) {
-	ConfigInit()
 	if len(GetChatMsgByRand(1)) == 0 {
 		t.Fatal("GetChatMsgByRand index 1 error")
 	}

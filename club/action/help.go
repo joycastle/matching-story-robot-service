@@ -1,8 +1,7 @@
 package action
 
 import (
-	"time"
-
+	"github.com/joycastle/casual-server-lib/faketime"
 	"github.com/joycastle/casual-server-lib/util"
 	"github.com/joycastle/matching-story-robot-service/club/config"
 	"github.com/joycastle/matching-story-robot-service/model"
@@ -11,7 +10,7 @@ import (
 
 func helpActiveTimeHandler() (int64, *Result) {
 	rnd := config.GetStrengthHelpTimeByRand()
-	return time.Now().Unix() + rnd, ActionSuccess().Detail("rnd", rnd)
+	return faketime.Now().Unix() + rnd, ActionSuccess().Detail("rnd", rnd)
 }
 
 func helpActionHandler(job *Job) *Result {
