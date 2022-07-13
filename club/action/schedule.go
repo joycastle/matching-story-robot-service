@@ -189,7 +189,7 @@ func UpdateRobotJobs(t int) error {
 			}
 
 			if len(userMap) == 0 {
-				logger.SetState(ErrorText(101).Detail("guild_user_name", err.Error()).String())
+				logger.SetState(ErrorText(101).Detail("guild_user_name").String())
 				break
 			}
 
