@@ -176,6 +176,7 @@ func SendUpdateScoreRPC(accountID string, userID int64, score int) (*MatchingRPC
 	data.Set("lang_type", "1")
 	data.Set("device_type", "9")
 
+	data.Set("level_id", fmt.Sprintf("robot_%d", time.Now().UnixNano()/1000000))
 	data.Set("score", fmt.Sprintf("%d", score))
 
 	rpcHost := config.Grpc["default"]

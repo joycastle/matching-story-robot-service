@@ -173,7 +173,7 @@ func GetLevelByRand(guildInfo model.Guild, userInfos []model.User) int {
 	randStep := mina + rand.Intn(maxa-mina+1)
 
 	//随机加减策略
-	if rand.Intn(100) >= 50 {
+	if rand.Intn(100) >= 40 {
 		randStep = randStep * -1
 	}
 

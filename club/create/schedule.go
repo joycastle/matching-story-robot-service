@@ -163,7 +163,7 @@ func taskProcess() {
 
 			//4.3创建机器人
 			var newRobots []model.User
-			var newRobotsUid []int64
+			var newRobotsUid map[int64]int = make(map[int64]int)
 			isCreateOk := true
 			for i := 0; i < newNum; i++ {
 				if rbtUser, err := CreateRobot(guildInfo, robotUsers, normalUsers); err != nil {
@@ -175,7 +175,7 @@ func taskProcess() {
 					robotUsers = append(robotUsers, rbtUser)
 					//日志打印和加入工会用
 					newRobots = append(newRobots, rbtUser)
-					newRobotsUid = append(newRobotsUid, rbtUser.UserID)
+					newRobotsUid[rbtUser.UserID] = rbtUser.UserLevel
 				}
 			}
 			if !isCreateOk {
@@ -192,7 +192,7 @@ func taskProcess() {
 				action.CreateFirstInJob(ru.UserID, guilID)
 			}
 
-			logger.Detail("targetNum", newNum, "createNum", len(newRobots), newRobotsUid)
+			logger.Detail("targetNum", newNum, "createNum", len(newRobots), "levelInfo", newRobotsUid)
 			break
 		}
 

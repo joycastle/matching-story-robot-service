@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/joycastle/matching-story-robot-service/confmanager"
+	"github.com/joycastle/matching-story-robot-service/model"
 )
 
 func TestMain(m *testing.M) {
@@ -105,4 +106,15 @@ func TestRobotTeam(t *testing.T) {
 
 func TestGetActiveTimeByRand(t *testing.T) {
 	fmt.Println("GetActiveTimeByRand", GetActiveTimeByRand())
+}
+
+func TestGetLevelByRand(t *testing.T) {
+	guild := model.Guild{
+		LevelLimit: 35,
+	}
+	users := []model.User{}
+	users = append(users, model.User{UserID: 100, UserLevel: 81})
+	for i := 0; i < 100; i++ {
+		fmt.Println("XXXXXXXX", GetLevelByRand(guild, users))
+	}
 }
