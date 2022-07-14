@@ -306,6 +306,9 @@ func UpdateRobotJobs(t int) error {
 			logger.AddCreateInfo(JOB_TYPE_REQUEST, CreateJob(requestCrontabJob, requestCrontabJobMu, robotNewJobsMap, requestActiveTimeHandler))
 			logger.AddCreateInfo(JOB_TYPE_HELP, CreateJob(helpCrontabJob, helpCrontabJobMu, robotNewJobsMap, helpActiveTimeHandler))
 			logger.AddCreateInfo(JOB_TYPE_OWN_AI, CreateJob(ownActionCrontabJob, ownActionCrontabJobMu, robotNewJobsMap, defaultActiveTimeHandler))
+
+			//sync guild job
+			UpdateGuildJob(robotNewJobsMap)
 			break
 		}
 

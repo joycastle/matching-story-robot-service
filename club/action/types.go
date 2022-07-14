@@ -106,6 +106,11 @@ type Job struct {
 	RobotNum   int   `json:"robot_num,omitempty"`
 }
 
+type GuildJob struct {
+	GuildID    int64 `json:"guild_id"`
+	ActionTime int64 `json:"action_time"`
+}
+
 type CrontabLog struct {
 	Action string   `json:"action"`
 	Total  int      `json:"total"`
@@ -175,4 +180,30 @@ func (ujl *UpdateJobLog) SetState(stat string) *UpdateJobLog {
 func (ujl *UpdateJobLog) String() string {
 	b, _ := json.Marshal(ujl)
 	return string(b)
+}
+
+type GuildScheduleLog struct {
+	Action string    `json:"action"`
+	Job    *GuildJob `json:"job"`
+	Msg    string    `json:"msg,omitempty"`
+	Result *Result   `json:"result,omitempty"`
+}
+
+func (gsl *GuildScheduleLog) String() string {
+	b, _ := json.Marshal(gsl)
+	return string(b)
+}
+
+func (gsl *GuildScheduleLog) SetResult(result *Result) *GuildScheduleLog {
+	gsl.Result = result
+	return gsl
+}
+
+func (gsl *GuildScheduleLog) SetError(msg string) *GuildScheduleLog {
+	gsl.Msg = msg
+	return gsl
+}
+
+func NewGuildScheduleLog(job *GuildJob, action string) *GuildScheduleLog {
+	return &GuildScheduleLog{Action: action, Job: job}
 }
