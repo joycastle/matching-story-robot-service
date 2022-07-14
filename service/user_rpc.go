@@ -19,17 +19,19 @@ import (
 func CreateGuildRobotUserRPC(name, headIcon string, likeCnt, level int) (model.User, error) {
 	var u model.User
 
+	dtype := lib.Md5(fmt.Sprintf("%d", time.Now().UnixNano())) //必须唯一
+
 	data := url.Values{}
 	data.Set("req_id", fmt.Sprintf("%d", time.Now().UnixNano()/1000000))
 	data.Set("user_id", "1001")
 	data.Set("lang_type", "0")
 	data.Set("from", "robot-service")
-	data.Set("account_id", lib.Md5(name))
+	data.Set("account_id", dtype)
 	data.Set("name", name)
 	data.Set("head_icon", headIcon)
 	data.Set("country", "CN")
 	data.Set("user_type", USERTYPE_CLUB_ROBOT_SERVICE)
-	data.Set("device", lib.Md5(name))
+	data.Set("device", dtype)
 	data.Set("device_type", "9")
 	data.Set("language", "0")
 	data.Set("like_cnt", fmt.Sprintf("%d", likeCnt))
