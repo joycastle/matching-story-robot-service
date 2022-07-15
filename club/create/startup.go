@@ -22,9 +22,9 @@ var (
 func Startup() {
 	go PullDatas(30)
 
-	go TaskTimed(20, JOB_TYPE_CREATE_ROBOT, createTaskCronMap, createTaskCronMu, createTaskChannel, nil)
-	go TaskTimed(20, JOB_TYPE_KICK_ROBOT, kickTaskCronMap, kickTaskCronMu, kickTaskChannel, nil)
+	go TaskTimed(20, JOB_TYPE_CREATE_ROBOT, createTaskCronMap, createTaskCronMu, createTaskChannel, createRobotTimeHandler)
+	go TaskTimed(20, JOB_TYPE_KICK_ROBOT, kickTaskCronMap, kickTaskCronMu, kickTaskChannel, kickRobotTimeHandler)
 
-	go TaskProcess(JOB_TYPE_CREATE_ROBOT, createTaskChannel, nil)
-	go TaskProcess(JOB_TYPE_KICK_ROBOT, kickTaskChannel, nil)
+	go TaskProcess(JOB_TYPE_CREATE_ROBOT, createTaskChannel, createRobotLogicHandler)
+	go TaskProcess(JOB_TYPE_KICK_ROBOT, kickTaskChannel, kickRobotLogicHandler)
 }
