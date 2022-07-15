@@ -5,7 +5,6 @@ import (
 	"time"
 
 	"github.com/joycastle/casual-server-lib/log"
-	"github.com/joycastle/matching-story-robot-service/club/cache"
 	"github.com/joycastle/matching-story-robot-service/lib"
 	"github.com/joycastle/matching-story-robot-service/service"
 )
@@ -34,11 +33,6 @@ func PullDatas(t int) {
 
 			okDataLen := len(okDataMap)
 			delDataLen := len(delDataMap)
-
-			if delDataLen > 0 {
-				num := cache.UpdateGuildDeleteStatus(delDataMap)
-				info.Set("cache_guild_status_len", num)
-			}
 
 			if okDataLen > 0 {
 				info.Set("create_task_map_len", MergeJobs(createTaskCronMap, createTaskCronMu, okDataMap))
