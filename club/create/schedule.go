@@ -19,14 +19,14 @@ var (
 )
 
 func Startup() {
-	go taskUpdate(20)  //read from db guild -> write to taskMapping
+	go taskUpdate(30)  //read from db guild -> write to taskMapping
 	go taskCrontab(10) //read from taskMapping -> write to taskChannel
 	go taskProcess()   //read from taskChannel -> operation create robot
 }
 
 func taskUpdate(t int) {
 	for {
-		start := faketime.Now()
+		start := time.Now()
 		logger := NewUpdateLog()
 		for {
 			//get all club

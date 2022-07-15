@@ -18,11 +18,10 @@ const (
 	JOB_TYPE_REQUEST_CHAT = "RequestChat"
 	JOB_TYPE_HELP         = "Help"
 	JOB_TYPE_ACTIVITY     = "Activity"
-
 	JOB_TYPE_DELETE_GUILD = "DeleteGuild"
 	JOB_TYPE_MONDAY       = "MondayUpdate"
-
-	JOB_TYPE_OWN_AI = "OwnAI"
+	JOB_TYPE_OWN_AI       = "OwnAI"
+	JOB_TYPE_LEAVE_GUILD  = "LeaveGuild"
 )
 
 var (
@@ -58,8 +57,13 @@ var (
 	ownActionProcessChannel chan *Job       = make(chan *Job, capacityChannel)
 
 	//data source for update robot action
-	RobotActionUpdateCrontabJob   map[string]*Job = make(map[string]*Job, capacityMap)
-	RobotActionUpdateCrontabJobMu *sync.Mutex     = new(sync.Mutex)
+	RobotActionUpdateJob   map[string]*Job = make(map[string]*Job, capacityMap)
+	RobotActionUpdateJobMu *sync.Mutex     = new(sync.Mutex)
+
+	//leave to guild for guild clear robot logic
+	leaveGuildJob            map[string]*Job = make(map[string]*Job, 1000) //only for distributing requests to reduce server pressure
+	leaveGuildJobMu          *sync.Mutex     = new(sync.Mutex)
+	leaveGuildProcessChannel chan *Job       = make(chan *Job, capacityChannel)
 )
 
 func DeleteJob(targets map[string]*Job, mu *sync.Mutex, newTargets map[string]*Job) int {
@@ -98,8 +102,8 @@ func JobKey(userID, guildID int64) string {
 
 func CrontabGenerateJob(jobType string, targets map[string]*Job, mu *sync.Mutex, output chan *Job, cycleTimeHandler func(*Job) (int64, *Result), t int) {
 	for {
-		start := faketime.Now()
-		now := start.Unix()
+		start := time.Now()
+		now := faketime.Now().Unix()
 		logger := NewCrontabLog(jobType)
 
 		needProcess := []*Job{}
@@ -163,17 +167,18 @@ func Startup() {
 	go CrontabGenerateJob(JOB_TYPE_REQUEST_CHAT, requestChatCrontabJob, requestChatCrontabJobMu, requestChatProcessChannel, nil, 10)
 	go CrontabGenerateJob(JOB_TYPE_HELP, helpCrontabJob, helpCrontabJobMu, helpProcessChannel, nil, 10)
 	go CrontabGenerateJob(JOB_TYPE_OWN_AI, ownActionCrontabJob, ownActionCrontabJobMu, ownActionProcessChannel, cycleTimeHandlerOwnAi, 10)
+	go CrontabGenerateJob(JOB_TYPE_LEAVE_GUILD, leaveGuildJob, leaveGuildJobMu, leaveGuildProcessChannel, nil, 10)
 
 	go JobActionProcess(JOB_TYPE_FIRSTIN, firstInProcessChannel, firstInActionHandler, false)
 	go JobActionProcess(JOB_TYPE_REQUEST, requestProcessChannel, requestActionHandler, true)
 	go JobActionProcess(JOB_TYPE_REQUEST_CHAT, requestChatProcessChannel, requestChatActionHandler, true)
 	go JobActionProcess(JOB_TYPE_HELP, helpProcessChannel, helpActionHandler, true)
 	go JobActionProcess(JOB_TYPE_OWN_AI, ownActionProcessChannel, ownActionHandler, true)
-
+	go JobActionProcess(JOB_TYPE_LEAVE_GUILD, leaveGuildProcessChannel, leaveGuildHandler, false)
 	go JobActionProcess(JOB_TYPE_DELETE_GUILD, deleteGuildChannel, deleteActionHandler, false)
 
 	//更新配置周一0点
-	go UpdateRobotConfigMonday(RobotActionUpdateCrontabJob, RobotActionUpdateCrontabJobMu)
+	go UpdateRobotConfigMonday(RobotActionUpdateJob, RobotActionUpdateJobMu)
 }
 
 func UpdateRobotJobs(t int) error {
@@ -300,7 +305,8 @@ func UpdateRobotJobs(t int) error {
 			logger.AddDeleteInfo(JOB_TYPE_REQUEST_CHAT, DeleteJob(requestChatCrontabJob, requestChatCrontabJobMu, robotNewJobsMap))
 			logger.AddDeleteInfo(JOB_TYPE_HELP, DeleteJob(helpCrontabJob, helpCrontabJobMu, robotNewJobsMap))
 			logger.AddDeleteInfo(JOB_TYPE_OWN_AI, DeleteJob(ownActionCrontabJob, ownActionCrontabJobMu, robotNewJobsMap))
-			logger.AddDeleteInfo(JOB_TYPE_MONDAY, DeleteJob(RobotActionUpdateCrontabJob, RobotActionUpdateCrontabJobMu, robotNewJobsMap))
+			logger.AddDeleteInfo(JOB_TYPE_MONDAY, DeleteJob(RobotActionUpdateJob, RobotActionUpdateJobMu, robotNewJobsMap))
+			logger.AddDeleteInfo(JOB_TYPE_LEAVE_GUILD, DeleteJob(leaveGuildJob, leaveGuildJobMu, robotNewJobsMap))
 
 			//create job
 			logger.AddCreateInfo(JOB_TYPE_REQUEST, CreateJob(requestCrontabJob, requestCrontabJobMu, robotNewJobsMap, requestActiveTimeHandler))

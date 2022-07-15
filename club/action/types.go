@@ -37,6 +37,13 @@ var errTexts = map[int]string{
 
 	//request
 	4000: "request: not exceeded freeze time",
+
+	//guild
+	5000: "guild: deleted",
+	5001: "guild: members is full 30",
+	5002: "guild: members is empty",
+	5003: "guild: robot members is lower",
+	5004: "guild: normal avtive user is lower",
 }
 
 type Result struct {

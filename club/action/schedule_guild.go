@@ -33,7 +33,9 @@ func getNewGuildTargetFromNewJobTargets(newTargets map[string]*Job) map[int64]*G
 	m := make(map[int64]*GuildJob, len(newTargets)/2)
 	for k, _ := range newTargets {
 		nk := GuildKeyFromJobKey(k)
-		m[nk] = &GuildJob{GuildID: nk}
+		if _, ok := m[nk]; !ok {
+			m[nk] = &GuildJob{GuildID: nk}
+		}
 	}
 	return m
 }
@@ -96,6 +98,7 @@ func CrontabGenerateGuildJob(jobType string, targets map[int64]*GuildJob, mu *sy
 			}
 		}
 		total = len(targets)
+
 		mu.Unlock()
 
 		needProcessNum := len(needProcess)
@@ -138,7 +141,7 @@ func CrontabGenerateGuildJob(jobType string, targets map[int64]*GuildJob, mu *sy
 }
 
 func StartupGuild() {
-	go CrontabGenerateGuildJob(GUILD_JOB_TYPE_CLEAR_ROBOT_DISPATCH, clearRobotJobMap, clearRobotJobMapMu, clearRobotJobProcessChannel, nil, 10)
+	go CrontabGenerateGuildJob(GUILD_JOB_TYPE_CLEAR_ROBOT_DISPATCH, clearRobotJobMap, clearRobotJobMapMu, clearRobotJobProcessChannel, clearRobotActiveTimeHandler, 20)
 	go GuildJobActionProcess(GUILD_JOB_TYPE_CLEAR_ROBOT_DISPATCH, clearRobotJobProcessChannel, clearRobotDispatchHandler, false)
 }
 
