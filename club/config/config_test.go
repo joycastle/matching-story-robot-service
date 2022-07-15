@@ -118,3 +118,8 @@ func TestGetLevelByRand(t *testing.T) {
 		fmt.Println("XXXXXXXX", GetLevelByRand(guild, users))
 	}
 }
+
+func TestGetRobotKictTimeRange(t *testing.T) {
+	GetRobotKictTimeRange()
+	fmt.Println(GetRobotKictNum())
+}

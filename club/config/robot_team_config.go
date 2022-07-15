@@ -250,3 +250,34 @@ func GetHelpTalkTimeGapByRand() int {
 	mina, maxa := Compare2Int(cmin, cmax)
 	return mina + rand.Intn(maxa-mina+1)
 }
+
+//获取机器人清退时间
+func GetRobotKictTimeRange() int64 {
+	cmin := configIRobotTeamConfig.GetRobotKickTimerangeByIndex(0)
+	cmax := configIRobotTeamConfig.GetRobotKickTimerangeByIndex(1)
+	mina, maxa := Compare2Int(cmin, cmax)
+	return int64(mina + rand.Intn(maxa-mina+1))
+}
+
+//获取机器人清退数量
+func GetRobotKictNum() int {
+	cmin := configIRobotTeamConfig.GetRobotKickRobotnumByIndex(0)
+	cmax := configIRobotTeamConfig.GetRobotKickRobotnumByIndex(1)
+	mina, maxa := Compare2Int(cmin, cmax)
+	return mina + rand.Intn(maxa-mina+1)
+}
+
+//获取机器人清退限制数量
+func GetRobotKickNumLimit() int {
+	return configIRobotTeamConfig.GetRobotNumMinlimit()
+}
+
+//获取清退机器人活跃天数
+func GetRobotKickActiveDays() int {
+	return configIRobotTeamConfig.GetRobotKickLevelByIndex(0)
+}
+
+//获取清退机器人活跃用户数
+func GetRobotKickActiveUsersNum() int {
+	return configIRobotTeamConfig.GetRobotKickActiveusernum()
+}

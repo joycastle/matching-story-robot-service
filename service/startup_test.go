@@ -1,6 +1,7 @@
 package service
 
 import (
+	"fmt"
 	"testing"
 	"time"
 
@@ -70,9 +71,14 @@ func TestMain(m *testing.M) {
 }
 
 func TestRpc(t *testing.T) {
+	return
 	if _, err := SendUpdateScoreRPC("43f6a40db954b4913c47ed60fa665bf9", 136833000009, 2); err != nil {
 		t.Fatal(err)
 	}
+}
+
+func TestRpcLeaveGuild(t *testing.T) {
+	fmt.Println(SendLeaveGuildRPC("", 136845000009, 131575164054798336))
 }
 
 /*

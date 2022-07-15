@@ -204,3 +204,52 @@ func SendUpdateScoreRPC(accountID string, userID int64, score int) (*MatchingRPC
 
 	return output, nil
 }
+
+func SendLeaveGuildRPC(accountID string, userID int64, guildId int64) (*MatchingRPCResponse, error) {
+	data := url.Values{}
+
+	if len(accountID) == 0 {
+		users, err := GetUserInfosWithField([]int64{userID}, []string{"account_id"})
+		if err != nil {
+			return nil, err
+		}
+		if len(users) != 1 {
+			return nil, fmt.Errorf("not found user infos user_id:%d", userID)
+		}
+		accountID = users[0].AccountID
+	}
+
+	data.Set("req_id", fmt.Sprintf("%d", time.Now().UnixNano()/1000000))
+	data.Set("from", "robot-service")
+	data.Set("account_id", accountID)
+	data.Set("user_id", fmt.Sprintf("%d", userID))
+	data.Set("lang_type", "1")
+	data.Set("device_type", "9")
+
+	data.Set("guild_id", fmt.Sprintf("%d", guildId))
+
+	rpcHost := config.Grpc["default"]
+
+	resp, err := http.PostForm(rpcHost+"/guild/leave", data)
+	if err != nil {
+		return nil, err
+	}
+	defer resp.Body.Close()
+
+	body, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return nil, err
+	}
+
+	output := &MatchingRPCResponse{}
+
+	if err := json.Unmarshal(body, output); err != nil {
+		return nil, fmt.Errorf(err.Error() + string(body))
+	}
+
+	if output.Code != 0 {
+		return output, errors.New(output.Data + " " + output.Errmsg)
+	}
+
+	return output, nil
+}
