@@ -14,6 +14,7 @@ import (
 const (
 	JOB_TYPE_CREATE_ROBOT = "CreateRobot"
 	JOB_TYPE_KICK_ROBOT   = "KickRobot"
+	JOB_TYPE_DELETE_GUILD = "DeleteGuild"
 )
 
 var (
@@ -22,20 +23,24 @@ var (
 	createTaskCronMap map[string]*library.Job = make(map[string]*library.Job, 10000)
 	createTaskCronMu  *sync.Mutex             = new(sync.Mutex)
 
-	//create robot
+	//kick robot
 	kickTaskChannel chan *library.Job       = make(chan *library.Job, 2000)
 	kickTaskCronMap map[string]*library.Job = make(map[string]*library.Job, 10000)
 	kickTaskCronMu  *sync.Mutex             = new(sync.Mutex)
+
+	//delete guild
+	deleteGuildTaskChannel chan *library.Job = make(chan *library.Job, 2000)
 )
 
 func Startup() {
 	go PullDatas(30)
 
-	go library.TaskTimed(JOB_TYPE_CREATE_ROBOT, createTaskCronMap, createTaskCronMu, createTaskChannel, createRobotTimeHandler, 20)
-	go library.TaskTimed(JOB_TYPE_KICK_ROBOT, kickTaskCronMap, kickTaskCronMu, kickTaskChannel, kickRobotTimeHandler, 20)
+	go library.TaskTimed(JOB_TYPE_CREATE_ROBOT, createTaskCronMap, createTaskCronMu, createTaskChannel, createRobotTimeHandler, 5)
+	go library.TaskTimed(JOB_TYPE_KICK_ROBOT, kickTaskCronMap, kickTaskCronMu, kickTaskChannel, kickRobotTimeHandler, 5)
 
 	go library.TaskProcess(JOB_TYPE_CREATE_ROBOT, createTaskChannel, createRobotLogicHandler)
 	go library.TaskProcess(JOB_TYPE_KICK_ROBOT, kickTaskChannel, kickRobotLogicHandler)
+	go library.TaskProcess(JOB_TYPE_DELETE_GUILD, deleteGuildTaskChannel, deleteGuildLogicHandler)
 }
 
 func JobKey(id int64) string {
@@ -60,7 +65,7 @@ func PullDatas(t int) {
 				if v.DeletedAt.Valid == true {
 					delDataLen++
 				} else {
-					okDataMap[JobKey(v.ID)] = library.NewEmptyJob()
+					okDataMap[JobKey(v.ID)] = library.NewEmptyJob().SetGuildID(v.ID)
 				}
 			}
 
