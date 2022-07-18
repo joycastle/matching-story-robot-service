@@ -8,7 +8,6 @@ import (
 
 func StartupServiceRobot() {
 	config.Startup()
-	create.Startup()
 	action.Startup()
-	action.StartupGuild()
+	create.Startup()
 }

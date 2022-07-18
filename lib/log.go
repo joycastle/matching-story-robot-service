@@ -42,6 +42,10 @@ func (lsj *LogStructuredJson) Failed() *LogStructuredJson {
 	return lsj
 }
 
+func (lsj *LogStructuredJson) IsFailed() bool {
+	return lsj.State == "FAILED"
+}
+
 func (lsj *LogStructuredJson) Success() *LogStructuredJson {
 	lsj.State = "SUCCESS"
 	return lsj

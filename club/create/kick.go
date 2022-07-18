@@ -5,6 +5,7 @@ import (
 
 	"github.com/joycastle/casual-server-lib/faketime"
 	"github.com/joycastle/matching-story-robot-service/club/config"
+	"github.com/joycastle/matching-story-robot-service/club/library"
 	"github.com/joycastle/matching-story-robot-service/lib"
 	"github.com/joycastle/matching-story-robot-service/service"
 )
@@ -46,11 +47,11 @@ func markKickingState(gid int64) int {
 	return length
 }
 
-func kickRobotTimeHandler(*Job) (int64, error) {
+func kickRobotTimeHandler(*library.Job) (int64, error) {
 	return faketime.Now().Unix() + config.GetRobotKictTimeRange(), nil
 }
 
-func kickRobotLogicHandler(job *Job) *lib.LogStructuredJson {
+func kickRobotLogicHandler(job *library.Job) *lib.LogStructuredJson {
 	info := lib.NewLogStructed()
 	kickRecordLen := 0
 	kickRecordLen = clearKickingState(job.GuildID)

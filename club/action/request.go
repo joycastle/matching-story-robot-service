@@ -4,6 +4,8 @@ import (
 	"github.com/joycastle/casual-server-lib/faketime"
 	"github.com/joycastle/casual-server-lib/util"
 	"github.com/joycastle/matching-story-robot-service/club/config"
+	"github.com/joycastle/matching-story-robot-service/club/library"
+	"github.com/joycastle/matching-story-robot-service/lib"
 	"github.com/joycastle/matching-story-robot-service/model"
 	"github.com/joycastle/matching-story-robot-service/service"
 )
@@ -12,16 +14,16 @@ var (
 	freezingTime int64 = 3600 * 7 //冷冻时间
 )
 
-func requestActiveTimeHandler() (int64, *Result) {
-	rnd := config.GetStrengthRequestByRand()
-	return faketime.Now().Unix() + rnd, ActionSuccess().Detail("rnd", rnd)
+func requestActiveTimeHandler() (int64, error) {
+	return faketime.Now().Unix() + config.GetStrengthRequestByRand(), nil
 }
 
-func requestActionHandler(job *Job) *Result {
+func requestActionHandler(job *library.Job) *lib.LogStructuredJson {
+	info := lib.NewLogStructed()
 	//获取我的请求记录
 	list, err := service.GetHelpRequestByGuildIDAndUserID(job.GuildID, job.UserID)
 	if err != nil {
-		return ErrorText(100).Detail("guild_help_respone", err.Error())
+		return info.Failed().Step(70).Err(err)
 	}
 
 	timeFilter := util.TimeStamp("2022-06-01 00:00:00")
@@ -49,14 +51,14 @@ func requestActionHandler(job *Job) *Result {
 	}
 
 	if !need {
-		return ErrorText(4000).Detail("freezingTime", "7hour")
+		return info.Failed().Step(71).Err(err).Set("freezingTime", "7hour")
 	}
 
 	if resp, err := service.SendRequestRPC("REQUEST", job.UserID, job.GuildID); err != nil {
-		return ErrorText(400).Detail(resp)
+		return info.Failed().Step(72).Err(err).Set("resp", resp)
 	} else {
 		//发送私信
 		CreateRequestChatJob(job.UserID, job.GuildID)
-		return ActionSuccess().Detail("rpcrespone", resp)
+		return info.Success().Set("resp", resp)
 	}
 }

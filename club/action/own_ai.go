@@ -1,6 +1,7 @@
 package action
 
 import (
+	"fmt"
 	"sync"
 	"time"
 
@@ -8,6 +9,8 @@ import (
 	"github.com/joycastle/casual-server-lib/log"
 	"github.com/joycastle/casual-server-lib/util"
 	"github.com/joycastle/matching-story-robot-service/club/config"
+	"github.com/joycastle/matching-story-robot-service/club/library"
+	"github.com/joycastle/matching-story-robot-service/lib"
 	"github.com/joycastle/matching-story-robot-service/service"
 )
 
@@ -25,63 +28,64 @@ func init() {
 	weedDaysConfig[time.Saturday] = 6
 }
 
-func cycleTimeHandlerOwnAi(job *Job) (int64, *Result) {
+func cycleTimeHandlerOwnAi(job *library.Job) (int64, error) {
 	robotConfig, err := service.GetRobotForGuild(job.UserID)
 	if err != nil {
-		return 0, ErrorText(100).Detail("robot_table", err.Error())
+		return 0, err
 	}
 
 	if robotConfig.ID <= 0 {
-		return 0, ErrorText(101).Detail("robot_table", job.UserID)
+		return 0, fmt.Errorf("confId not set")
 	}
 
 	actionID := int(robotConfig.GroupID)
 
 	if actionID <= 0 {
-		return 0, ErrorText(103).Detail("group_id", "as action_id")
+		return 0, fmt.Errorf("actionId not set")
 	}
 
 	actionTimes := int(robotConfig.ActNum)
 	ts, err := config.GetSleepTimeByActionTimesByRand(actionID, actionTimes)
 	if err != nil {
-		return 0, ErrorText(200).Detail("sleep time", err.Error(), "actionID", actionID, "actionTimes", actionTimes)
+		return 0, err
 	}
 
-	return faketime.Now().Unix() + int64(ts), ActionSuccess()
+	return faketime.Now().Unix() + int64(ts), nil
 }
 
-func ownActionHandler(job *Job) *Result {
+func ownActionHandler(job *library.Job) *lib.LogStructuredJson {
+	info := lib.NewLogStructed()
 	robotConfig, err := service.GetRobotForGuild(job.UserID)
 	if err != nil {
-		return ErrorText(100).Detail("robot_rable", err.Error())
+		return info.Failed().Step(51).Err(err)
 	}
 
 	if robotConfig.ID <= 0 {
-		return ErrorText(101).Detail("robot_table", job.UserID)
+		return info.Failed().Step(52).ErrString("confId is not config")
 	}
 
 	actionID := robotConfig.GroupID
 	if actionID <= 0 {
-		return ErrorText(103).Detail("group_id", "as action_id")
+		return info.Failed().Step(53).ErrString("actionID is not config")
 	}
 
 	activeDaysMap, err := config.GetRobotActiveDaysByActionID(int(actionID))
 	if err != nil {
-		return ErrorText(200).Detail("active_days", err.Error())
+		return info.Failed().Step(54).Err(err)
 	}
 
 	if len(activeDaysMap) == 0 {
-		return ErrorText(201).Detail("active_days", actionID)
+		return info.Failed().Step(55).ErrString("activeDaysMap empty")
 	}
 
 	if _, ok := activeDaysMap[-1]; ok && len(activeDaysMap) == 1 {
-		return ErrorText(1000).Detail("activeDaysMap", activeDaysMap)
+		return info.Failed().Step(56).ErrString("avtive not match").Set("activeDaysMap", activeDaysMap)
 	}
 
 	todayWeek := faketime.Now().Weekday()
 	todayWeekInt := weedDaysConfig[todayWeek]
 	if _, ok := activeDaysMap[todayWeekInt]; !ok {
-		return ErrorText(1001).Detail(
+		return info.Failed().Step(561).Set(
 			"action_id", actionID,
 			"todayWeek", todayWeek,
 			"avtiveDays", activeDaysMap[todayWeekInt])
@@ -91,11 +95,11 @@ func ownActionHandler(job *Job) *Result {
 	//1.获取工会成员
 	uids, err := service.GetGuildUserIds(job.GuildID)
 	if err != nil {
-		return ErrorText(100).Detail("guild_user_map", err.Error())
+		return info.Failed().Step(57).Err(err)
 	}
 	userInfos, err := service.GetUserInfosWithField(uids, []string{"user_level", "account_id"})
 	if err != nil {
-		return ErrorText(100).Detail("user_table", err.Error())
+		return info.Failed().Step(58).Err(err)
 	}
 	normalUserMaxLevel := 0
 	currentUserLevel := 0
@@ -114,16 +118,16 @@ func ownActionHandler(job *Job) *Result {
 	}
 
 	if len(userAccountID) == 0 {
-		return ErrorText(101).Detail("user_table", "account not found")
+		return info.Failed().Step(59).ErrString("account not found")
 	}
 
 	//rule1判断
 	rule1Limit, err := config.GetRule1TargetByRand(int(actionID))
 	if err != nil {
-		return ErrorText(200).Detail("rule1", err.Error())
+		return info.Failed().Step(590).Err(err)
 	}
 	if (currentUserLevel - normalUserMaxLevel) >= rule1Limit {
-		return ErrorText(1002).Detail(
+		return info.Failed().Step(5900).Set(
 			"currentUserLevel", currentUserLevel,
 			"normalUserMaxLevel", normalUserMaxLevel,
 			"rule1Limit", rule1Limit)
@@ -132,10 +136,10 @@ func ownActionHandler(job *Job) *Result {
 	//rule2判断
 	rule2Limit, err := config.GetRule2TargetByRand(int(actionID))
 	if err != nil {
-		return ErrorText(200).Detail("rule2", err.Error())
+		return info.Failed().Step(591).Err(err)
 	}
 	if rule2Limit <= 0 || currentUserLevel > rule2Limit {
-		return ErrorText(1003).Detail(
+		return info.Failed().Step(5910).Set(
 			"currentUserLevel", currentUserLevel,
 			"rule2Limit", rule2Limit)
 	}
@@ -143,27 +147,27 @@ func ownActionHandler(job *Job) *Result {
 	//增加关卡
 	step, err := config.GetStepByActionTimesByRand(int(actionID), int(robotConfig.ActNum))
 	if err != nil {
-		return ErrorText(200).Detail("LeveStep", err.Error(), "act_num", robotConfig.ActNum)
+		return info.Failed().Step(592).Err(err).Set("act_num", robotConfig.ActNum)
 	}
 
 	if err := service.UpdateUserLevelByUid(job.UserID, step); err != nil {
-		return ErrorText(102).Detail("user_table", err.Error())
+		return info.Failed().Step(593).Err(err)
 	}
 	//增加次数
 	if err := service.UpdateRobotActiveNumByUid(job.UserID, 1); err != nil {
-		return ErrorText(102).Detail("robot_table", err.Error())
+		return info.Failed().Step(594).Err(err)
 	}
 
 	//增加积分
 	rpcRet, err := service.SendUpdateScoreRPC(userAccountID, job.UserID, step)
 	if err != nil {
-		return ErrorText(400).Detail("update_score", err.Error())
+		return info.Failed().Step(595).Err(err).Set("resp", rpcRet)
 	}
 
-	return ActionSuccess().Detail("update_score_rpc", rpcRet)
+	return info.Success().Set("resp", rpcRet)
 }
 
-func UpdateRobotConfigMonday(targets map[string]*Job, mu *sync.Mutex) {
+func UpdateRobotConfigMonday(targets map[string]*library.Job, mu *sync.Mutex) {
 	for {
 		now := time.Now()
 		nowStamp := now.Unix()
@@ -173,7 +177,7 @@ func UpdateRobotConfigMonday(targets map[string]*Job, mu *sync.Mutex) {
 		time.Sleep(time.Duration(timeDuration) * time.Second)
 
 		start := time.Now()
-		temp := make(map[string]*Job, capacityMap)
+		temp := make(map[string]*library.Job, capacityMap)
 		mu.Lock()
 		for k, v := range targets {
 			temp[k] = v

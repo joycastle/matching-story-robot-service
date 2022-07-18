@@ -3,28 +3,24 @@ package action
 import (
 	"github.com/joycastle/casual-server-lib/faketime"
 	"github.com/joycastle/matching-story-robot-service/club/config"
+	"github.com/joycastle/matching-story-robot-service/club/library"
+	"github.com/joycastle/matching-story-robot-service/lib"
 	"github.com/joycastle/matching-story-robot-service/service"
 )
 
 func CreateRequestChatJob(userID, guildID int64) {
-	job := &Job{
-		GuildID:    guildID,
-		UserID:     userID,
-		ActionTime: faketime.Now().Unix() + int64(config.GetHelpTalkTimeGapByRand()),
-	}
-
 	k := JobKey(userID, guildID)
-
 	requestChatCrontabJobMu.Lock()
-	requestChatCrontabJob[k] = job
+	requestChatCrontabJob[k] = library.NewEmptyJob().SetGuildID(guildID).SetUserID(userID).SetNormalStatus().SetActiveTime(faketime.Now().Unix() + int64(config.GetHelpTalkTimeGapByRand()))
 	requestChatCrontabJobMu.Unlock()
 }
 
-func requestChatActionHandler(job *Job) *Result {
+func requestChatActionHandler(job *library.Job) *lib.LogStructuredJson {
+	info := lib.NewLogStructed()
 	chatMsg := config.GetChatMsgByRand(2)
 	respone, err := service.SendChatMessageRPC("requestChat", job.UserID, job.GuildID, chatMsg)
 	if err != nil {
-		return ErrorText(400).Detail(err.Error(), "chatMsg", chatMsg, "respone", respone)
+		return info.Failed().Step(61).Err(err).Set("chatMsg", chatMsg, "respone", respone)
 	}
-	return ActionSuccess().Detail(respone.Data, "chatMsg", chatMsg)
+	return info.Success().Set("chatMsg", chatMsg, "respone", respone)
 }

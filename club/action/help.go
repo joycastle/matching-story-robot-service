@@ -4,20 +4,22 @@ import (
 	"github.com/joycastle/casual-server-lib/faketime"
 	"github.com/joycastle/casual-server-lib/util"
 	"github.com/joycastle/matching-story-robot-service/club/config"
+	"github.com/joycastle/matching-story-robot-service/club/library"
+	"github.com/joycastle/matching-story-robot-service/lib"
 	"github.com/joycastle/matching-story-robot-service/model"
 	"github.com/joycastle/matching-story-robot-service/service"
 )
 
-func helpActiveTimeHandler() (int64, *Result) {
-	rnd := config.GetStrengthHelpTimeByRand()
-	return faketime.Now().Unix() + rnd, ActionSuccess().Detail("rnd", rnd)
+func helpActiveTimeHandler(job *library.Job) (int64, error) {
+	return faketime.Now().Unix() + config.GetStrengthHelpTimeByRand(), nil
 }
 
-func helpActionHandler(job *Job) *Result {
+func helpActionHandler(job *library.Job) *lib.LogStructuredJson {
+	info := lib.NewLogStructed()
 	//未完成的帮助
 	allRequest, err := service.GetGuildRequestInfosWithFiledsByGuildIDs([]int64{job.GuildID}, []string{"total", "count", "requester_id", "guild_id", "time"})
 	if err != nil {
-		return ErrorText(100).Detail("guild_help_request", err.Error())
+		return info.Failed().Step(31).Err(err)
 	}
 
 	timeFilter := util.TimeStamp("2022-06-01 00:00:00")
@@ -29,7 +31,7 @@ func helpActionHandler(job *Job) *Result {
 	}
 
 	if len(notCompleteRequest) == 0 {
-		return ErrorText(3000)
+		return info.Failed().Step(32).ErrString("no complete request")
 	}
 
 	//过滤机器人用户
@@ -40,11 +42,11 @@ func helpActionHandler(job *Job) *Result {
 		}
 	}
 	if len(users) == 0 {
-		return ErrorText(3001)
+		return info.Failed().Step(33).ErrString("no users")
 	}
 	userTypes, err := service.GetUserInfosWithField(users, []string{"user_type"})
 	if err != nil {
-		return ErrorText(100).Detail("user_table", err.Error(), users)
+		return info.Failed().Step(34).Err(err)
 	}
 	normalUserMap := make(map[int64]struct{})
 	for _, v := range userTypes {
@@ -53,7 +55,7 @@ func helpActionHandler(job *Job) *Result {
 		}
 	}
 	if len(normalUserMap) == 0 {
-		return ErrorText(3002)
+		return info.Failed().Step(35).ErrString("no normal users")
 	}
 
 	//正常用户的请求
@@ -68,7 +70,7 @@ func helpActionHandler(job *Job) *Result {
 	//查看请求帮助记录
 	respones, err := service.GetGuildResponeInfosWithFiledsByHelpIDs(requestIds, []string{"responder_id"})
 	if err != nil {
-		return ErrorText(100).Detail("guild_help_respone", err.Error(), requestIds)
+		return info.Failed().Step(36).Err(err).Set("requestIds", requestIds)
 	}
 	responesUserMap := make(map[int64]map[int64]struct{})
 	for _, v := range respones {
@@ -89,18 +91,17 @@ func helpActionHandler(job *Job) *Result {
 	}
 
 	if len(targets) == 0 {
-		return ErrorText(3003)
+		return info.Failed().Step(37).ErrString("no new targets")
 	}
 
-	ret := ActionSuccess()
 	//发送请求
 	for _, v := range targets {
 		if resp, err := service.SendRequestHelpRPC("HELP", job.UserID, job.GuildID, v.ID); err != nil {
-			return ErrorText(400).Detail("help_id", v.ID)
+			return info.Failed().Step(38).Err(err).Set("resp", resp, "helpID", v.ID)
 		} else {
-			ret.Detail("help_id", v.ID, resp.Data)
+			info.Set("help_id", v.ID, resp.Data)
 		}
 	}
 
-	return ret
+	return info.Success()
 }

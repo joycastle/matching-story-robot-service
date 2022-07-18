@@ -1,19 +1,13 @@
 # server-lib-log
 logs:
-  club-create:
-    output: var/logs/club/create.log-*-*-*
+  club-process:
+    output: var/logs/club/process.log-*-*-*
     level: ALL
-  club-dispatch:
-    output: var/logs/club/dispatch.log-*-*-*
+  club-timed:
+    output: var/logs/club/timed.log-*-*-*
     level: ALL
-  club-action:
-    output: var/logs/club/action.log-*-*-*
-    level: ALL
-  club-guild-dispatch:
-    output: var/logs/club/guild/dispatch.log-*-*-*
-    level: ALL
-  club-guild-action:
-    output: var/logs/club/guild/action.log-*-*-*
+  club-data:
+    output: var/logs/club/data.log-*-*-*
     level: ALL
   slowsql:
     output: var/logs/slowsql.log-*-*-*

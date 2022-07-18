@@ -4,16 +4,17 @@ import (
 	"github.com/joycastle/casual-server-lib/faketime"
 	"github.com/joycastle/matching-story-robot-service/club/action"
 	"github.com/joycastle/matching-story-robot-service/club/config"
+	"github.com/joycastle/matching-story-robot-service/club/library"
 	"github.com/joycastle/matching-story-robot-service/lib"
 	"github.com/joycastle/matching-story-robot-service/model"
 	"github.com/joycastle/matching-story-robot-service/service"
 )
 
-func createRobotTimeHandler(*Job) (int64, error) {
+func createRobotTimeHandler(*library.Job) (int64, error) {
 	return faketime.Now().Unix() + config.GetActiveTimeByRand(), nil
 }
 
-func createRobotLogicHandler(job *Job) *lib.LogStructuredJson {
+func createRobotLogicHandler(job *library.Job) *lib.LogStructuredJson {
 	info := lib.NewLogStructed()
 
 	if IsKickingState(job.GuildID) {
