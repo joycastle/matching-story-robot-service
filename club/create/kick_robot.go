@@ -66,8 +66,8 @@ func kickRobotLogicHandler(job *library.Job) *lib.LogStructuredJson {
 		return info.Failed().Step(10).Err(err)
 	}
 	//是否满员
-	if len(uids) >= 30 {
-		return info.Failed().Step(1).ErrString("guild members is full")
+	if len(uids) < 30 {
+		return info.Failed().Step(1).ErrString("guild members is not full")
 	}
 	if len(uids) == 0 {
 		return info.Failed().Step(2).ErrString("guild members is empty")
