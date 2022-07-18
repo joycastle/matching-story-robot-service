@@ -19,8 +19,12 @@ func IsKickingState(gid int64) bool {
 	kickRecordMu.RLock()
 	defer kickRecordMu.RUnlock()
 
-	if expire, ok := kickRecordMap[gid]; ok && faketime.Now().Unix()-expire < 0 {
-		return true
+	if expire, ok := kickRecordMap[gid]; ok {
+		if faketime.Now().Unix()-expire < 0 {
+			return true
+		} else {
+			delete(kickRecordMap, gid)
+		}
 	}
 
 	return false
