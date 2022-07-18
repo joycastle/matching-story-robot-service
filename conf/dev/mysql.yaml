@@ -2,7 +2,7 @@
 s-mysql:
   default-master:
     addr: "172.31.1.83:3306"
-    username: root
+    username: "admin"
     password: '123456'
     database: db_game
     options: charset=utf8mb4&parseTime=True
@@ -14,7 +14,7 @@ s-mysql:
     statlog: run
   default-slave:
     addr: "172.31.1.83:3306"
-    username: root
+    username: "admin"
     password: '123456'
     database: db_game
     options: charset=utf8mb4&parseTime=True
