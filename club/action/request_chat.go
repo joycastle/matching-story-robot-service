@@ -11,7 +11,7 @@ import (
 func CreateRequestChatJob(userID, guildID int64) {
 	k := JobKey(userID, guildID)
 	requestChatCrontabJobMu.Lock()
-	requestChatCrontabJob[k] = library.NewEmptyJob().SetGuildID(guildID).SetUserID(userID).SetNormalStatus().SetActiveTime(faketime.Now().Unix() + int64(config.GetHelpTalkTimeGapByRand()))
+	requestChatCrontabJob[k] = library.NewEmptyJob().SetGuildID(guildID).SetUserID(userID).SetActiveTime(faketime.Now().Unix() + int64(config.GetHelpTalkTimeGapByRand()))
 	requestChatCrontabJobMu.Unlock()
 }
 

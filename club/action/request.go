@@ -14,7 +14,7 @@ var (
 	freezingTime int64 = 3600 * 7 //冷冻时间
 )
 
-func requestActiveTimeHandler() (int64, error) {
+func requestActiveTimeHandler(job *library.Job) (int64, error) {
 	return faketime.Now().Unix() + config.GetStrengthRequestByRand(), nil
 }
 

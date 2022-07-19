@@ -37,9 +37,9 @@ var (
 func Startup() {
 	go PullDatas(30)
 
-	go library.TaskTimed(JOB_TYPE_CREATE_ROBOT, createTaskCronMap, createTaskCronMu, createTaskChannel, createRobotTimeHandler, 20)
-	go library.TaskTimed(JOB_TYPE_KICK_ROBOT, kickTaskCronMap, kickTaskCronMu, kickTaskChannel, kickRobotTimeHandler, 20)
-	go library.TaskTimed(JOB_TYPE_DELETE_GUILD, deleteGuildTaskCronMap, deleteGuildTaskCronMu, deleteGuildTaskChannel, deleteGuildTimeHandler, 20)
+	go library.TaskTimed(JOB_TYPE_CREATE_ROBOT, createTaskCronMap, createTaskCronMu, createTaskChannel, 20)
+	go library.TaskTimed(JOB_TYPE_KICK_ROBOT, kickTaskCronMap, kickTaskCronMu, kickTaskChannel, 20)
+	go library.TaskTimed(JOB_TYPE_DELETE_GUILD, deleteGuildTaskCronMap, deleteGuildTaskCronMu, deleteGuildTaskChannel, 20)
 
 	go library.TaskProcess(JOB_TYPE_CREATE_ROBOT, createTaskChannel, createRobotLogicHandler)
 	go library.TaskProcess(JOB_TYPE_KICK_ROBOT, kickTaskChannel, kickRobotLogicHandler)
@@ -48,6 +48,9 @@ func Startup() {
 
 func JobKey(id int64) string {
 	return fmt.Sprintf("%d", id)
+}
+func JobKeyHandler(job *library.Job) string {
+	return fmt.Sprintf("%d", job.GetGuildID())
 }
 
 func PullDatas(t int) {
@@ -75,13 +78,13 @@ func PullDatas(t int) {
 			okDataLen := len(okDataMap)
 
 			if okDataLen > 0 {
-				library.DeleteJobs(createTaskCronMap, createTaskCronMu, okDataMap)
-				library.DeleteJobs(kickTaskCronMap, kickTaskCronMu, okDataMap)
-				library.DeleteJobs(deleteGuildTaskCronMap, deleteGuildTaskCronMu, okDataMap)
+				library.DeleteJobs(JOB_TYPE_CREATE_ROBOT, createTaskCronMap, createTaskCronMu, okDataMap)
+				library.DeleteJobs(JOB_TYPE_KICK_ROBOT, kickTaskCronMap, kickTaskCronMu, okDataMap)
+				library.DeleteJobs(JOB_TYPE_DELETE_GUILD, deleteGuildTaskCronMap, deleteGuildTaskCronMu, okDataMap)
 
-				info.Set("create_state", library.CreateJobs(createTaskCronMap, createTaskCronMu, okDataMap))
-				info.Set("kick_state", library.CreateJobs(kickTaskCronMap, kickTaskCronMu, okDataMap))
-				info.Set("delete_guild", library.CreateJobs(deleteGuildTaskCronMap, deleteGuildTaskCronMu, okDataMap))
+				library.CreateJobs(JOB_TYPE_CREATE_ROBOT, createTaskCronMap, createTaskCronMu, okDataMap, createRobotTimeHandler, JobKeyHandler)
+				library.CreateJobs(JOB_TYPE_KICK_ROBOT, kickTaskCronMap, kickTaskCronMu, okDataMap, kickRobotTimeHandler, JobKeyHandler)
+				library.CreateJobs(JOB_TYPE_DELETE_GUILD, deleteGuildTaskCronMap, deleteGuildTaskCronMu, okDataMap, deleteGuildTimeHandler, JobKeyHandler)
 			}
 
 			info.Success().Set("total", len(list), "new", okDataLen, "del", delDataLen)

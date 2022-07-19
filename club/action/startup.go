@@ -17,8 +17,6 @@ const (
 	JOB_TYPE_REQUEST      = "Request"
 	JOB_TYPE_REQUEST_CHAT = "RequestChat"
 	JOB_TYPE_HELP         = "Help"
-	JOB_TYPE_ACTIVITY     = "Activity"
-	JOB_TYPE_DELETE_GUILD = "DeleteGuild"
 	JOB_TYPE_MONDAY       = "MondayUpdate"
 	JOB_TYPE_OWN_AI       = "OwnAI"
 )
@@ -47,9 +45,6 @@ var (
 	helpCrontabJobMu   *sync.Mutex             = new(sync.Mutex)
 	helpProcessChannel chan *library.Job       = make(chan *library.Job, capacityChannel)
 
-	//delete guild
-	deleteGuildChannel chan *library.Job = make(chan *library.Job, 100)
-
 	//using for ownaction
 	ownActionCrontabJob     map[string]*library.Job = make(map[string]*library.Job, capacityMap)
 	ownActionCrontabJobMu   *sync.Mutex             = new(sync.Mutex)
@@ -60,38 +55,28 @@ var (
 	RobotActionUpdateCrontabJobMu *sync.Mutex             = new(sync.Mutex)
 )
 
-func DeleteJob(targets map[string]*library.Job, mu *sync.Mutex, newTargets map[string]*library.Job) int {
-	c := 0
-	mu.Lock()
-	for k, _ := range targets {
-		if _, ok := newTargets[k]; !ok {
-			delete(targets, k)
-			c = c + 1
-		}
-	}
-	mu.Unlock()
-	return c
-}
-
 func JobKey(userID, guildID int64) string {
 	return fmt.Sprintf("%d-%d", userID, guildID)
+}
+
+func JobKeyHandler(job *library.Job) string {
+	return fmt.Sprintf("%d-%d", job.GetUserID(), job.GetGuildID())
 }
 
 func Startup() {
 	go UpdateRobotJobs(10)
 
-	go library.TaskTimed(JOB_TYPE_FIRSTIN, firstInCrontabJob, firstInCrontabJobMu, firstInProcessChannel, nil, 10)
-	go library.TaskTimed(JOB_TYPE_REQUEST, requestCrontabJob, requestCrontabJobMu, requestProcessChannel, nil, 10)
-	go library.TaskTimed(JOB_TYPE_REQUEST_CHAT, requestChatCrontabJob, requestChatCrontabJobMu, requestChatProcessChannel, nil, 10)
-	go library.TaskTimed(JOB_TYPE_HELP, helpCrontabJob, helpCrontabJobMu, helpProcessChannel, nil, 10)
-	go library.TaskTimed(JOB_TYPE_OWN_AI, ownActionCrontabJob, ownActionCrontabJobMu, ownActionProcessChannel, cycleTimeHandlerOwnAi, 10)
+	go library.TaskTimed(JOB_TYPE_FIRSTIN, firstInCrontabJob, firstInCrontabJobMu, firstInProcessChannel, 10)
+	go library.TaskTimed(JOB_TYPE_REQUEST, requestCrontabJob, requestCrontabJobMu, requestProcessChannel, 10)
+	go library.TaskTimed(JOB_TYPE_REQUEST_CHAT, requestChatCrontabJob, requestChatCrontabJobMu, requestChatProcessChannel, 10)
+	go library.TaskTimed(JOB_TYPE_HELP, helpCrontabJob, helpCrontabJobMu, helpProcessChannel, 10)
+	go library.TaskTimed(JOB_TYPE_OWN_AI, ownActionCrontabJob, ownActionCrontabJobMu, ownActionProcessChannel, 10)
 
 	go library.TaskProcess(JOB_TYPE_FIRSTIN, firstInProcessChannel, firstInActionHandler)
 	go library.TaskProcess(JOB_TYPE_REQUEST, requestProcessChannel, robotActionBeforeCheck, requestActionHandler)
 	go library.TaskProcess(JOB_TYPE_REQUEST_CHAT, requestChatProcessChannel, robotActionBeforeCheck, requestChatActionHandler)
 	go library.TaskProcess(JOB_TYPE_HELP, helpProcessChannel, robotActionBeforeCheck, helpActionHandler)
 	go library.TaskProcess(JOB_TYPE_OWN_AI, ownActionProcessChannel, robotActionBeforeCheck, ownActionHandler)
-	go library.TaskProcess(JOB_TYPE_DELETE_GUILD, deleteGuildChannel, deleteActionHandler)
 
 	//更新配置周一0点
 	go UpdateRobotConfigMonday(RobotActionUpdateCrontabJob, RobotActionUpdateCrontabJobMu)
@@ -198,17 +183,17 @@ func UpdateRobotJobs(t int) error {
 			}
 
 			//delete job
-			library.DeleteJobs(firstInCrontabJob, firstInCrontabJobMu, robotNewJobsMap)
-			library.DeleteJobs(requestCrontabJob, requestCrontabJobMu, robotNewJobsMap)
-			library.DeleteJobs(requestChatCrontabJob, requestChatCrontabJobMu, robotNewJobsMap)
-			library.DeleteJobs(helpCrontabJob, helpCrontabJobMu, robotNewJobsMap)
-			library.DeleteJobs(ownActionCrontabJob, ownActionCrontabJobMu, robotNewJobsMap)
-			library.DeleteJobs(RobotActionUpdateCrontabJob, RobotActionUpdateCrontabJobMu, robotNewJobsMap)
+			library.DeleteJobs(JOB_TYPE_FIRSTIN, firstInCrontabJob, firstInCrontabJobMu, robotNewJobsMap)
+			library.DeleteJobs(JOB_TYPE_REQUEST, requestCrontabJob, requestCrontabJobMu, robotNewJobsMap)
+			library.DeleteJobs(JOB_TYPE_REQUEST_CHAT, requestChatCrontabJob, requestChatCrontabJobMu, robotNewJobsMap)
+			library.DeleteJobs(JOB_TYPE_HELP, helpCrontabJob, helpCrontabJobMu, robotNewJobsMap)
+			library.DeleteJobs(JOB_TYPE_OWN_AI, ownActionCrontabJob, ownActionCrontabJobMu, robotNewJobsMap)
+			library.DeleteJobs(JOB_TYPE_MONDAY, RobotActionUpdateCrontabJob, RobotActionUpdateCrontabJobMu, robotNewJobsMap)
 
 			//create job
-			info.Set(JOB_TYPE_REQUEST, library.CreateJobs(requestCrontabJob, requestCrontabJobMu, robotNewJobsMap))
-			info.Set(JOB_TYPE_HELP, library.CreateJobs(helpCrontabJob, helpCrontabJobMu, robotNewJobsMap))
-			info.Set(JOB_TYPE_OWN_AI, library.CreateJobs(ownActionCrontabJob, ownActionCrontabJobMu, robotNewJobsMap))
+			library.CreateJobs(JOB_TYPE_REQUEST, requestCrontabJob, requestCrontabJobMu, robotNewJobsMap, requestActiveTimeHandler, JobKeyHandler)
+			library.CreateJobs(JOB_TYPE_HELP, helpCrontabJob, helpCrontabJobMu, robotNewJobsMap, helpActiveTimeHandler, JobKeyHandler)
+			library.CreateJobs(JOB_TYPE_OWN_AI, ownActionCrontabJob, ownActionCrontabJobMu, robotNewJobsMap, cycleTimeHandlerOwnAi, JobKeyHandler)
 
 			break
 		}

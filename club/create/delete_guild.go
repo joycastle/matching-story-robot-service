@@ -2,6 +2,7 @@ package create
 
 import (
 	"math/rand"
+	"sync"
 
 	"github.com/joycastle/casual-server-lib/faketime"
 	"github.com/joycastle/casual-server-lib/log"
@@ -9,6 +10,11 @@ import (
 	"github.com/joycastle/matching-story-robot-service/lib"
 	"github.com/joycastle/matching-story-robot-service/model"
 	"github.com/joycastle/matching-story-robot-service/service"
+)
+
+var (
+	deleteMap map[int64]struct{} = make(map[int64]struct{}, 1000)
+	deleteMu  *sync.Mutex        = new(sync.Mutex)
 )
 
 func deleteGuildTimeHandler(job *library.Job) (int64, error) {
@@ -20,6 +26,13 @@ func deleteGuildTimeHandler(job *library.Job) (int64, error) {
 
 func deleteGuildLogicHandler(job *library.Job) *lib.LogStructuredJson {
 	info := lib.NewLogStructed()
+
+	deleteMu.Lock()
+	if _, ok := deleteMap[job.GuildID]; ok {
+		deleteMu.Unlock()
+		return info.Failed().Step(34).ErrString("alread delete")
+	}
+	deleteMu.Unlock()
 
 	//1.获取机器人和真实用户分布
 	userDistributions, err := service.GetGuildUserTypeDistribution(job.GuildID)
@@ -41,6 +54,11 @@ func deleteGuildLogicHandler(job *library.Job) *lib.LogStructuredJson {
 		if err := service.DeleteGuild(job.GuildID); err != nil {
 			return info.Failed().Err(err).Step(32)
 		}
+
+		deleteMu.Lock()
+		deleteMap[job.GuildID] = struct{}{}
+		deleteMu.Unlock()
+
 		return info.Success().Set("robotNum", len(robotUsers))
 	}
 

@@ -7,23 +7,14 @@ import (
 	"github.com/joycastle/casual-server-lib/faketime"
 )
 
-const (
-	JobStatusInit   = 0
-	JobStatusNormal = 1
-)
-
 type Job struct {
 	ActionTime int64 `json:"action_time"`
 	GuildID    int64 `json:"guild_id"`
 	UserID     int64 `json:"user_id,omitempty"`
-	Status     int8  `json:"status"`
 }
 
 func NewEmptyJob() *Job {
-	return &Job{
-		ActionTime: 0,
-		Status:     JobStatusInit,
-	}
+	return &Job{}
 }
 
 func (job *Job) SetActiveTime(t int64) *Job {
@@ -55,18 +46,6 @@ func (job *Job) SetUserID(v int64) *Job {
 
 func (job *Job) GetUserID() int64 {
 	return job.UserID
-}
-
-func (job *Job) SetNormalStatus() *Job {
-	job.Status = JobStatusNormal
-	return job
-}
-
-func (job *Job) IsInit() bool {
-	if job.Status == JobStatusInit {
-		return true
-	}
-	return false
 }
 
 func (job *Job) Expired() bool {

@@ -6,6 +6,9 @@ logs:
   club-timed:
     output: var/logs/club/timed.log-*-*-*
     level: ALL
+  club-merge:
+    output: var/logs/club/merge.log-*-*-*
+    level: ALL
   club-data:
     output: var/logs/club/data.log-*-*-*
     level: ALL

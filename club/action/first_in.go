@@ -11,7 +11,7 @@ import (
 func CreateFirstInJob(userID, guildID int64) {
 	k := JobKey(userID, guildID)
 	firstInCrontabJobMu.Lock()
-	firstInCrontabJob[k] = library.NewEmptyJob().SetGuildID(guildID).SetUserID(userID).SetNormalStatus().SetActiveTime(faketime.Now().Unix() + int64(config.GetJoinTalkTimeGapByRand()))
+	firstInCrontabJob[k] = library.NewEmptyJob().SetGuildID(guildID).SetUserID(userID).SetActiveTime(faketime.Now().Unix() + int64(config.GetJoinTalkTimeGapByRand()))
 	firstInCrontabJobMu.Unlock()
 }
 
