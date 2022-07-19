@@ -41,13 +41,23 @@ func cycleTimeHandlerOwnAi(job *library.Job) (int64, error) {
 		return 0, fmt.Errorf("actionId not set")
 	}
 
+	tts := 0
 	actionTimes := int(robotConfig.ActNum)
-	ts, err := config.GetSleepTimeByActionTimesByRand(actionID, actionTimes)
-	if err != nil {
-		return 0, err
+	if actionTimes == 0 {
+		ts, err := config.GetFirstActionTimeByRand(actionID)
+		if err != nil {
+			return 0, err
+		}
+		tts = ts
+	} else {
+		ts, err := config.GetSleepTimeByActionTimesByRand(actionID, actionTimes)
+		if err != nil {
+			return 0, err
+		}
+		tts = ts
 	}
 
-	return faketime.Now().Unix() + int64(ts), nil
+	return faketime.Now().Unix() + int64(tts), nil
 }
 
 func ownActionHandler(job *library.Job) *lib.LogStructuredJson {

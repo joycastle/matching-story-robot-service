@@ -18,6 +18,7 @@ var (
 	activeSleepRule1Map       map[int][]int            = make(map[int][]int)
 	activeSleepRule2TargetMap map[int][][]int          = make(map[int][][]int)
 	activeSleepRule2TimeMap   map[int][]int            = make(map[int][]int)
+	activeInitTimeMap         map[int][]int            = make(map[int][]int)
 )
 
 //读取配置信息
@@ -103,10 +104,26 @@ func ReadRobotTeamFromConfManager() error {
 
 			activeSleepRule2TimeMap[id] = tmpe
 
+			//activeInitTimeMap
+			tmpx := []int{}
+			for j := 0; j < iface.GetInitialTimeLen(); j++ {
+				tmpx = append(tmpx, iface.GetInitialTimeByIndex(j))
+			}
+			activeInitTimeMap[id] = tmpx
+
 		}
 	}
 
 	return nil
+}
+
+//获取第一次行动时间
+func GetFirstActionTimeByRand(aid int) (int, error) {
+	if ret, ok := activeInitTimeMap[aid]; ok {
+		min, max := Compare2Int(ret[0], ret[1])
+		return min + rand.Intn(max-min+1), nil
+	}
+	return 0, errParseIndexNotFound("robotTeam", "initialTime", fmt.Sprintf("%d", aid))
 }
 
 //获取活跃天数
