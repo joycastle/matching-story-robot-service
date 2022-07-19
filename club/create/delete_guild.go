@@ -37,7 +37,8 @@ func deleteGuildLogicHandler(job *library.Job) *lib.LogStructuredJson {
 		if err := service.DeleteGuild(job.GuildID); err != nil {
 			return info.Failed().Err(err).Step(32)
 		}
+		return info.Success().Set("robotNum", len(robotUsers))
 	}
 
-	return info.Success().Set("robotNum", len(robotUsers))
+	return info.Failed().Step(33).Set("normalNum", len(normalUsers), "robotNum", len(robotUsers))
 }
