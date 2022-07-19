@@ -77,9 +77,11 @@ func PullDatas(t int) {
 			if okDataLen > 0 {
 				library.DeleteJobs(createTaskCronMap, createTaskCronMu, okDataMap)
 				library.DeleteJobs(kickTaskCronMap, kickTaskCronMu, okDataMap)
+				library.DeleteJobs(deleteGuildTaskCronMap, deleteGuildTaskCronMu, okDataMap)
 
 				info.Set("create_state", library.CreateJobs(createTaskCronMap, createTaskCronMu, okDataMap))
 				info.Set("kick_state", library.CreateJobs(kickTaskCronMap, kickTaskCronMu, okDataMap))
+				info.Set("delete_guild", library.CreateJobs(deleteGuildTaskCronMap, deleteGuildTaskCronMu, okDataMap))
 			}
 
 			info.Success().Set("total", len(list), "new", okDataLen, "del", delDataLen)
