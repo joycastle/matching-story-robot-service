@@ -77,7 +77,7 @@ func kickRobotLogicHandler(job *library.Job) *lib.LogStructuredJson {
 	robotNum := 0
 	normalUserActiveNum := 0
 	avtiveDays := config.GetRobotKickActiveDays()
-	users, err := service.GetUserInfosWithField(uids, []string{"login_time"})
+	users, err := service.GetUserInfosWithField(uids, []string{"login_time", "user_level"})
 	robotMaxLevelUid := int64(0)
 	robotMaxLevel := 0
 	for _, u := range users {

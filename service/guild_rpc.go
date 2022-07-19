@@ -208,6 +208,10 @@ func SendUpdateScoreRPC(accountID string, userID int64, score int) (*MatchingRPC
 func SendLeaveGuildRPC(accountID string, userID int64, guildId int64) (*MatchingRPCResponse, error) {
 	data := url.Values{}
 
+	if userID == 0 {
+		return nil, fmt.Errorf("user_id must > 0")
+	}
+
 	if len(accountID) == 0 {
 		users, err := GetUserInfosWithField([]int64{userID}, []string{"account_id"})
 		if err != nil {
