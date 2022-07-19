@@ -32,6 +32,8 @@ func TaskTimed(businessType string, targets map[string]*Job, mu *sync.Mutex, ch 
 			if job.Expired() {
 				expiredJobs[k] = job
 			}
+
+			log.Get("club-timed").Debug(businessType, job.GetActiveTime(), job.GetActiveTimeDesc())
 		}
 		total = len(targets)
 		mu.Unlock()
@@ -49,7 +51,7 @@ func TaskTimed(businessType string, targets map[string]*Job, mu *sync.Mutex, ch 
 						info.Set(fmt.Sprintf("timeHandler:%v", job), err.Error())
 						actTime, _ = DefaultTimeHandler(nil)
 					}
-					job.ActionTime = actTime
+					job.SetActiveTime(actTime)
 				}
 			}
 

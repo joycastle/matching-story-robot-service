@@ -1,6 +1,8 @@
 package library
 
 import (
+	"time"
+
 	"github.com/joycastle/casual-server-lib/faketime"
 )
 
@@ -25,6 +27,14 @@ func NewEmptyJob() *Job {
 func (job *Job) SetActiveTime(t int64) *Job {
 	job.ActionTime = t
 	return job
+}
+
+func (job *Job) GetActiveTime() int64 {
+	return job.ActionTime
+}
+
+func (job *Job) GetActiveTimeDesc() string {
+	return time.Unix(job.ActionTime, 0).Format("2006-01-02 15:04:05")
 }
 
 func (job *Job) SetGuildID(v int64) *Job {
