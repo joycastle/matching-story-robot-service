@@ -51,8 +51,9 @@ var (
 	ownActionProcessChannel chan *library.Job       = make(chan *library.Job, capacityChannel)
 
 	//data source for update robot action
-	RobotActionUpdateCrontabJob   map[string]*library.Job = make(map[string]*library.Job, capacityMap)
-	RobotActionUpdateCrontabJobMu *sync.Mutex             = new(sync.Mutex)
+	RobotActionUpdateCrontabJob     map[string]*library.Job = make(map[string]*library.Job, capacityMap)
+	RobotActionUpdateCrontabJobMu   *sync.Mutex             = new(sync.Mutex)
+	RobotActionUpdateProcessChannel chan *library.Job       = make(chan *library.Job, capacityChannel)
 )
 
 func JobKey(userID, guildID int64) string {
@@ -71,15 +72,14 @@ func Startup() {
 	go library.TaskTimed(JOB_TYPE_REQUEST_CHAT, requestChatCrontabJob, requestChatCrontabJobMu, requestChatProcessChannel, 10)
 	go library.TaskTimed(JOB_TYPE_HELP, helpCrontabJob, helpCrontabJobMu, helpProcessChannel, 10)
 	go library.TaskTimed(JOB_TYPE_OWN_AI, ownActionCrontabJob, ownActionCrontabJobMu, ownActionProcessChannel, 10)
+	go library.TaskTimed(JOB_TYPE_MONDAY, RobotActionUpdateCrontabJob, RobotActionUpdateCrontabJobMu, RobotActionUpdateProcessChannel, 60)
 
 	go library.TaskProcess(JOB_TYPE_FIRSTIN, firstInProcessChannel, firstInActionHandler)
 	go library.TaskProcess(JOB_TYPE_REQUEST, requestProcessChannel, robotActionBeforeCheck, requestActionHandler)
 	go library.TaskProcess(JOB_TYPE_REQUEST_CHAT, requestChatProcessChannel, robotActionBeforeCheck, requestChatActionHandler)
 	go library.TaskProcess(JOB_TYPE_HELP, helpProcessChannel, robotActionBeforeCheck, helpActionHandler)
 	go library.TaskProcess(JOB_TYPE_OWN_AI, ownActionProcessChannel, robotActionBeforeCheck, ownActionHandler)
-
-	//更新配置周一0点
-	go UpdateRobotConfigMonday(RobotActionUpdateCrontabJob, RobotActionUpdateCrontabJobMu)
+	go library.TaskProcess(JOB_TYPE_MONDAY, RobotActionUpdateProcessChannel, robotActionBeforeCheck, robotActionUpdateHandler)
 }
 
 func UpdateRobotJobs(t int) error {
@@ -194,6 +194,7 @@ func UpdateRobotJobs(t int) error {
 			library.CreateJobs(JOB_TYPE_REQUEST, requestCrontabJob, requestCrontabJobMu, robotNewJobsMap, requestActiveTimeHandler, JobKeyHandler)
 			library.CreateJobs(JOB_TYPE_HELP, helpCrontabJob, helpCrontabJobMu, robotNewJobsMap, helpActiveTimeHandler, JobKeyHandler)
 			library.CreateJobs(JOB_TYPE_OWN_AI, ownActionCrontabJob, ownActionCrontabJobMu, robotNewJobsMap, cycleTimeHandlerOwnAi, JobKeyHandler)
+			library.CreateJobs(JOB_TYPE_MONDAY, RobotActionUpdateCrontabJob, RobotActionUpdateCrontabJobMu, robotNewJobsMap, robotActionUpdateTimeHandler, JobKeyHandler)
 
 			break
 		}

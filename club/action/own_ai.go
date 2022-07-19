@@ -2,12 +2,9 @@ package action
 
 import (
 	"fmt"
-	"sync"
 	"time"
 
 	"github.com/joycastle/casual-server-lib/faketime"
-	"github.com/joycastle/casual-server-lib/log"
-	"github.com/joycastle/casual-server-lib/util"
 	"github.com/joycastle/matching-story-robot-service/club/config"
 	"github.com/joycastle/matching-story-robot-service/club/library"
 	"github.com/joycastle/matching-story-robot-service/lib"
@@ -165,90 +162,4 @@ func ownActionHandler(job *library.Job) *lib.LogStructuredJson {
 	}
 
 	return info.Success().Set("resp", rpcRet)
-}
-
-func UpdateRobotConfigMonday(targets map[string]*library.Job, mu *sync.Mutex) {
-	for {
-		now := time.Now()
-		nowStamp := now.Unix()
-		mondayStamp := util.WeekMondayTimestamp(now)
-		sunStamp := mondayStamp + 86400*7
-		timeDuration := sunStamp - nowStamp
-		time.Sleep(time.Duration(timeDuration) * time.Second)
-
-		start := time.Now()
-		temp := make(map[string]*library.Job, capacityMap)
-		mu.Lock()
-		for k, v := range targets {
-			temp[k] = v
-		}
-		mu.Unlock()
-
-		//用户信息
-		uids := []int64{}
-		for _, job := range temp {
-			uids = append(uids, job.UserID)
-		}
-		userLevels, err := service.GetUserInfosWithField(uids, []string{"user_level"})
-		if err != nil {
-			continue
-		}
-		userLevelsMap := make(map[int64]int, len(uids))
-		for _, u := range userLevels {
-			userLevelsMap[u.UserID] = u.UserLevel
-		}
-
-		//机器人信息
-		robotConfigs, err := service.GetRobotInfosWithField(uids, []string{"conf_id", "group_id"})
-		if err != nil {
-			continue
-		}
-		type RobotConf struct {
-			UserType int32
-			ActionID int64
-		}
-		robotConfigsMap := make(map[string]RobotConf, len(robotConfigs))
-		for _, robot := range robotConfigs {
-			robotConfigsMap[robot.RobotID] = RobotConf{UserType: robot.ConfID, ActionID: robot.GroupID}
-		}
-
-		//获取要更新的目标
-		needUpdateConfigs := make(map[string]int64, len(robotConfigs))
-		needUpdateUids := []int64{}
-		for _, job := range temp {
-			userLevel, ok := userLevelsMap[job.UserID]
-			if !ok {
-				continue
-			}
-			robotID := service.GetRobotIDByUid(job.UserID)
-			robotConfig, ok := robotConfigsMap[robotID]
-			if !ok {
-				continue
-			}
-			actionID := config.GetRobotActionIDByRand(userLevel, robotConfig.UserType)
-			if actionID == robotConfig.ActionID {
-				continue
-			}
-
-			needUpdateConfigs[robotID] = actionID
-			needUpdateUids = append(needUpdateUids, job.UserID)
-		}
-
-		//开始执行更新操作
-		if len(needUpdateConfigs) > 0 {
-			//更新活动次数为0
-			if err := service.ResetRobotActNum(needUpdateUids); err != nil {
-				continue
-			}
-			for robotID, actionID := range needUpdateConfigs {
-				if err := service.UpdateRobotByRobotID(robotID, "group_id", actionID); err != nil {
-					continue
-				}
-				time.Sleep(1000)
-			}
-		}
-
-		cost := time.Since(start).Nanoseconds() / 1000000
-		log.Get("club-dispatch").Info("RobotActionIDUpdate", "processNum:", len(needUpdateConfigs), "cost:", cost, "ms")
-	}
 }
