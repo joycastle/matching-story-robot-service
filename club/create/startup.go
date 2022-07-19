@@ -29,7 +29,9 @@ var (
 	kickTaskCronMu  *sync.Mutex             = new(sync.Mutex)
 
 	//delete guild
-	deleteGuildTaskChannel chan *library.Job = make(chan *library.Job, 2000)
+	deleteGuildTaskChannel chan *library.Job       = make(chan *library.Job, 10000)
+	deleteGuildTaskCronMap map[string]*library.Job = make(map[string]*library.Job, 10000)
+	deleteGuildTaskCronMu  *sync.Mutex             = new(sync.Mutex)
 )
 
 func Startup() {
@@ -37,10 +39,10 @@ func Startup() {
 
 	go library.TaskTimed(JOB_TYPE_CREATE_ROBOT, createTaskCronMap, createTaskCronMu, createTaskChannel, createRobotTimeHandler, 20)
 	go library.TaskTimed(JOB_TYPE_KICK_ROBOT, kickTaskCronMap, kickTaskCronMu, kickTaskChannel, kickRobotTimeHandler, 20)
+	go library.TaskTimed(JOB_TYPE_DELETE_GUILD, deleteGuildTaskCronMap, deleteGuildTaskCronMu, deleteGuildTaskChannel, deleteGuildTimeHandler, 20)
 
 	go library.TaskProcess(JOB_TYPE_CREATE_ROBOT, createTaskChannel, createRobotLogicHandler)
 	go library.TaskProcess(JOB_TYPE_KICK_ROBOT, kickTaskChannel, kickRobotLogicHandler)
-
 	go library.TaskProcess(JOB_TYPE_DELETE_GUILD, deleteGuildTaskChannel, deleteGuildLogicHandler)
 }
 

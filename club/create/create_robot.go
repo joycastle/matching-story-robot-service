@@ -46,7 +46,6 @@ func createRobotLogicHandler(job *library.Job) *lib.LogStructuredJson {
 
 	//case 全是机器人则删除工会
 	if len(normalUsers) == 0 {
-		addDeleteGuildTask(job.GuildID)
 		return info.Failed().Step(6).ErrString("will delete guild").Set("normalUsers", len(normalUsers), "robotUsers", len(robotUsers))
 	}
 
