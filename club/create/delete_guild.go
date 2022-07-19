@@ -12,9 +12,10 @@ import (
 )
 
 func deleteGuildTimeHandler(job *library.Job) (int64, error) {
+	u := faketime.Now().Unix()
 	r := int64(rand.Intn(30))
-	log.Get("club-timed").Debug("Delete", r, job.String())
-	return faketime.Now().Unix() + r, nil
+	log.Get("club-timed").Debug("Delete", r, u, job.String())
+	return u + r, nil
 }
 
 func deleteGuildLogicHandler(job *library.Job) *lib.LogStructuredJson {
