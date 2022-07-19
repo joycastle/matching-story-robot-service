@@ -33,7 +33,7 @@ func TaskTimed(businessType string, targets map[string]*Job, mu *sync.Mutex, ch 
 				expiredJobs[k] = job
 			}
 
-			log.Get("club-timed").Debug(businessType, job.GetActiveTime(), job.GetActiveTimeDesc())
+			log.Get("club-timed").Debug(businessType, job.String(), job.GetActiveTimeDesc(), faketime.Now().Unix())
 		}
 		total = len(targets)
 		mu.Unlock()

@@ -4,14 +4,17 @@ import (
 	"math/rand"
 
 	"github.com/joycastle/casual-server-lib/faketime"
+	"github.com/joycastle/casual-server-lib/log"
 	"github.com/joycastle/matching-story-robot-service/club/library"
 	"github.com/joycastle/matching-story-robot-service/lib"
 	"github.com/joycastle/matching-story-robot-service/model"
 	"github.com/joycastle/matching-story-robot-service/service"
 )
 
-func deleteGuildTimeHandler(*library.Job) (int64, error) {
-	return faketime.Now().Unix() + int64(rand.Intn(30)), nil
+func deleteGuildTimeHandler(job *library.Job) (int64, error) {
+	r := int64(rand.Intn(30))
+	log.Get("club-timed").Debug("Delete", r, job.String())
+	return faketime.Now().Unix() + r, nil
 }
 
 func deleteGuildLogicHandler(job *library.Job) *lib.LogStructuredJson {

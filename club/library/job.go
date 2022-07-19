@@ -1,6 +1,7 @@
 package library
 
 import (
+	"encoding/json"
 	"time"
 
 	"github.com/joycastle/casual-server-lib/faketime"
@@ -20,7 +21,8 @@ type Job struct {
 
 func NewEmptyJob() *Job {
 	return &Job{
-		Status: JobStatusInit,
+		ActionTime: 0,
+		Status:     JobStatusInit,
 	}
 }
 
@@ -42,9 +44,17 @@ func (job *Job) SetGuildID(v int64) *Job {
 	return job
 }
 
+func (job *Job) GetGuildID() int64 {
+	return job.GuildID
+}
+
 func (job *Job) SetUserID(v int64) *Job {
 	job.UserID = v
 	return job
+}
+
+func (job *Job) GetUserID() int64 {
+	return job.UserID
 }
 
 func (job *Job) SetNormalStatus() *Job {
@@ -64,4 +74,9 @@ func (job *Job) Expired() bool {
 		return true
 	}
 	return false
+}
+
+func (job *Job) String() string {
+	b, _ := json.Marshal(job)
+	return string(b)
 }
