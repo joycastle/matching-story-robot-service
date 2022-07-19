@@ -23,7 +23,6 @@ func TaskTimed(businessType string, targets map[string]*Job, mu *sync.Mutex, ch 
 			proJobs        []*Job          = make([]*Job, 0)
 			proJobsLen     int             = 0
 			initJobsLen    int             = 0
-			deleteJobsLen  int             = 0
 		)
 
 		//check expired jobs
@@ -31,6 +30,7 @@ func TaskTimed(businessType string, targets map[string]*Job, mu *sync.Mutex, ch 
 		for k, job := range targets {
 			if job.Expired() {
 				expiredJobs[k] = job
+				delete(targets, k) //expired must delete
 			}
 
 			log.Get("club-timed").Debug(businessType, job.String(), job.GetActiveTimeDesc(), faketime.Now().Unix())
@@ -57,18 +57,15 @@ func TaskTimed(businessType string, targets map[string]*Job, mu *sync.Mutex, ch 
 
 			mu.Lock()
 			for k, job := range expiredJobs {
-				if _, ok := targets[k]; !ok {
-					continue
-				}
 				if job.IsInit() {
 					job.SetNormalStatus()
 					initJobsLen++
 				} else {
 					proJobs = append(proJobs, job)
-					if timeHandler == nil {
-						delete(targets, k)
-						deleteJobsLen++
-					}
+				}
+
+				if timeHandler != nil {
+					targets[k] = job
 				}
 			}
 			total = len(targets)
@@ -83,7 +80,7 @@ func TaskTimed(businessType string, targets map[string]*Job, mu *sync.Mutex, ch 
 			}
 		}
 
-		info.Success().Set("total", total, "expired", expiredJobsLen, "pro", proJobsLen, "init", initJobsLen, "del", deleteJobsLen)
+		info.Success().Set("total", total, "expired", expiredJobsLen, "pro", proJobsLen, "init", initJobsLen)
 
 		cost := faketime.Since(start).Nanoseconds() / 1000000
 		log.Get("club-timed").Info(businessType, info.String(), "cost:", cost, "ms")
