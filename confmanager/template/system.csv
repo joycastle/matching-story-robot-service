@@ -1,4 +1,0 @@
-ID,MaxLevel,GuildLevelLimit,GuildMaxNum,GuildActivityLevelLimit,HelpInterval,MaxUnAckHelpCnt,MaxUnfinishedHelpCnt,GuildRankCount,UserRankCount
-INT,INT,INT,INT,INT,INT,INT,INT,INT,INT
-ID,满级关卡号,公会限制等级,公会最大人数,公会活动参与限制,公会帮助间隔,最大待消费的请求体力,单次拉取未完成的最大帮助个数,公会排行榜数量,玩家排行榜数量
-1,721,35,30,34,25200,50,50,200,200

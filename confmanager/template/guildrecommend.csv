@@ -1,7 +1,0 @@
-ID,GuildCnt,MinMemberCnt,MaxMemberCnt
-INT,INT,INT,INT
-ID,公会数量,最少人数,最大人数
-1,20,1,4
-2,15,5,9
-3,10,10,20
-4,5,21,29
