@@ -21,7 +21,7 @@ echo "当前发行版本号：""$RELEASE_VERSION"
 for f in ${TargetDir}/*
 do
 	fname=$(basename $f)
-	cp $fname $TargetDir
+	cp $RELEASE_VERSION/$fname $TargetDir
 done
 
 echo  "配置文件夹"$TargetDir
