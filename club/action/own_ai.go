@@ -157,7 +157,7 @@ func ownActionHandler(job *library.Job) *lib.LogStructuredJson {
 		staticUserLevel = currentUserLevel
 	} else {
 		m := make(map[int]int)
-		if err := json.Unmarshal([]byte(robotConfig.Name), m); err != nil {
+		if err := json.Unmarshal([]byte(robotConfig.Name), &m); err != nil {
 			return info.Failed().Step(5902).Err(err).Set("config index", index, "user_level", currentUserLevel, "robotcfg", robotConfig.Name)
 		}
 		if staticLevel, ok := m[index]; !ok {
