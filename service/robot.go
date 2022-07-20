@@ -24,13 +24,14 @@ func UpdateRobotRule2ConfigByUid(uid int64, target string) error {
 	return nil
 }
 
-func CreateRobotForGuild(uid int64, utype int32, actionID int64) (model.Robot, error) {
+func CreateRobotForGuild(uid int64, utype int32, actionID int64, rule1SleepTime int) (model.Robot, error) {
 	var robot model.Robot
 	robot.RobotID = GetRobotIDByUid(uid)
 	robot.ConfID = utype
 	robot.GroupID = actionID
 	robot.CreateTime = time.Now().Unix()
 	robot.ActNum = 0
+	robot.IndexNum = int32(rule1SleepTime)
 
 	if err := mysql.Get("default-master").Create(&robot); err.Error != nil || err.RowsAffected != 1 {
 		return robot, fmt.Errorf("%s affected:%d", err.Error, err.RowsAffected)
@@ -104,7 +105,7 @@ func GetRobotInfosWithField(uids []int64, fileds []string) ([]model.Robot, error
 	return out, nil
 }
 
-func ResetRobotWithFiled(uids []int64, k string, v any) error {
+func ResetRobotWithFiled(uids []int64, args ...any) error {
 	if len(uids) == 0 {
 		return nil
 	}
@@ -118,11 +119,16 @@ func ResetRobotWithFiled(uids []int64, k string, v any) error {
 		listArraySlice[index] = append(listArraySlice[index], GetRobotIDByUid(v))
 	}
 
-	sql := fmt.Sprintf("UPDATE `robot_table` SET `?` = ?  WHERE `robot_id` IN ? LIMIT ?;")
+	setValues, err := MergeFiledsKV(args...)
+	if err != nil {
+		return err
+	}
+
+	sql := fmt.Sprintf("UPDATE `robot_table` SET %s  WHERE `robot_id` IN ? LIMIT ?;", strings.Join(setValues, ","))
 
 	for _, vs := range listArraySlice {
 		var ret []model.Robot
-		if r := mysql.Get("default-master").Debug().Raw(sql, k, v, vs, len(vs)).Scan(&ret); r.Error != nil {
+		if r := mysql.Get("default-master").Debug().Raw(sql, vs, len(vs)).Scan(&ret); r.Error != nil {
 			return r.Error
 		}
 	}

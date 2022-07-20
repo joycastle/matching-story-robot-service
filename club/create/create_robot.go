@@ -128,12 +128,16 @@ func CreateRobot(guildInfo model.Guild, robotUsers []model.User, normalUsers []m
 	//create robot config
 	robotUserType := config.GetRobotTypeByRand(userLevel)
 	robotAction := config.GetRobotActionIDByRand(userLevel, robotUserType)
-	_, err = service.CreateRobotForGuild(u.UserID, robotUserType, robotAction)
+	robotRule1SleepTs, err := config.GetRule1TargetByRand(int(robotAction))
+	if err != nil {
+		return u, err
+	}
+	_, err = service.CreateRobotForGuild(u.UserID, robotUserType, robotAction, robotRule1SleepTs)
 	if err != nil {
 		return u, err
 	}
 
-	return u, err
+	return u, nil
 }
 
 //判断当前工会是否满足开启机器人的条件

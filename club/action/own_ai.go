@@ -130,11 +130,8 @@ func ownActionHandler(job *library.Job) *lib.LogStructuredJson {
 	}
 
 	//rule1判断
-	rule1Limit, err := config.GetRule1TargetByRand(int(actionID))
-	if err != nil {
-		return info.Failed().Step(590).Err(err)
-	}
-	if (currentUserLevel - normalUserMaxLevel) >= rule1Limit {
+	rule1Limit := robotConfig.IndexNum
+	if (currentUserLevel - normalUserMaxLevel) >= int(rule1Limit) {
 		return info.Failed().Step(5900).Set(
 			"currentUserLevel", currentUserLevel,
 			"normalUserMaxLevel", normalUserMaxLevel,

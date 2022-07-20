@@ -48,13 +48,13 @@ func robotActionUpdateHandler(job *library.Job) *lib.LogStructuredJson {
 		return info.Failed().Step(715).ErrString("same action id").Set("action_id", actionID)
 	}
 
-	if err := service.ResetRobotWithFiled([]int64{job.GetUserID()}, "act_num", 0); err != nil {
-		return info.Failed().Step(716).Err(err)
+	rule1SleepTs, err := config.GetRule1TargetByRand(int(actionID))
+	if err != nil {
+		return info.Failed().Step(7151).Err(err)
 	}
 
-	//rule2config
-	if err := service.ResetRobotWithFiled([]int64{job.GetUserID()}, "name", ""); err != nil {
-		return info.Failed().Step(7161).Err(err)
+	if err := service.ResetRobotWithFiled([]int64{job.GetUserID()}, "act_num", 0, "name", "index_num", rule1SleepTs); err != nil {
+		return info.Failed().Step(716).Err(err)
 	}
 
 	robotID := service.GetRobotIDByUid(job.GetUserID())

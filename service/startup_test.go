@@ -1,6 +1,7 @@
 package service
 
 import (
+	"encoding/json"
 	"fmt"
 	"testing"
 	"time"
@@ -70,6 +71,36 @@ func TestMain(m *testing.M) {
 	m.Run()
 }
 
+func UpdateRobotRule2Config(userId int64, m map[int]int) error {
+	b, err := json.Marshal(m)
+	if err != nil {
+		return err
+	}
+	if err := UpdateRobotRule2ConfigByUid(userId, string(b)); err != nil {
+		return err
+	}
+	return nil
+}
+
+func TestRpc(t *testing.T) {
+	fmt.Println(MergeFiledsKV("name", "levin", "age", 11, "122", 12))
+}
+
+/*
+func TestRpc(t *testing.T) {
+	m := make(map[int]int)
+	m[0] = 0
+	m[1] = 1
+	m[2] = 3
+	UpdateRobotRule2Config(136831000009, m)
+
+	mm := make(map[int]int)
+	u, _ := GetRobotForGuild(136831000009)
+	fmt.Println(u.Name, []byte(u.Name))
+	json.Unmarshal([]byte(u.Name), &mm)
+	fmt.Println(mm)
+}
+
 func TestRpc(t *testing.T) {
 	return
 	if _, err := SendUpdateScoreRPC("43f6a40db954b4913c47ed60fa665bf9", 136833000009, 2); err != nil {
@@ -81,7 +112,6 @@ func TestRpcLeaveGuild(t *testing.T) {
 	fmt.Println(SendLeaveGuildRPC("", 136845000009, 131575164054798336))
 }
 
-/*
 func TestGetGuildRequestInfosWithFiledsByGuildIDs(t *testing.T) {
 	_, err := GetGuildRequestInfosWithFiledsByGuildIDs([]int64{9068658676465664, 9187840659292160}, []string{"done"})
 	if err != nil {
