@@ -4,7 +4,6 @@ package csvauto
 //RobotTeam auto
 type RobotTeam struct {
 	ID                    int     //#
-	Type                  int     //机器人类型（1.普通；2.俱乐部属性；3俱乐部）
 	GroupNum              int     //机器人组号
 	GroupWeight           int     //机器人组内权重
 	TargetType            int     //目标类型（1.关卡;2.收集物）
@@ -23,7 +22,6 @@ type RobotTeam struct {
 //IRobotTeam auto
 type IRobotTeam interface {
 	GetID() int
-	GetType() int
 	GetGroupNum() int
 	GetGroupWeight() int
 	GetTargetType() int
@@ -51,11 +49,6 @@ type IRobotTeam interface {
 //GetID auto
 func (r *RobotTeam) GetID() int {
 	return r.ID
-}
-
-//GetType auto
-func (r *RobotTeam) GetType() int {
-	return r.Type
 }
 
 //GetGroupNum auto

@@ -1,18 +1,18 @@
-﻿ID,type,text_num
+ID,type,text_num
 INT,INT,STRING
 #,聊天信息类型（1：初次入会2：请求体力）,多语言编号
-1,1,jointeam_chat1
-2,1,jointeam_chat2
-3,1,jointeam_chat3
-4,1,jointeam_chat4
-5,1,jointeam_chat5
-6,1,jointeam_chat6
-7,2,teamhelp_chat1
-8,2,teamhelp_chat2
-9,2,teamhelp_chat3
-10,2,teamhelp_chat4
-11,2,teamhelp_chat5
-12,2,teamhelp_chat6
-13,2,teamhelp_chat7
-14,2,teamhelp_chat8
-15,2,teamhelp_chat9
+1,1,Hello everyone
+2,1,good to join the team!
+3,1,good vibe here
+4,1,hi
+5,1,the levels kind hard to play
+6,1,i will help you guys collect lives
+7,2,please help me with lives 
+8,2,run out of lives please help
+9,2,help! run out of lives
+10,2,help me collect lives please
+11,2,can't pass the levels need more lives please help
+12,2,help
+13,2,thanks
+14,2,thanks very much
+15,2,please click to help me

@@ -1,4 +1,4 @@
-﻿ID,Level_range,robot_type,robot_weight,robot_ai_id
+ID,Level_range,robot_type,robot_weight,robot_ai_id
 INT,INT_ARRAY,INT_ARRAY,INT_ARRAY,INT2_ARRAY
 #,关卡分段（左开右闭，-1为满级|精英赛）,行为类型：1:积极型；2：平衡型；3：懒惰型,单个机器人随机出时的类型权重,对应类型对应的行为id(robot_team表ID)
 1,-1,1|2|3,1|1|1,1001|1002|1003;1004|1005|1006;1007|1008|1009
