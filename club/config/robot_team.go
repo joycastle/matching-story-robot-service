@@ -182,13 +182,13 @@ func GetRule1TargetByRand(aid int) (int, error) {
 }
 
 //获取rule2目标值, 必须用GetRobotActiveDaysByActionID判断，才能准确
-func GetRule2TargetByRand(aid int) (int, error) {
+func GetRule2TargetByRand(aid int) (int, int, error) {
 	v, ok := activeDayMap[aid]
 	if !ok {
-		return 0, errParseIndexNotFound("robotTeam", "activeDayMap", fmt.Sprintf("%d", aid))
+		return 0, 0, errParseIndexNotFound("robotTeam", "activeDayMap", fmt.Sprintf("%d", aid))
 	}
 	if len(v) <= 1 {
-		return 0, errParseIndexLimit("robotTeam", fmt.Sprintf("%d", aid), "activeDayMap", 2)
+		return 0, 0, errParseIndexLimit("robotTeam", fmt.Sprintf("%d", aid), "activeDayMap", 2)
 	}
 
 	weekMin := 10
@@ -224,10 +224,10 @@ func GetRule2TargetByRand(aid int) (int, error) {
 	}
 
 	if index < 0 {
-		return 0, errParseIndexNotFound("robotTeam", "activeSleepRule2TargetMap", fmt.Sprintf("%d", aid))
+		return 0, 0, errParseIndexNotFound("robotTeam", "activeSleepRule2TargetMap", fmt.Sprintf("%d", aid))
 	}
 
 	length := len(activeSleepRule2TargetMap[aid][index])
 
-	return activeSleepRule2TargetMap[aid][index][rand.Intn(length)], nil
+	return activeSleepRule2TargetMap[aid][index][rand.Intn(length)], index, nil
 }

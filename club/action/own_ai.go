@@ -1,6 +1,7 @@
 package action
 
 import (
+	"encoding/json"
 	"fmt"
 	"time"
 
@@ -95,7 +96,7 @@ func ownActionHandler(job *library.Job) *lib.LogStructuredJson {
 		return info.Failed().Step(561).Set(
 			"action_id", actionID,
 			"todayWeek", todayWeek,
-			"avtiveDays", activeDaysMap[todayWeekInt])
+			"avtiveDays", activeDaysMap[todayWeekInt]).ErrString("not a active day")
 	}
 
 	//获取最高积分
@@ -141,14 +142,40 @@ func ownActionHandler(job *library.Job) *lib.LogStructuredJson {
 	}
 
 	//rule2判断
-	rule2Limit, err := config.GetRule2TargetByRand(int(actionID))
+	rule2Limit, index, err := config.GetRule2TargetByRand(int(actionID))
 	if err != nil {
 		return info.Failed().Step(591).Err(err)
 	}
-	if rule2Limit <= 0 || currentUserLevel > rule2Limit {
+
+	staticUserLevel := 0
+	if len(robotConfig.Name) == 0 {
+		m := make(map[int]int)
+		m[index] = currentUserLevel
+		if err := UpdateRobotRule2Config(job.UserID, m); err != nil {
+			return info.Failed().Step(5901).Err(err).Set("config index", index, "user_level", currentUserLevel)
+		}
+		staticUserLevel = currentUserLevel
+	} else {
+		m := make(map[int]int)
+		if err := json.Unmarshal([]byte(robotConfig.Name), m); err != nil {
+			return info.Failed().Step(5902).Err(err).Set("config index", index, "user_level", currentUserLevel, "robotcfg", robotConfig.Name)
+		}
+		if staticLevel, ok := m[index]; !ok {
+			m[index] = currentUserLevel
+			if err := UpdateRobotRule2Config(job.UserID, m); err != nil {
+				return info.Failed().Step(5902).Err(err).Set("config index", index, "user_level", currentUserLevel)
+			}
+			staticUserLevel = currentUserLevel
+		} else {
+			staticUserLevel = staticLevel
+		}
+	}
+
+	if rule2Limit <= 0 || currentUserLevel > (rule2Limit+staticUserLevel) {
 		return info.Failed().Step(5910).Set(
 			"currentUserLevel", currentUserLevel,
-			"rule2Limit", rule2Limit)
+			"rule2Limit", rule2Limit,
+			"staticUserLevel", staticUserLevel)
 	}
 
 	//增加关卡
@@ -172,4 +199,15 @@ func ownActionHandler(job *library.Job) *lib.LogStructuredJson {
 	}
 
 	return info.Success().Set("resp", rpcRet)
+}
+
+func UpdateRobotRule2Config(userId int64, m map[int]int) error {
+	b, err := json.Marshal(m)
+	if err != nil {
+		return err
+	}
+	if err := service.UpdateRobotRule2ConfigByUid(userId, string(b)); err != nil {
+		return err
+	}
+	return nil
 }

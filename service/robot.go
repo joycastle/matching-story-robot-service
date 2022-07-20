@@ -14,6 +14,16 @@ func GetRobotIDByUid(uid int64) string {
 	return fmt.Sprintf("club_%d", uid)
 }
 
+func UpdateRobotRule2ConfigByUid(uid int64, target string) error {
+	robotID := GetRobotIDByUid(uid)
+	var robot model.Robot
+	sql := "UPDATE `robot_table` SET `name` = ? WHERE `robot_id` = ? LIMIT 1;"
+	if r := mysql.Get("default-master").Debug().Raw(sql, target, robotID).Scan(&robot); r.Error != nil {
+		return r.Error
+	}
+	return nil
+}
+
 func CreateRobotForGuild(uid int64, utype int32, actionID int64) (model.Robot, error) {
 	var robot model.Robot
 	robot.RobotID = GetRobotIDByUid(uid)
@@ -94,7 +104,7 @@ func GetRobotInfosWithField(uids []int64, fileds []string) ([]model.Robot, error
 	return out, nil
 }
 
-func ResetRobotActNum(uids []int64) error {
+func ResetRobotWithFiled(uids []int64, k string, v any) error {
 	if len(uids) == 0 {
 		return nil
 	}
@@ -108,11 +118,11 @@ func ResetRobotActNum(uids []int64) error {
 		listArraySlice[index] = append(listArraySlice[index], GetRobotIDByUid(v))
 	}
 
-	sql := fmt.Sprintf("UPDATE `robot_table` SET `act_num` = 0  WHERE `robot_id` IN ? LIMIT ?;")
+	sql := fmt.Sprintf("UPDATE `robot_table` SET `?` = ?  WHERE `robot_id` IN ? LIMIT ?;")
 
 	for _, vs := range listArraySlice {
 		var ret []model.Robot
-		if r := mysql.Get("default-master").Debug().Raw(sql, vs, len(vs)).Scan(&ret); r.Error != nil {
+		if r := mysql.Get("default-master").Debug().Raw(sql, k, v, vs, len(vs)).Scan(&ret); r.Error != nil {
 			return r.Error
 		}
 	}
