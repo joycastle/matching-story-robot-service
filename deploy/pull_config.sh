@@ -22,7 +22,7 @@ echo "当前发行版本号：""$RELEASE_VERSION"
 for f in ${TargetDir}/*
 do
 	fname=$RELEASE_VERSION/$(basename $f)
-	go run ../format.go -f $fname -ff $f
+	../format -f $fname -ff $f
 done
 
 echo  "配置文件夹"$TargetDir
