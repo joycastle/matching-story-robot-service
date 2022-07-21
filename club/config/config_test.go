@@ -116,3 +116,10 @@ func TestGetFirstActionTimeByRand(t *testing.T) {
 	f, err := GetFirstActionTimeByRand(10090)
 	fmt.Println("GetFirstActionTimeByRand", f, err)
 }
+
+func TestGetRule2TargetByRand(t *testing.T) {
+	fmt.Println("GetRule2TargetByRand")
+	for i := 1001; i < 1010; i++ {
+		fmt.Println(GetRule2TargetByRand(i))
+	}
+}

@@ -3,6 +3,7 @@ package config
 import (
 	"fmt"
 	"math/rand"
+	"strings"
 
 	"github.com/joycastle/casual-server-lib/faketime"
 	"github.com/joycastle/casual-server-lib/util"
@@ -181,14 +182,31 @@ func GetRule1TargetByRand(aid int) (int, error) {
 	return min + rand.Intn(max-min+1), nil
 }
 
+//获取rule2目标值
+func GetRule2TargetByRand(aid int) (string, error) {
+	arrs, ok := activeSleepRule2TargetMap[aid]
+	if !ok {
+		return "", errParseIndexNotFound("robotTeam", "activeSleepRule2TargetMap", fmt.Sprintf("%d", aid))
+	}
+	out := []string{}
+	for _, arr := range arrs {
+		min, max := Compare2Int(arr[0], arr[1])
+		out = append(out, fmt.Sprintf("%d", min+rand.Intn(max-min+1)))
+	}
+
+	return strings.Join(out, "|"), nil
+}
+
 //获取rule2目标值, 必须用GetRobotActiveDaysByActionID判断，才能准确
-func GetRule2TargetByRand(aid int) (int, int, error) {
+func GetRule2TargetTimeByRand(aid int) (int, map[int][]int64, error) {
+	cfg := make(map[int][]int64)
+
 	v, ok := activeDayMap[aid]
 	if !ok {
-		return 0, 0, errParseIndexNotFound("robotTeam", "activeDayMap", fmt.Sprintf("%d", aid))
+		return 0, cfg, errParseIndexNotFound("robotTeam", "activeDayMap", fmt.Sprintf("%d", aid))
 	}
 	if len(v) <= 1 {
-		return 0, 0, errParseIndexLimit("robotTeam", fmt.Sprintf("%d", aid), "activeDayMap", 2)
+		return 0, cfg, errParseIndexLimit("robotTeam", fmt.Sprintf("%d", aid), "activeDayMap", 2)
 	}
 
 	weekMin := 10
@@ -210,24 +228,33 @@ func GetRule2TargetByRand(aid int) (int, int, error) {
 
 	totalSeconds := (weekMax - weekMin + 1) * 86400
 	proportionTime := RangeIndexWithSliceStep(activeSleepRule2TimeMap[aid], totalSeconds)
-	index := -1
 	//fmt.Println(proportionTime, weekMax, weekMin)
 	//fmt.Println(util.FromUnixtime(currentStamp).Format("2006-01-02 15:04:05"))
 	for k, v := range proportionTime {
 		min, max := ValueWithRangeKey(k)
-		//fmt.Println(util.FromUnixtime(filterFirstDay + int64(min)).Format("2006-01-02 15:04:05"))
-		//fmt.Println(util.FromUnixtime(filterFirstDay + int64(max)).Format("2006-01-02 15:04:05"))
-		if currentStamp >= filterFirstDay+int64(min) && currentStamp <= filterFirstDay+int64(max) {
-			index = v
+
+		if _, ok := cfg[v]; !ok {
+			cfg[v] = []int64{}
+		}
+
+		startT := filterFirstDay + int64(min)
+		endT := filterFirstDay + int64(max)
+
+		cfg[v] = append(cfg[v], startT)
+		cfg[v] = append(cfg[v], endT)
+	}
+
+	index := -1
+	for k, v := range cfg {
+		if currentStamp >= v[0] && currentStamp <= v[1] {
+			index = k
 			break
 		}
 	}
 
 	if index < 0 {
-		return 0, 0, errParseIndexNotFound("robotTeam", "activeSleepRule2TargetMap", fmt.Sprintf("%d", aid))
+		return 0, cfg, errParseIndexNotFound("robotTeam", "activeSleepRule2TargetMap", fmt.Sprintf("%d", aid))
 	}
 
-	length := len(activeSleepRule2TargetMap[aid][index])
-
-	return activeSleepRule2TargetMap[aid][index][rand.Intn(length)], index, nil
+	return index, cfg, nil
 }

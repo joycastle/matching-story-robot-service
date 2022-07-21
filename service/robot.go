@@ -24,7 +24,7 @@ func UpdateRobotRule2ConfigByUid(uid int64, target string) error {
 	return nil
 }
 
-func CreateRobotForGuild(uid int64, utype int32, actionID int64, rule1SleepTime int) (model.Robot, error) {
+func CreateRobotForGuild(uid int64, utype int32, actionID int64, rule1SleepTime int, rule2SleepTime string) (model.Robot, error) {
 	var robot model.Robot
 	robot.RobotID = GetRobotIDByUid(uid)
 	robot.ConfID = utype
@@ -32,6 +32,7 @@ func CreateRobotForGuild(uid int64, utype int32, actionID int64, rule1SleepTime 
 	robot.CreateTime = time.Now().Unix()
 	robot.ActNum = 0
 	robot.IndexNum = int32(rule1SleepTime)
+	robot.HeadIcon = rule2SleepTime
 
 	if err := mysql.Get("default-master").Create(&robot); err.Error != nil || err.RowsAffected != 1 {
 		return robot, fmt.Errorf("%s affected:%d", err.Error, err.RowsAffected)

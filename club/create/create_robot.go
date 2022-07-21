@@ -118,21 +118,24 @@ func CreateRobot(guildInfo model.Guild, robotUsers []model.User, normalUsers []m
 	userHeadIcon := config.GetRobotIconByRand()
 	userLikeCount := config.GetLikeNumByRand()
 	userLevel := config.GetLevelByRand(guildInfo, normalUsers)
+	robotUserType := config.GetRobotTypeByRand(userLevel)
+	robotAction := config.GetRobotActionIDByRand(userLevel, robotUserType)
+	robotRule1SleepTs, err := config.GetRule1TargetByRand(int(robotAction))
+	if err != nil {
+		return model.User{}, err
+	}
+	robotRule2SleepTs, err := config.GetRule2TargetByRand(int(robotAction))
+	if err != nil {
+		return model.User{}, err
+	}
 
 	//create user
 	u, err := service.CreateGuildRobotUserRPC(userName, userHeadIcon, userLikeCount, userLevel)
 	if err != nil {
 		return u, err
 	}
-
 	//create robot config
-	robotUserType := config.GetRobotTypeByRand(userLevel)
-	robotAction := config.GetRobotActionIDByRand(userLevel, robotUserType)
-	robotRule1SleepTs, err := config.GetRule1TargetByRand(int(robotAction))
-	if err != nil {
-		return u, err
-	}
-	_, err = service.CreateRobotForGuild(u.UserID, robotUserType, robotAction, robotRule1SleepTs)
+	_, err = service.CreateRobotForGuild(u.UserID, robotUserType, robotAction, robotRule1SleepTs, robotRule2SleepTs)
 	if err != nil {
 		return u, err
 	}

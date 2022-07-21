@@ -3,6 +3,8 @@ package action
 import (
 	"encoding/json"
 	"fmt"
+	"strconv"
+	"strings"
 	"time"
 
 	"github.com/joycastle/casual-server-lib/faketime"
@@ -139,10 +141,18 @@ func ownActionHandler(job *library.Job) *lib.LogStructuredJson {
 	}
 
 	//rule2判断
-	rule2Limit, index, err := config.GetRule2TargetByRand(int(actionID))
+	rule2TargetConfig := stringToSlice(robotConfig.HeadIcon)
+	index, rule2TimeConfig, err := config.GetRule2TargetTimeByRand(int(actionID))
 	if err != nil {
-		return info.Failed().Step(591).Err(err)
+		return info.Failed().Step(591).Err(err).Set("rule2TimeConfig", rule2TimeConfig)
 	}
+
+	info.Set("rule2TimeConfig", rule2TimeConfig, "rule2TargetConfig", rule2TargetConfig, "index", index)
+
+	if index > len(rule2TargetConfig)-1 {
+		return info.Failed().Step(5911)
+	}
+	rule2Limit := rule2TargetConfig[index]
 
 	staticUserLevel := 0
 	if len(robotConfig.Name) == 0 {
@@ -207,4 +217,14 @@ func UpdateRobotRule2Config(userId int64, m map[int]int) error {
 		return err
 	}
 	return nil
+}
+
+func stringToSlice(s string) []int {
+	arrs := strings.Split(s, "|")
+	out := make([]int, len(arrs))
+	for k, v := range arrs {
+		vv, _ := strconv.Atoi(v)
+		out[k] = vv
+	}
+	return out
 }
