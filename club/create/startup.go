@@ -5,6 +5,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/joycastle/casual-server-lib/flowcontrol"
 	"github.com/joycastle/casual-server-lib/log"
 	"github.com/joycastle/matching-story-robot-service/club/library"
 	"github.com/joycastle/matching-story-robot-service/lib"
@@ -71,7 +72,9 @@ func PullDatas(t int) {
 				if v.DeletedAt.Valid == true {
 					delDataLen++
 				} else {
-					okDataMap[JobKey(v.ID)] = library.NewEmptyJob().SetGuildID(v.ID)
+					if _, hit := flowcontrol.IsHit("robot-service", fmt.Sprintf("%d", v.ID), v.ID); hit {
+						okDataMap[JobKey(v.ID)] = library.NewEmptyJob().SetGuildID(v.ID)
+					}
 				}
 			}
 

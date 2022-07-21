@@ -2,12 +2,15 @@ package main
 
 import (
 	"flag"
+	"math/rand"
 	"os"
 	"os/signal"
 	"path/filepath"
+	"time"
 
 	"github.com/joycastle/casual-server-lib/config"
 	"github.com/joycastle/casual-server-lib/faketime"
+	"github.com/joycastle/casual-server-lib/flowcontrol"
 	"github.com/joycastle/casual-server-lib/log"
 	"github.com/joycastle/casual-server-lib/mysql"
 	"github.com/joycastle/casual-server-lib/redis"
@@ -16,6 +19,7 @@ import (
 )
 
 func main() {
+	rand.Seed(time.Now().UnixNano())
 	//run params
 	runEnv := flag.String("env", "dev", "dev(本机开发环境), pre(预发布环境), prod(线上环境), other_env(其他开发配置名称)")
 	flag.Parse()
@@ -53,6 +57,9 @@ func main() {
 
 	// init redis
 	redis.InitRedis(config.Redis)
+
+	//开启流量控制
+	flowcontrol.Use("robot-service").SetMysqlNode("default-master", "default-slave").Startup()
 
 	//confmanager
 	if err := confmanager.GetConfManagerVer().LoadCsv("confmanager/template"); err != nil {

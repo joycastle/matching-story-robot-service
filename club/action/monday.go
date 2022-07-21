@@ -53,7 +53,12 @@ func robotActionUpdateHandler(job *library.Job) *lib.LogStructuredJson {
 		return info.Failed().Step(7151).Err(err)
 	}
 
-	if err := service.ResetRobotWithFiled([]int64{job.GetUserID()}, "act_num", 0, "name", "index_num", rule1SleepTs); err != nil {
+	rule2SleepTs, err := config.GetRule2TargetByRand(int(actionID))
+	if err != nil {
+		return info.Failed().Step(7152).Err(err)
+	}
+
+	if err := service.ResetRobotWithFiled([]int64{job.GetUserID()}, "act_num", 0, "name", "index_num", rule1SleepTs, "head_icon", rule2SleepTs); err != nil {
 		return info.Failed().Step(716).Err(err)
 	}
 

@@ -5,6 +5,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/joycastle/casual-server-lib/flowcontrol"
 	"github.com/joycastle/casual-server-lib/log"
 	"github.com/joycastle/matching-story-robot-service/club/library"
 	"github.com/joycastle/matching-story-robot-service/lib"
@@ -178,8 +179,10 @@ func UpdateRobotJobs(t int) error {
 
 			robotNewJobsMap := make(map[string]*library.Job, len(robotUsers))
 			for _, v := range robotUsers {
-				index := JobKey(v.UserID, v.GuildID)
-				robotNewJobsMap[index] = library.NewEmptyJob().SetGuildID(v.GuildID).SetUserID(v.UserID)
+				if _, hit := flowcontrol.IsHit("robot-service", fmt.Sprintf("%d", v.GuildID), v.GuildID); hit {
+					index := JobKey(v.UserID, v.GuildID)
+					robotNewJobsMap[index] = library.NewEmptyJob().SetGuildID(v.GuildID).SetUserID(v.UserID)
+				}
 			}
 
 			//delete job

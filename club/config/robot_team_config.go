@@ -99,8 +99,6 @@ func GetRobotNameByRand(existsNames ...string) string {
 		return "Empty"
 	}
 
-	//rand.Seed(time.Now().UnixNano())
-
 	return rangelist[rand.Intn(len(rangelist))]
 }
 
@@ -109,7 +107,6 @@ func GetRobotIconByRand() string {
 	//头像索引客户端配置
 	appMinIndex := 1
 	appMaxIndex := 14
-	//rand.Seed(time.Now().UnixNano())
 	return fmt.Sprintf("%d", appMinIndex+rand.Intn(appMaxIndex))
 }
 
@@ -169,7 +166,6 @@ func GetLevelByRand(guildInfo model.Guild, userInfos []model.User) int {
 	mina, maxa := Compare2Int(min, max)
 
 	//随机值
-	//rand.Seed(time.Now().UnixNano())
 	randStep := mina + rand.Intn(maxa-mina+1)
 
 	//随机加减策略
