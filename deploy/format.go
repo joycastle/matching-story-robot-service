@@ -12,17 +12,21 @@ func main() {
 	flag.Parse()
 
 	boms := []string{string('\uFEFF')}
+
+	fs, err := ioutil.ReadFile(*f)
+	if err != nil {
+		panic(err)
+	}
+	outs := string(fs)
+
 	for _, bom := range boms {
-		fs, err := ioutil.ReadFile(*f)
-		if err != nil {
-			panic(err)
+		if strings.HasPrefix(outs, bom) {
+			outs = strings.TrimPrefix(outs, bom)
+			break
 		}
-		s := string(fs)
-		if strings.HasPrefix(s, bom) {
-			s = strings.TrimPrefix(s, bom)
-			if err := ioutil.WriteFile(*ff, []byte(s), 0666); err != nil {
-				panic(err)
-			}
-		}
+	}
+
+	if err := ioutil.WriteFile(*ff, []byte(outs), 0666); err != nil {
+		panic(err)
 	}
 }
