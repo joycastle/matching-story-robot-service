@@ -3,7 +3,7 @@ module github.com/joycastle/matching-story-robot-service
 go 1.18
 
 require (
-	github.com/joycastle/casual-server-lib v0.0.0-20220721131206-8c6ca667efb3
+	github.com/joycastle/casual-server-lib v0.0.0-20220721135547-e669b573ccdc
 	google.golang.org/grpc v1.46.2
 	google.golang.org/protobuf v1.28.0
 	gorm.io/gorm v1.23.7
