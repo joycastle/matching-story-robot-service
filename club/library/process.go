@@ -3,7 +3,6 @@ package library
 import (
 	"time"
 
-	"github.com/joycastle/casual-server-lib/faketime"
 	"github.com/joycastle/casual-server-lib/log"
 	"github.com/joycastle/matching-story-robot-service/lib"
 )
@@ -31,7 +30,7 @@ func TaskProcess(businessType string, ch chan *Job, handlers ...func(*Job) *lib.
 			}
 		}
 
-		cost := faketime.Since(start).Nanoseconds() / 1000000
+		cost := time.Since(start).Nanoseconds() / 1000000
 		log.Get("club-process").Info(businessType, info.String(), "ch:", len(ch), "cost:", cost, "ms")
 	}
 }
