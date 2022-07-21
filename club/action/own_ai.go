@@ -168,7 +168,7 @@ func ownActionHandler(job *library.Job) *lib.LogStructuredJson {
 		}
 	}
 
-	if rule2Limit <= 0 || currentUserLevel > (rule2Limit+staticUserLevel) {
+	if rule2Limit <= 0 || currentUserLevel >= (rule2Limit+staticUserLevel) {
 		return info.Failed().Step(5910).Set(
 			"currentUserLevel", currentUserLevel,
 			"rule2Limit", rule2Limit,

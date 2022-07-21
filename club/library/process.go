@@ -32,6 +32,6 @@ func TaskProcess(businessType string, ch chan *Job, handlers ...func(*Job) *lib.
 		}
 
 		cost := faketime.Since(start).Nanoseconds() / 1000000
-		log.Get("club-process").Info(businessType, info.String(), "cost:", cost, "ms")
+		log.Get("club-process").Info(businessType, info.String(), "ch:", len(ch), "cost:", cost, "ms")
 	}
 }

@@ -23,6 +23,7 @@ for f in ${TargetDir}/*
 do
 	fname=$RELEASE_VERSION/$(basename $f)
 	../format -f $fname -ff $f
+	echo "新文件:"$fname" 写入："$f
 done
 
 echo  "配置文件夹"$TargetDir
