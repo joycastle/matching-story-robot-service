@@ -123,3 +123,7 @@ func TestGetRule2TargetByRand(t *testing.T) {
 		fmt.Println(GetRule2TargetByRand(i))
 	}
 }
+
+func TestAAA(t *testing.T) {
+	fmt.Println(GetRobotActionIDByRand(300, 2))
+}

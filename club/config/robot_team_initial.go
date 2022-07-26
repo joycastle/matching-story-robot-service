@@ -14,6 +14,8 @@ var (
 	robotTypeMap  map[int][]int   = make(map[int][]int)
 	robotWightMap map[int][]int   = make(map[int][]int)
 	robotAiddMap  map[int][][]int = make(map[int][][]int)
+
+	robotTypeIndexMap map[int]map[int]int = make(map[int]map[int]int)
 )
 
 //读取配置信息
@@ -73,6 +75,15 @@ func ReadRobotTeamInitialFromConfManager() error {
 					robotAiddMap[i] = [][]int{}
 				}
 				robotAiddMap[i] = append(robotAiddMap[i], iface.GetRobotAiIDByIndex(j))
+			}
+		}
+
+		for k, vs := range robotTypeMap {
+			if _, ok := robotTypeIndexMap[k]; !ok {
+				robotTypeIndexMap[k] = make(map[int]int)
+			}
+			for index, v := range vs {
+				robotTypeIndexMap[k][v] = index
 			}
 		}
 	}
@@ -143,7 +154,8 @@ func getRobotTypeByIndex(index int) int {
 
 func GetRobotActionIDByRand(level int, utype int32) int64 {
 	index := getLevelRangeIndex(level)
-	actionIds := robotAiddMap[index][utype-1]
+	utypeIndex := robotTypeIndexMap[index][int(utype)]
+	actionIds := robotAiddMap[index][utypeIndex]
 	length := len(actionIds)
 	return int64(actionIds[rand.Intn(length)])
 }

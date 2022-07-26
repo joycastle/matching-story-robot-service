@@ -101,6 +101,9 @@ github.com/golang/protobuf v1.4.3/go.mod h1:oDoupMAO8OvCJWAcko0GGGIgR6R6ocIYbsSw
 github.com/golang/protobuf v1.5.0/go.mod h1:FsONVRAS9T7sI+LIUmWTfcYkHO4aIWwzhcaSAoJOfIk=
 github.com/golang/protobuf v1.5.2 h1:ROPKBNFfQgOUMifHyP+KYbvpjbdoFNs+aK7DXlji0Tw=
 github.com/golang/protobuf v1.5.2/go.mod h1:XVQd3VNwM+JqD3oG2Ue2ip4fOMUkwXdXDdiuN0vRsmY=
+github.com/gomodule/redigo v1.8.5/go.mod h1:P9dn9mFrCBvWhGE1wpxx6fgq7BAeLBk+UUUzlpkBYO0=
+github.com/gomodule/redigo v1.8.9 h1:Sl3u+2BI/kk+VEatbj0scLdrFhjPmbxOc1myhDP41ws=
+github.com/gomodule/redigo v1.8.9/go.mod h1:7ArFNvsTjH8GMMzB4uy1snslv2BwmginuMs06a1uzZE=
 github.com/google/btree v0.0.0-20180813153112-4030bb1f1f0c/go.mod h1:lNA+9X1NB3Zf8V7Ke586lFgjr2dZNuvo3lPJSGZ5JPQ=
 github.com/google/btree v1.0.0/go.mod h1:lNA+9X1NB3Zf8V7Ke586lFgjr2dZNuvo3lPJSGZ5JPQ=
 github.com/google/go-cmp v0.2.0/go.mod h1:oXzfMopK8JAjlY9xF4vHSVASa0yLyX7SntLO5aqRK0M=
@@ -172,6 +175,12 @@ github.com/joycastle/casual-server-lib v0.0.0-20220721135547-e669b573ccdc h1:g9P
 github.com/joycastle/casual-server-lib v0.0.0-20220721135547-e669b573ccdc/go.mod h1:w4ksdqOz0T7TV5qF9a5Kd9UIFuBu+T2LNxgFvQ/1xaM=
 github.com/joycastle/casual-server-lib v0.0.0-20220722032456-c8327f713308 h1:rI3aJhi/Wh30LDiO7x08NvV2MMwKlSwcLYbootYzm6I=
 github.com/joycastle/casual-server-lib v0.0.0-20220722032456-c8327f713308/go.mod h1:w4ksdqOz0T7TV5qF9a5Kd9UIFuBu+T2LNxgFvQ/1xaM=
+github.com/joycastle/casual-server-lib v0.0.0-20220725041626-bf33a470d5a4 h1:/IJ5CVPIHtjerBzTcMZTJlaS4RIlthBRJBdihfn6Isg=
+github.com/joycastle/casual-server-lib v0.0.0-20220725041626-bf33a470d5a4/go.mod h1:w4ksdqOz0T7TV5qF9a5Kd9UIFuBu+T2LNxgFvQ/1xaM=
+github.com/joycastle/casual-server-lib v0.0.0-20220726045444-8a42e408ff76 h1:LJsweO1MER0D+NjPRyLlIz+7JjYgaVmBeSyWg0yLkTg=
+github.com/joycastle/casual-server-lib v0.0.0-20220726045444-8a42e408ff76/go.mod h1:ajENg2xfOwsPlzqyKMfWk3oLxOwN/KI75ASFyetc5Tk=
+github.com/joycastle/casual-server-lib v0.0.0-20220726111159-b378ef3e1c00 h1:MIGrqX0OxV+lO3dKfWAWa9MUJvPO3YRVdMhEgX3qHoo=
+github.com/joycastle/casual-server-lib v0.0.0-20220726111159-b378ef3e1c00/go.mod h1:ajENg2xfOwsPlzqyKMfWk3oLxOwN/KI75ASFyetc5Tk=
 github.com/jstemmer/go-junit-report v0.0.0-20190106144839-af01ea7f8024/go.mod h1:6v2b51hI/fHJwM22ozAgKL4VKDeJcHhJFhtBdhmNjmU=
 github.com/jstemmer/go-junit-report v0.9.1/go.mod h1:Brl9GWCQeLvo8nXZwPNNblvFj/XSXhF0NWZEnDohbsk=
 github.com/kisielk/gotool v1.0.0/go.mod h1:XhKaO+MFFWcvkIS/tQcRk01m1F5IRFswLeQ+oQHNcck=
@@ -185,6 +194,8 @@ github.com/magiconair/properties v1.8.6 h1:5ibWZ6iY0NctNGWo87LalDlEZ6R41TqbbDamh
 github.com/magiconair/properties v1.8.6/go.mod h1:y3VJvCyxH9uVvJTWEGAELF3aiYNyPKd5NZ3oSwXrF60=
 github.com/mitchellh/mapstructure v1.5.0 h1:jeMsZIYE/09sWLaz43PL7Gy6RuMjD2eJVyuac5Z2hdY=
 github.com/mitchellh/mapstructure v1.5.0/go.mod h1:bFUtVrKA4DC2yAKiSyO/QUcy7e+RRV2QTWOzhPopBRo=
+github.com/mna/redisc v1.3.2 h1:sc9C+nj6qmrTFnsXb70xkjAHpXKtjjBuE6v2UcQV0ZE=
+github.com/mna/redisc v1.3.2/go.mod h1:CplIoaSTDi5h9icnj4FLbRgHoNKCHDNJDVRztWDGeSQ=
 github.com/pelletier/go-toml v1.9.5 h1:4yBQzkHv+7BHq2PQUZF3Mx0IYxG7LsP222s7Agd3ve8=
 github.com/pelletier/go-toml v1.9.5/go.mod h1:u1nR/EPcESfeI/szUZKdtJ0xRNbUoANCkoOuaOx1Y+c=
 github.com/pelletier/go-toml/v2 v2.0.1 h1:8e3L2cCQzLFi2CR4g7vGFuFxX7Jl1kKX8gW+iV0GUKU=
@@ -370,6 +381,8 @@ golang.org/x/sys v0.0.0-20220704084225-05e143d24a9e h1:CsOuNlbOuf0mzxJIefr6Q4uAU
 golang.org/x/sys v0.0.0-20220704084225-05e143d24a9e/go.mod h1:oPkhp1MJrh7nUepCBck5+mAzfO9JrbApNNgaTdGDITg=
 golang.org/x/sys v0.0.0-20220721230656-c6bc011c0c49 h1:TMjZDarEwf621XDryfitp/8awEhiZNiwgphKlTMGRIg=
 golang.org/x/sys v0.0.0-20220721230656-c6bc011c0c49/go.mod h1:oPkhp1MJrh7nUepCBck5+mAzfO9JrbApNNgaTdGDITg=
+golang.org/x/sys v0.0.0-20220722155257-8c9f86f7a55f h1:v4INt8xihDGvnrfjMDVXGxw9wrfxYyCjk0KbXjhR55s=
+golang.org/x/sys v0.0.0-20220722155257-8c9f86f7a55f/go.mod h1:oPkhp1MJrh7nUepCBck5+mAzfO9JrbApNNgaTdGDITg=
 golang.org/x/term v0.0.0-20201126162022-7de9c90e9dd1/go.mod h1:bj7SfCRtBDWHUb9snDiAeCFNEtKQo2Wmx5Cou7ajbmo=
 golang.org/x/text v0.0.0-20170915032832-14c0d48ead0c/go.mod h1:NqM8EUOU14njkJ3fqMW+pc6Ldnwhi/IjpwHt7yyuwOQ=
 golang.org/x/text v0.3.0/go.mod h1:NqM8EUOU14njkJ3fqMW+pc6Ldnwhi/IjpwHt7yyuwOQ=
