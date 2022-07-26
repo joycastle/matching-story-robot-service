@@ -1,4 +1,4 @@
-name: 三消机器人服务部署
+name: matching-story-robot-service-deploy
 on:
   workflow_dispatch:
     inputs:
