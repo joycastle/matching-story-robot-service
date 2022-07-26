@@ -6,6 +6,11 @@ on:
         description: 'Environment to deploy.(Select:dev,pre,prod)'
         required: true
         default: 'dev'
+      csv_version:
+        description: 'Csv config version: use latest is empty'
+        required: false
+        default: ''
+
 jobs:
   deploy-dev:
     name: Deploy robot-dev
@@ -27,7 +32,7 @@ jobs:
           ls ${{ github.workspace }}
 
       - name: 拉取git配置
-        run: bash deploy/pull_config.sh dev
+        run: bash deploy/pull_config.sh dev ${{ github.event.inputs.csv_version }}
 
       - name: 编译镜像 
         run: docker-compose -f deploy/docker-compose-dev.yaml build
@@ -59,7 +64,7 @@ jobs:
           ls ${{ github.workspace }}
 
       - name: 拉取git配置
-        run: bash deploy/pull_config.sh dev
+        run: bash deploy/pull_config.sh dev ${{ github.event.inputs.csv_version }}
 
       - name: 编译镜像 
         run: docker-compose -f deploy/docker-compose-pre.yaml build
@@ -91,7 +96,7 @@ jobs:
           ls ${{ github.workspace }}
 
       - name: 拉取git配置
-        run: bash deploy/pull_config.sh master
+        run: bash deploy/pull_config.sh master  ${{ github.event.inputs.csv_version }}
 
       - name: 编译镜像 
         run: docker-compose -f deploy/docker-compose-prod.yaml build

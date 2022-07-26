@@ -9,6 +9,10 @@ if [ -d "./Server_V2_Config" ];then
     rm -rf ./Server_V2_Config
 fi
 
+go env -w GO111MODULE=off
+go build format.go
+go env -w GO111MODULE=on
+
 git clone \
   --branch "$CONFIG_BRANCH" \
   --depth 1  \
@@ -17,7 +21,13 @@ git clone \
 cd Server_V2_Config || exit
 
 RELEASE_VERSION=$(sed -n 1p RELEASE_VERSION)
+
+if [ "$2" != "" ];then
+	RELEASE_VERSION=$2
+fi
+
 echo "当前发行版本号：""$RELEASE_VERSION"
+
 
 for f in ${TargetDir}/*
 do
