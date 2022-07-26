@@ -15,8 +15,8 @@ services:
     volumes:
       - /home/ec2-user/var/run/logs/matching-story-robot-service:/app/var/logs
     networks:
-      - matching-story
+      - matching-story-network-main
 
 networks:
-  matching-story:
+  matching-story-network-main:
     external: true
