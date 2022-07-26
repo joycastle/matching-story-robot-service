@@ -1,15 +1,15 @@
 version: "3.3"
 services:
-  matching-story-robot-service-dev:
+  matching-story-robot-service-pre:
     build:
       context: ../
       dockerfile: Dockerfile
-    image: matching-story-robot-service:dev
+    image: matching-story-robot-service:pre
     restart: on-failure:10
     privileged: true
     entrypoint: ./matching-story-robot-service
     command: -env dev
-    container_name: matching-story-robot-service-dev
+    container_name: matching-story-robot-service-pre
     ports:
       - "1122:1122"
     volumes:

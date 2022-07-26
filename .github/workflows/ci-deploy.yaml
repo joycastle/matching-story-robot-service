@@ -3,7 +3,7 @@ on:
   workflow_dispatch:
     inputs:
       job:
-        description: 'Environment to deploy.(Select:dev,pre,production,dev1)'
+        description: 'Environment to deploy.(Select:dev,pre,prod)'
         required: true
         default: 'dev'
 jobs:
@@ -18,7 +18,7 @@ jobs:
       - name: Check out repository code
         uses: actions/checkout@v2
         with:
-          ref: ${{ github.ref }}
+          ref: dev
       - run: echo "💡 The ${{ github.repository }} repository has been cloned to the runner."
       - run: echo "🖥️ The workflow is now ready to test your code on the runner."
 
@@ -37,5 +37,71 @@ jobs:
 
       - name: 查看服务状态
         run: docker-compose -f deploy/docker-compose-dev.yaml logs | tail -n 20
+
+      - run: echo "🍏 This job's status is ${{ job.status }}."
+
+  deploy-pre:
+    name: Deploy robot-pre
+    runs-on: [ robot-pre ]
+    if: ${{ github.event.inputs.job == 'pre'}}
+    steps:
+      - run: echo "🎉 The job was automatically triggered by a ${{ github.event_name }} event."
+      - run: echo "🐧 This job is now running on a ${{ runner.os }} server hosted by GitHub!"
+      - run: echo "🔎 The name of your branch is ${{ github.ref }} and your repository is ${{ github.repository }}."
+      - name: Check out repository code
+        uses: actions/checkout@v2
+        with:
+          ref: pre
+      - run: echo "💡 The ${{ github.repository }} repository has been cloned to the runner."
+      - run: echo "🖥️ The workflow is now ready to test your code on the runner."
+
+      - name: List files in the repository
+        run: |
+          ls ${{ github.workspace }}
+
+      - name: 拉取git配置
+        run: bash deploy/pull_config.sh dev
+
+      - name: 编译镜像 
+        run: docker-compose -f deploy/docker-compose-pre.yaml build
+
+      - run: docker-compose -f deploy/docker-compose-pre.yaml stop
+      - run: docker-compose -f deploy/docker-compose-pre.yaml up -d
+
+      - name: 查看服务状态
+        run: docker-compose -f deploy/docker-compose-pre.yaml logs | tail -n 20
+
+      - run: echo "🍏 This job's status is ${{ job.status }}."
+
+deploy-prod:
+    name: Deploy robot-prod
+    runs-on: [ robot-prod ]
+    if: ${{ github.event.inputs.job == 'prod'}}
+    steps:
+      - run: echo "🎉 The job was automatically triggered by a ${{ github.event_name }} event."
+      - run: echo "🐧 This job is now running on a ${{ runner.os }} server hosted by GitHub!"
+      - run: echo "🔎 The name of your branch is ${{ github.ref }} and your repository is ${{ github.repository }}."
+      - name: Check out repository code
+        uses: actions/checkout@v2
+        with:
+          ref: main
+      - run: echo "💡 The ${{ github.repository }} repository has been cloned to the runner."
+      - run: echo "🖥️ The workflow is now ready to test your code on the runner."
+
+      - name: List files in the repository
+        run: |
+          ls ${{ github.workspace }}
+
+      - name: 拉取git配置
+        run: bash deploy/pull_config.sh master
+
+      - name: 编译镜像 
+        run: docker-compose -f deploy/docker-compose-prod.yaml build
+
+      - run: docker-compose -f deploy/docker-compose-prod.yaml stop
+      - run: docker-compose -f deploy/docker-compose-prod.yaml up -d
+
+      - name: 查看服务状态
+        run: docker-compose -f deploy/docker-compose-prod.yaml logs | tail -n 20
 
       - run: echo "🍏 This job's status is ${{ job.status }}."
